@@ -2,7 +2,6 @@
 
 A structured repository documenting my Java and Data Structures & Algorithms learning journey — concept implementations and notes written during active study.
 
-![Topics](https://img.shields.io/badge/Topics_Completed-0%2F22-blue?style=flat-square)
 ![Language](https://img.shields.io/badge/Language-Java-red?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)
 
@@ -18,7 +17,7 @@ This repository focuses on consistent learning through concept implementation, s
 
 | Metric | Value |
 | :--- | :--- |
-| Topics Completed | 0 / 22 |
+| Topics Completed | 1 / 22 |
 | Implementations Written | 0 |
 | Current Focus | Java Fundamentals |
 | Target Completion | October 2026 |
@@ -30,11 +29,11 @@ This repository focuses on consistent learning through concept implementation, s
 <details>
 <summary><b>1. Introduction to Programming</b></summary>
 
-- [ ] Types of languages (Compiled vs Interpreted)
-- [ ] Memory management overview
-- [ ] Flow of a program
-- [ ] Flowcharts
-- [ ] Pseudocode
+- [x] Types of languages (Compiled vs Interpreted)
+- [x] Memory management overview
+- [x] Flow of a program
+- [x] Flowcharts
+- [x] Pseudocode
 
 </details>
 
@@ -42,8 +41,8 @@ This repository focuses on consistent learning through concept implementation, s
 <summary><b>2. Java Language Fundamentals</b></summary>
 
 - [ ] **Introduction to Java**
-  - [ ] JVM, JRE, JDK architecture and how it works
-  - [ ] Setup and environment installation
+  - [X] JVM, JRE, JDK architecture and how it works
+  - [x] Setup and environment installation
   - [ ] Input and Output (`Scanner`, `BufferedReader`)
   - [ ] Data types (Primitives vs Reference)
   - [ ] Coding best practices and naming conventions
@@ -320,9 +319,19 @@ This repository focuses on consistent learning through concept implementation, s
 
 ---
 
+## Notes
+
+The `/notes` folder contains one markdown file per topic, written during active study sessions. Each file covers key concepts, important observations, and anything worth remembering from that topic.
+
+---
+
 ## Resources
 
 - [Kunal Kushwaha DSA Bootcamp](https://github.com/kunal-kushwaha/DSA-Bootcamp-Java)
 - [Striver A2Z DSA Sheet](https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2)
 - [Oracle Java Documentation](https://docs.oracle.com/en/java/)
 - [Visualgo — Algorithm Visualization](https://visualgo.net)
+
+---
+
+*Started: May 2026*
