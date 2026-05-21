@@ -40,12 +40,12 @@ This repository focuses on consistent learning through concept implementation, s
 <details>
 <summary><b>2. Java Language Fundamentals</b></summary>
 
-- [ ] **Introduction to Java**
+- [x] **Introduction to Java**
   - [X] JVM, JRE, JDK architecture and how it works
   - [x] Setup and environment installation
-  - [ ] Input and Output (`Scanner`, `BufferedReader`)
-  - [ ] Data types (Primitives vs Reference)
-  - [ ] Coding best practices and naming conventions
+  - [x] Input and Output (`Scanner`, `BufferedReader`)
+  - [x] Data types (Primitives vs Reference)
+  - [x] Coding best practices and naming conventions
 - [ ] **Conditionals and Loops**
   - [ ] `if-else` execution flow
   - [ ] Loops (`for`, `while`, `do-while`)
