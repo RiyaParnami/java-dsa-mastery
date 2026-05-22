@@ -20,13 +20,13 @@ public class TypeCasting {
         byte x = 40 ;
         byte y = 50 ;
         byte z = 100;
-        int d = (x*y) / z;
+        int d = (x*y) / z; // (x*y) this is performed using integer as it is a expression , and it is byte evaluation.so it is a integer now.
         System.out.println(d);
 
-        int number = 'A';
-        System.out.println("今日は");
+        int number = 'A'; // automatic type conversion give ascii value of this
+        System.out.println("今日は"); // java follows unicode principle so we can put any language
 
-        System.out.println(3 * 4.56874685f);
+        System.out.println(3 * 4.56874685f); // float > int..prints float
 
         byte l = 42;
         char c = 'a';
