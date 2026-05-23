@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 1 / 22 |
-| Implementations Written | 7 |
+| Implementations Written | 15 |
 | Current Focus | Java Fundamentals |
 | Target Completion | October 2026 |
 
@@ -46,10 +46,10 @@ This repository focuses on consistent learning through concept implementation, s
   - [x] Input and Output (`Scanner`, `BufferedReader`)
   - [x] Data types (Primitives vs Reference)
   - [x] Coding best practices and naming conventions
-- [ ] **Conditionals and Loops**
-  - [ ] `if-else` execution flow
-  - [ ] Loops (`for`, `while`, `do-while`)
-  - [ ] `switch` statements and enhanced switch
+- [x] **Conditionals and Loops**
+  - [x] `if-else` execution flow
+  - [x] Loops (`for`, `while`, `do-while`)
+  - [x] `switch` statements and enhanced switch
 - [ ] **Functions and Methods**
   - [ ] Introduction and call stack execution
   - [ ] Scoping (block, method, loop scope)

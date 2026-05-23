@@ -251,3 +251,93 @@ myCalc.addNumbers(5, 10);
 **The difference:**
 - Static: call it directly using the class name
 - Regular: must use `new` to build an object first, then call it
+
+# Java Fundamentals
+
+## Conditionals and Loops
+
+### if-else
+```java
+if (boolean expression) {
+    // body
+} else {
+    // do this
+}
+```
+- Condition must be a boolean expression (true or false)
+- Can chain with `else if` for multiple conditions
+- Operators: `&&` (and), `||` (or), `!=` (not equal)
+
+### for loop — use when you know how many times the loop will run
+```java
+for (initialisation; condition; increment/decrement) {
+    // body
+}
+```
+
+### while loop — use when you don't know how many times the loop will run
+```java
+while (condition) {
+    // body
+}
+```
+
+### do-while — executes at least once even if condition is not met
+```java
+do {
+    // body
+} while (condition);
+```
+
+---
+
+## Important Digit Extraction Pattern
+
+To get the last digit of a number: `n % 10`  
+To remove the last digit: `n / 10`
+
+This pattern is used in many problems:
+
+**Counting occurrences of a digit:**
+```
+n = 13839, count occurrences of 3
+rem = n % 10  → last digit
+if rem == 3 → count++
+n = n / 10   → remove last digit
+repeat while n > 0
+```
+
+**Reversing a number:**
+```
+n = 23597
+ans = 0
+rem = n % 10 → 7
+ans = ans * 10 + rem → 7
+n = n / 10 → 2359
+
+rem = 9 → ans = 79
+rem = 5 → ans = 795
+rem = 3 → ans = 7953
+rem = 2 → ans = 79532
+```
+
+---
+
+## Fibonacci Numbers
+
+Sequence: 0, 1, 1, 2, 3, 5, 8, 13 ...  
+Each number = sum of previous two numbers.
+
+To find nth Fibonacci number:
+- Start with a = 0, b = 1
+- Each step: new b = a + b, new a = old b
+- Repeat n-2 times (since we already have first two)
+
+---
+
+## Key Observations from Practice
+
+- `Math.max(a, b)` — returns larger of two numbers, can be nested: `Math.max(c, Math.max(a, b))`
+- `in.next().trim().charAt(0)` — to read a single character from Scanner
+- Always handle division by zero: check `num2 != 0` before dividing
+- `do-while` is the right choice when a menu needs to show at least once (like a Calculator)
