@@ -341,3 +341,92 @@ To find nth Fibonacci number:
 - `in.next().trim().charAt(0)` — to read a single character from Scanner
 - Always handle division by zero: check `num2 != 0` before dividing
 - `do-while` is the right choice when a menu needs to show at least once (like a Calculator)
+
+## Switch Statements
+
+In switch statements you can jump to various cases based on your expression.
+
+### Old Syntax
+```java
+switch (expression) {
+    case one:
+        // do something
+        break;
+    case two:
+        // do something
+        break;
+    default:
+        // do something
+}
+```
+
+### Enhanced Syntax (Java 14+) — preferred
+```java
+switch (expression) {
+    case one -> // do this;
+    case two -> // do this;
+    default  -> // do this;
+}
+```
+- `break` is not required in enhanced syntax
+- For multiple statements in one case, use `{ }`
+
+### Multiple values in one case
+```java
+case 1, 2, 3, 4, 5 -> System.out.println("Weekday");
+case 6, 7          -> System.out.println("Weekend");
+```
+
+### Important Rules
+- Cases must be the same type as the expression
+- Cases must be a constant or literal — not a variable
+- Duplicate case values are not allowed
+- `break` terminates the sequence — without it, execution falls through to the next case
+- `default` executes when none of the cases match
+- If `default` is not at the end, put `break` after it
+
+### Nested Switch
+A switch inside another switch case. Used when one case needs further branching.
+
+```java
+switch (empID) {
+    case 3 -> {
+        switch (department) {
+            case "IT"         -> System.out.println("IT Department");
+            case "Management" -> System.out.println("Management Department");
+            default           -> System.out.println("No department entered");
+        }
+    }
+}
+```
+
+---
+
+## == vs .equals()
+
+### == (Identity operator)
+- For primitives: compares raw values directly
+- For objects: compares memory addresses (references)
+- Question it asks: "Are these two variables pointing to the exact same physical spot in memory?"
+- Safe for primitives, unreliable for objects
+- Can throw `NullPointerException` if the first object is null
+
+### .equals() (Content method)
+- Compares the actual text or values inside the objects
+- Question it asks: "Do these two objects look identical on the inside, even if they are in different memory spots?"
+- `.equals()` will give true in both cases — whether same reference or different reference with same value
+- Always use `.equals()` for String comparison, never `==`
+
+```java
+// Example
+String a = "Riya";  // a points to object "Riya"
+String b = "Riya";  // b points to a different object also called "Riya"
+
+a == b        // false — different memory addresses
+a.equals(b)   // true  — same content
+```
+
+- Always use `.equals()` for String comparison in Java
+- `==` can throw a NullPointerException if the first object is null
+
+---
