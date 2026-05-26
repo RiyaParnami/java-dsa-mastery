@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 1 / 22 |
-| Implementations Written | 17 |
+| Implementations Written | 24 |
 | Current Focus | Java Fundamentals |
 | Target Completion | October 2026 |
 
@@ -51,8 +51,8 @@ This repository focuses on consistent learning through concept implementation, s
   - [x] Loops (`for`, `while`, `do-while`)
   - [x] `switch` statements and enhanced switch
 - [ ] **Functions and Methods**
-  - [ ] Introduction and call stack execution
-  - [ ] Scoping (block, method, loop scope)
+  - [x] Introduction and call stack execution
+  - [x] Scoping (block, method, loop scope)
   - [ ] Shadowing
   - [ ] Variable length arguments (`varargs`)
   - [ ] Method overloading
