@@ -430,3 +430,172 @@ a.equals(b)   // true  — same content
 - `==` can throw a NullPointerException if the first object is null
 
 ---
+
+## Functions and Methods
+
+In Java, functions are called methods because everything lives inside a class. A method is a block of code that only runs when it is called.
+
+**The Problem without methods — WET Code (Write Everything Twice)**
+Without methods you end up copy-pasting the same logic over and over, making your program messy and hard to fix.
+
+**The Solution — DRY Code (Don't Repeat Yourself)**
+Bundle that logic into a single reusable method. Define it once, use it many times.
+
+### Syntax
+```java
+access-modifier return-type methodName() {
+    // code
+    return statement; // function ends here
+}
+```
+
+### Return Type
+- A return statement causes program control to transfer back to the caller of a method
+- Return type may be a primitive type like `int`, `char`, or `void` (returns nothing)
+- The type of data returned must be compatible with the return type specified by the method
+- The variable receiving the returned value must also be compatible with the return type
+- After `return`, nothing executes in that method
+
+### Calling a method
+```java
+methodName(); // calling the function
+```
+
+---
+
+## Pass by Value
+
+In Java there is no such thing as pass by reference — there is only pass by value.
+
+### For primitives (int, short, char, byte etc.)
+- The value is copied and passed
+- Changes inside the method do not affect the original variable
+
+```java
+// In main:
+int a = 10, b = 20;
+swap(a, b);
+// a and b are still 10 and 20 here
+
+// Inside swap:
+static void swap(int a, int b) {
+    int temp = a;
+    a = b;
+    b = temp;
+    // change is only valid inside this function scope
+}
+```
+
+### For objects and arrays
+- The value of the reference variable is passed (i.e. the memory address)
+- Both the original and parameter variable point to the same object
+- So changes to the object's content ARE visible outside
+
+```java
+// arr and nums both point to same array [1,3,2,45,6]
+static void change(int[] nums) {
+    nums[0] = 99; // changes the actual object → arr becomes [99,3,2,45,6]
+}
+```
+
+### For Strings (important edge case)
+- Strings are objects but they are immutable
+- Assigning a new value inside a method creates a new object, does not change the original
+
+```java
+static void changeName(String naam) {
+    naam = "Akriti"; // creates new object, naam now points to new object
+    // original name variable still points to "Riya"
+}
+```
+
+---
+
+## Scopes
+
+### Function scope
+Variables declared inside a method can't be accessed outside that method.
+
+### Block scope
+Refers to the visibility and lifetime of a variable declared within a specific set of curly braces `{ }`.
+- Variables initialized outside a block can be updated inside the block
+- Variables initialized inside a block cannot be updated outside the block, but can be re-initialized outside
+- Variables like `a` declared outside, updated inside a block, retain the updated value outside too
+
+### Loop scope
+Variables declared inside a loop have loop scope — they cannot be accessed outside the loop.
+
+---
+
+## Shadowing
+
+Shadowing in Java is the practice of using variables in overlapping scopes with the same name, where the low-level scope overrides the variable of the high-level scope.
+
+```java
+static int x = 90; // class-level variable
+
+public static void main(String[] args) {
+    System.out.println(x); // 90 — class variable
+    int x;                 // class variable is now shadowed
+    x = 40;
+    System.out.println(x); // 40 — local variable
+}
+
+static void fun() {
+    System.out.println(x); // 90 — sees class variable, not shadowed here
+}
+```
+
+- Scope of a local variable begins when its value is initialized, not after declaration
+
+---
+
+## Variable Arguments (varargs)
+
+Used to take a variable number of arguments. A method that takes a variable number of arguments is a varargs method.
+
+```java
+static void fun(int ...v) {
+    System.out.println(Arrays.toString(v));
+    // v is treated as an array of type int[]
+}
+```
+
+- Can pass strings, chars, or any type with varargs
+- varargs parameter must always be the last in the parameter list
+
+```java
+static void multiple(int a, int b, String ...v) {
+    // a and b are fixed, v takes the rest
+}
+```
+
+---
+
+## Method Overloading
+
+Method overloading happens when two methods have the same name but different arguments.
+
+- Same name, same arguments with no return type difference → NOT overloading (not allowed)
+- Same name, different arguments → allowed, this is overloading
+- At compile time, Java decides which method to run based on the arguments passed
+
+```java
+static void fun(int a)     { } // called when int is passed
+static void fun(String s)  { } // called when String is passed
+
+static int sum(int a, int b)         { return a + b; }
+static int sum(int a, int b, int c)  { return a + b + c; }
+```
+
+---
+
+## Armstrong Number
+
+A number where the sum of each digit raised to the power of the number of digits equals the original number.
+
+```
+153 → (1)³ + (5)³ + (3)³ = 1 + 125 + 27 = 153 ✓
+```
+
+Logic: extract each digit using `% 10`, cube it, add to sum, remove digit using `/ 10`. Compare final sum with original number.
