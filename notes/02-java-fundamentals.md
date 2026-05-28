@@ -252,7 +252,7 @@ myCalc.addNumbers(5, 10);
 - Static: call it directly using the class name
 - Regular: must use `new` to build an object first, then call it
 
-# Java Fundamentals
+---
 
 ## Conditionals and Loops
 

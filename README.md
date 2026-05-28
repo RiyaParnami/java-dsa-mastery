@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 2 / 22 |
-| Implementations Written | 29 |
+| Implementations Written | 30 |
 | Current Focus | Java Fundamentals |
 | Target Completion | October 2026 |
 
@@ -62,8 +62,8 @@ This repository focuses on consistent learning through concept implementation, s
 <details>
 <summary><b>3. Arrays</b></summary>
 
-- [ ] Introduction to 1D and 2D arrays
-- [ ] Memory management (stack vs heap allocation)
+- [x] Introduction to 1D and 2D arrays
+- [x] Memory management (stack vs heap allocation)
 - [ ] Input and output with arrays
 - [ ] Dynamic arrays (`ArrayList` introduction)
 - [ ] Pattern questions (nested loop logic)
