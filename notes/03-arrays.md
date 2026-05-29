@@ -132,3 +132,34 @@ int[] arr = new int[5];
 - Forgetting that array size is fixed after creation
 - Trying to assign `null` to a primitive type array element directly
 - Confusing declaration (stack) with initialisation (heap)
+
+## Input and Output
+
+```java
+// Print array
+System.out.println(Arrays.toString(arr));
+
+// For loop input
+for (int i = 0; i < arr.length; i++) {
+    arr[i] = in.nextInt();
+}
+
+// Enhanced for loop (for-each) — for reading only, cannot modify
+for (int num : arr) {
+    System.out.print(num + " ");
+}
+```
+
+- `arr.length` — gives size of array
+- `Arrays.toString(arr)` — prints array in readable format, needs `import java.util.Arrays`
+- Enhanced for loop gives element directly, not index — use regular for loop when you need index
+
+## Passing Arrays to Methods
+
+Arrays are objects — reference value is passed, not a copy. Both variables point to same array in heap.
+
+```java
+static void change(int[] arr) {
+    arr[0] = 99; // changes original array
+}
+```

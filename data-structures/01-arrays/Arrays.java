@@ -30,5 +30,10 @@ public class Arrays {
 
 //        String str = null; //can assign null to non-primitives
 //        int num = null; // can't assign null to primitives , it's just a special literal that is like none in python
+
+
+//        for (String element : arr) {
+//            System.out.println(element);
+//        }
     }
 }
