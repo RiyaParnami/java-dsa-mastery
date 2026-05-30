@@ -32,7 +32,8 @@ public class Arrays {
 //        int num = null; // can't assign null to primitives , it's just a special literal that is like none in python
 
 
-//        for (String element : arr) {
+          // enhanced for loop
+//        for (String element : arr) { // for(datatype element inside the arr : arr){print element}
 //            System.out.println(element);
 //        }
     }

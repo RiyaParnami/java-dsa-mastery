@@ -163,3 +163,57 @@ static void change(int[] arr) {
     arr[0] = 99; // changes original array
 }
 ```
+
+## 2D Arrays
+
+```java
+// Declaration
+int[][] arr = new int[3][3]; // 3 rows, 3 columns
+
+// Number of columns is not mandatory, rows are mandatory
+int[][] arr = new int[3][];
+
+// Direct initialisation
+int[][] arr = {
+    {1, 2, 3},
+    {4, 5, 6},
+    {7, 8, 9}
+};
+```
+
+- `arr.length` — number of rows
+- `arr[row].length` — number of columns in that row
+
+**Input and Output:**
+```java
+// input
+for (int row = 0; row < arr.length; row++) {
+    for (int col = 0; col < arr[row].length; col++) {
+        arr[row][col] = in.nextInt();
+    }
+}
+
+// output using Arrays.toString
+for (int row = 0; row < arr.length; row++) {
+    System.out.println(Arrays.toString(arr[row]));
+}
+
+// enhanced for loop
+for (int[] a : arr) {
+    System.out.println(Arrays.toString(a));
+}
+```
+
+## Jagged Arrays
+
+Rows with different number of columns.
+
+```java
+int[][] arr = {
+    {1, 2, 3, 4},  // 4 columns
+    {5, 6},         // 2 columns
+    {7, 8, 9}       // 3 columns
+};
+```
+
+Use `arr[row].length` instead of a fixed column size when iterating — works for both regular and jagged arrays.
