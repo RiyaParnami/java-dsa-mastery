@@ -133,87 +133,170 @@ int[] arr = new int[5];
 - Trying to assign `null` to a primitive type array element directly
 - Confusing declaration (stack) with initialisation (heap)
 
-## Input and Output
+---
+
+## Two Pointer Method — Reverse an Array
+
+Use two pointers, one at start and one at end, swap and move towards each other until they meet.
 
 ```java
-// Print array
-System.out.println(Arrays.toString(arr));
-
-// For loop input
-for (int i = 0; i < arr.length; i++) {
-    arr[i] = in.nextInt();
-}
-
-// Enhanced for loop (for-each) — for reading only, cannot modify
-for (int num : arr) {
-    System.out.print(num + " ");
+static void reverse(int[] arr) {
+    int start = 0;
+    int end = arr.length - 1;
+    while (start < end) {
+        swap(arr, start, end);
+        start++;
+        end--;
+    }
 }
 ```
 
-- `arr.length` — gives size of array
-- `Arrays.toString(arr)` — prints array in readable format, needs `import java.util.Arrays`
-- Enhanced for loop gives element directly, not index — use regular for loop when you need index
-
-## Passing Arrays to Methods
-
-Arrays are objects — reference value is passed, not a copy. Both variables point to same array in heap.
-
-```java
-static void change(int[] arr) {
-    arr[0] = 99; // changes original array
-}
-```
+---
 
 ## 2D Arrays
 
-```java
-// Declaration
-int[][] arr = new int[3][3]; // 3 rows, 3 columns
+A 2D array can be visualised as a matrix (rows and columns). It is essentially an array of arrays.
 
-// Number of columns is not mandatory, rows are mandatory
-int[][] arr = new int[3][];
+Think of it as a 1D array written vertically, then each element replaced with another array.
+
+```
+int[] num = {2, 5, 6, 9, 34}  →  5 rows
+
+Replace each element with an array:
+int[][] num = {
+    {1, 2, 3, 4},
+    {5, 6, 7, 8},
+    {9, 10, 11, 12},
+    {13, 14, 15, 16},
+    {17, 18, 19, 20}
+};
+// rows = 5, columns = 4, total elements = 5 * 4 = 20
+```
+
+### Syntax
+
+```java
+// Fixed size
+datatype[][] variable-name = new datatype[row-size][column-size];
+
+// Declaration then initialisation
+datatype[][] variable-name;
+variable-name = new datatype[row-size][column-size];
 
 // Direct initialisation
-int[][] arr = {
-    {1, 2, 3},
-    {4, 5, 6},
-    {7, 8, 9}
-};
+datatype[][] variable-name = {{array1}, {array2}, {array3}};
 ```
 
-- `arr.length` — number of rows
-- `arr[row].length` — number of columns in that row
+- Row size is mandatory to give
+- Column size is not mandatory (jagged arrays allowed)
 
-**Input and Output:**
+### Internal Memory
+
+```
+Stack         Heap
+------        ---------------------------
+arr    →      {[1,2,3], [4,5,6], [2,8,9]}  ← array of arrays
+               row 0     row 1    row 2
+```
+
+- `arr` reference variable is declared in stack
+- A new object is created in heap with the size of the array
+- Each row is itself an array object stored in different parts of heap
+
+### Accessing Elements
+
 ```java
-// input
-for (int row = 0; row < arr.length; row++) {
-    for (int col = 0; col < arr[row].length; col++) {
-        arr[row][col] = in.nextInt();
+arr[0]    // gives {1, 2, 3} — first row (an array)
+arr[0][2] // gives 3 — element at row 0, column 2
+```
+
+### Dynamic 2D Array (jagged)
+
+```java
+int[][] num = {
+    {1, 2, 3, 4},
+    {5, 6, 7},
+    {8, 9, 10, 11},
+    {12, 13},
+    {14}
+};
+// rows = 5, columns = dynamic (each row has different length)
+```
+
+---
+
+## ArrayList
+
+ArrayList is similar to vectors in C++. It is part of the Collections Framework, present in `java.util` package. It provides dynamic arrays in Java and is slower than standard arrays.
+
+Use ArrayList when you don't want to set a fixed size because you don't know how many elements you may add, or you may want to update the size in the future.
+
+### Syntax
+
+```java
+ArrayList<Integer> list = new ArrayList<>(5);
+//         ↑               ↑                ↑
+//    wrapper class    creates object    initial size (optional)
+```
+
+- Must use wrapper classes (not primitives) — `Integer` not `int`, `Double` not `double`
+- Initial size is optional — ArrayList will resize automatically
+
+### Common Methods
+
+```java
+list.add(67);           // adds element to end
+list.set(0, 99);        // updates value at index 0
+list.get(i);            // retrieves value at index i — use this, not list[i]
+list.remove(2);         // removes element at index 2
+list.contains(654);     // returns true/false
+list.size();            // returns current size
+```
+
+### Internal Working
+
+Internally the size of ArrayList is fixed but not permanently — it can change according to input you provide.
+
+Example: initial size set to 5
+```
+[4 | 9 | 3 |   |   ]
+```
+You add 4 more elements but don't have enough space. Java will create a new list with a new size (it depends) enough to accommodate new elements, copy the old list to new list, and delete the old list.
+
+```
+[4 | 9 | 3 | 6 | 5 | 23 | 12 |   |   |   ]
+```
+
+### Array vs ArrayList
+
+| Array | ArrayList |
+| :--- | :--- |
+| Fixed length/size | Can contain as many elements as you want even though initial size is specified |
+| Can be created using both primitive and non-primitive datatypes | Cannot be created using primitives — only objects or wrapper classes |
+
+### Multi-dimensional ArrayList
+
+```java
+ArrayList<ArrayList<Integer>> list = new ArrayList<>();
+
+// initialise inner lists
+for (int i = 0; i < 3; i++) {
+    list.add(new ArrayList<>());
+}
+
+// add elements
+for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+        list.get(i).add(in.nextInt());
     }
 }
-
-// output using Arrays.toString
-for (int row = 0; row < arr.length; row++) {
-    System.out.println(Arrays.toString(arr[row]));
-}
-
-// enhanced for loop
-for (int[] a : arr) {
-    System.out.println(Arrays.toString(a));
-}
 ```
 
-## Jagged Arrays
+---
 
-Rows with different number of columns.
+## Important Notes
 
-```java
-int[][] arr = {
-    {1, 2, 3, 4},  // 4 columns
-    {5, 6},         // 2 columns
-    {7, 8, 9}       // 3 columns
-};
-```
-
-Use `arr[row].length` instead of a fixed column size when iterating — works for both regular and jagged arrays.
+- `Arrays.toString(array)` — internally uses a loop and gives output in proper format. Needs `import java.util.Arrays`
+- In an array, since we can change the objects, arrays are **mutable**
+- Strings are **immutable** — cannot change the object itself, only reassign reference
+- ArrayList in Java is similar to vectors in C++
