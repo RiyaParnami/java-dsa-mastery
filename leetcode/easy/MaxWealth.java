@@ -5,7 +5,7 @@ public class MaxWealth {
 
     }
     public int maximumWealth(int[][] accounts) {
-        // person = rol
+        // person = row
         // account = col
         int ans = Integer.MIN_VALUE;
         for (int[] ints : accounts) {
@@ -14,6 +14,7 @@ public class MaxWealth {
             for (int anInt : ints) {
                 sum += anInt;
             }
+            
             // now we have sum of accounts of person
             // check with overall ans
             if (sum > ans) {
