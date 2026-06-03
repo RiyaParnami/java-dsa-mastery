@@ -168,4 +168,12 @@ static int orderAgnosticBS(int[] arr, int target) {
 - Applying binary search on unsorted array — gives wrong results
 - Using `while (start < end)` instead of `while (start <= end)` — misses single element arrays
 - Forgetting `str.length()` uses parentheses unlike `arr.length`
-- Not handling empty array before starting the search loop
+- Not handling empty array before starting the search loop 
+
+---
+
+## Floor and Ceiling
+
+**Floor** — greatest number <= target. When loop ends, `end` pointer holds the floor index.
+
+**Ceiling** — smallest number >= target. When loop ends, `start` pointer holds the ceiling index. Handle edge case where target > largest element → return -1.
