@@ -162,18 +162,92 @@ static int orderAgnosticBS(int[] arr, int target) {
 
 ---
 
+## Modified Binary Search Patterns
+
+### Floor and Ceiling — Key Insight
+When the while loop breaks, `start = end + 1` (start crossed end). This is the reason:
+- **Floor** — return `end` because end is pointing to the greatest element ≤ target
+- **Ceiling** — return `start` because start is pointing to the smallest element ≥ target
+- When no answer found, `start` will be > target — it is the next big number
+
+```
+arr = [2, 3, 5, 9, 14, 16, 18], target = 15
+ceiling(arr, 14) = 14
+ceiling(arr, 15) = 16
+ceiling(arr, 4)  = 5
+ceiling(arr, 9)  = 9
+```
+
+When condition is violated: `s = e + 1`, so `s > e`. The answer `s` when condition violated will be the smallest element greater than target.
+
+---
+
+### First and Last Position in Sorted Array
+Run binary search twice — first time to find start position, second time for last position. Complexity is same — O(log n) both times.
+
+- Find first occurrence → when target found, save index as potential answer then move `end = mid - 1` to keep searching left
+- Find last occurrence → when target found, save index as potential answer then move `start = mid + 1` to keep searching right
+
+```
+arr = [5, 7, 7, 7, 8, 8, 10], target = 7
+first occurrence → end = mid - 1 when found → ans = index 1
+last occurrence  → start = mid + 1 when found → ans = index 3
+```
+
+---
+
+### Infinite Array — Finding Range First
+When array size is unknown (infinite), you cannot directly apply binary search. First find the range where target lies, then apply binary search.
+
+**Algorithm:**
+1. Start with box size 2 (start = 0, end = 1)
+2. While target > arr[end] → double the box size
+3. New start = old end + 1
+4. New end = old end + (size of box) * 2
+
+```
+size of box = end - start + 1   (finding size by indices)
+
+arr = [2, 3, 5, 6, 7, 8, 10, 11, 12, 15, 20, 23, 30]
+target = 15
+
+start=0, end=1 → box=[2,3] → 15 > 3
+new start = 2, end = 1 + (1-0+1)*2 = 1+4 = 5 → box=[5,6,7,8,10,11] → 15 > 11  
+new start = 6, end = 5 + (5-2+1)*2 = 5+8 = 13 → apply binary search
+```
+
+---
+
+### Smallest Letter Greater Than Target
+Exact same approach as ceiling of a number with two differences:
+1. Ignore the target itself — looking for strictly greater
+2. Array wraps around — if start goes out of bounds, return `letters[start % letters.length]`
+
+```
+arr = ['c', 'd', 'j', 'j'], target = 'j'
+condition violated: start = end + 1 → start = length of array = N
+return S % N → N % N = 0 → return letters[0] = 'c'
+```
+
+---
+
+### Mountain Array — Peak Finding
+When `arr[mid] > arr[mid+1]` → you are in descending part → answer may be here, look left → `end = mid`
+When `arr[mid] < arr[mid+1]` → you are in ascending part → peak is to right → `start = mid + 1`
+
+When loop ends, `start == end` pointing to peak element.
+
+**Search in Mountain Array:**
+1. Find peak index
+2. Binary search on left half (ascending) using order agnostic BS
+3. If not found, binary search on right half (descending)
+
+---
+
 ## Common Mistakes
 
 - Using `(start + end) / 2` for mid — can cause integer overflow for large arrays
 - Applying binary search on unsorted array — gives wrong results
 - Using `while (start < end)` instead of `while (start <= end)` — misses single element arrays
 - Forgetting `str.length()` uses parentheses unlike `arr.length`
-- Not handling empty array before starting the search loop 
-
----
-
-## Floor and Ceiling
-
-**Floor** — greatest number <= target. When loop ends, `end` pointer holds the floor index.
-
-**Ceiling** — smallest number >= target. When loop ends, `start` pointer holds the ceiling index. Handle edge case where target > largest element → return -1.
+- Not handling empty array before starting the search loop
