@@ -4,6 +4,7 @@ public class Mountain {
     public static void main(String[] args) {
 
     }
+    
     // https://leetcode.com/problems/peak-index-in-a-mountain-array/
     // https://leetcode.com/problems/find-peak-element/
     public int peakIndexInMountainArray(int[] arr) {
