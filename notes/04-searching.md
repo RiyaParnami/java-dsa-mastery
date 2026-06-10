@@ -244,6 +244,57 @@ When loop ends, `start == end` pointing to peak element.
 
 ---
 
+## Rotated Binary Search (Search in Rotated Sorted Array)
+
+A rotated sorted array is a sorted array that has been rotated at some pivot point.
+
+```
+Original: [2, 4, 5, 7, 8, 9, 10, 12]
+After 1 rotation: [12, 2, 4, 5, 7, 8, 9, 10]
+After 2 rotations: [10, 12, 2, 4, 5, 7, 8, 9]
+```
+
+**Pivot** — the point where the next numbers start ascending again. It is the largest number in the array. From where your next numbers are ascending.
+
+### Algorithm
+1. Find the pivot
+2. Search in first half (0, pivot) using simple binary search
+3. Otherwise search in second half (pivot+1, end)
+
+### Finding Pivot — 4 Cases
+
+**Case 1:** `arr[mid] > arr[mid+1]` → mid element is bigger than next element → mid is the pivot
+
+**Case 2:** `arr[mid] < arr[mid-1]` → mid element is smaller than previous element → mid-1 is the pivot
+
+**Case 3:** `arr[start] >= arr[mid]` → start element is bigger than or equal to mid element → all elements from mid will be smaller than start → these are bigger numbers, ignore mid → `end = mid - 1`
+
+**Case 4:** `arr[start] < arr[mid]` → left side is sorted, pivot is in right half → `start = mid + 1`
+
+```
+arr = [3, 4, 5, 6, 7, 0, 1, 2]
+                    ↑
+                  pivot (index 4, value 7)
+```
+
+### RBS Using Pivot
+```
+arr = [4, 5, 6, 7, 0, 1, 2]
+       s        p        e
+```
+- Case 1: pivot element == target → found
+- Case 2: target >= start element → search space = (s, p-1) — because all numbers after pivot are < start
+- Case 3: target < start element → search space = (p+1, end)
+
+### For Duplicate Values
+When `arr[mid] == arr[start] == arr[end]` → cannot determine which side is sorted → skip duplicates from both ends:
+- Check if start is pivot: `if arr[start] > arr[start+1]` → return start
+- Increment start
+- Check if end is pivot: `if arr[end] < arr[end-1]` → return end
+- Decrement end
+
+---
+
 ## Common Mistakes
 
 - Using `(start + end) / 2` for mid — can cause integer overflow for large arrays
