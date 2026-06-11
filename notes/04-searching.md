@@ -295,6 +295,109 @@ When `arr[mid] == arr[start] == arr[end]` → cannot determine which side is sor
 
 ---
 
+## Rotation Count
+
+How many times has a sorted array been rotated?
+
+```
+arr = [4, 5, 6, 7, 0, 1, 2]
+Original: [0, 1, 2, 4, 5, 6, 7]
+Rotated 4 times from original
+pivot = 3 (index of value 7)
+ans = pivot + 1 = 4
+```
+
+If pivot is not found (`pivot == -1`), array is not rotated → `ans = -1 + 1 = 0`.
+
+```java
+static int countRotations(int[] arr) {
+    int pivot = findPivot(arr);
+    return pivot + 1;
+}
+```
+
+---
+
+## Split Array Largest Sum
+
+Split an array into `m` non-empty continuous subarrays such that the largest sum among these subarrays is minimized.
+
+```
+arr = [7, 2, 5, 10, 8], m = 2
+split into 2 parts → answer is the lowest possible "maximum part sum"
+```
+
+### Setting up the search range
+```
+min ans = max value in array     (start)
+max ans = sum of all values      (end)
+
+arr = [7, 2, 5, 10, 8]
+start = 10 (max element)
+end   = 32 (sum of all)
+```
+
+Since the answer definitely lies between `start` and `end`, and this range is sorted — apply Binary Search.
+
+### Algorithm
+1. `mid = start + (end - start) / 2` — try mid as a potential max sum
+2. Calculate how many `pieces` the array can be divided into without any piece exceeding `mid`
+3. If `pieces > m` → mid is too small, need bigger max sum → `start = mid + 1`
+4. If `pieces <= m` → mid works, try smaller → `end = mid`
+5. When `start == end` → that is the answer
+
+### Calculating pieces for a given mid
+```java
+int sum = 0;
+int pieces = 1;
+for (int num : nums) {
+    if (sum + num > mid) {
+        sum = num;   // start a new subarray
+        pieces++;
+    } else {
+        sum += num;
+    }
+}
+```
+
+### Walkthrough
+```
+arr = [7, 2, 5, 10, 8], m = 2
+start = 10, end = 32
+mid = 21 → split: [7,2,5]=14, [8,10]=18 → both <= 21 → pieces = 2
+pieces <= m → end = 21
+
+start = 10, end = 21
+mid = 15 → split: [7,2,5]=14, [8]=8, [10]=10 → pieces = 3
+pieces > m → start = mid + 1 = 16
+
+start = 16, end = 21
+mid = 18 → split: [7,2,5]=14, [8,10]=18 → pieces = 2
+pieces <= m → end = 18
+
+start = 16, end = 18
+mid = 17 → pieces = 3 (exceeds m) → start = 18
+
+start = 18, end = 18 → loop ends → ans = 18
+```
+
+### Two Important Edge Checks
+1. **Minimum number of partitions = 1** — the entire array as one piece, sum = sum of entire array (case 1, max value of ans)
+2. **Maximum number of partitions = N** — each element is its own piece, ans = max element in array (case 2, min value of ans)
+
+```
+arr = [3, 4, 1, 2]
+Case 1 (1 partition): [3,4,1,2] → sum = 10
+Case 2 (N partitions): [3],[4],[1],[2] → max element = 4
+
+max value of ans = case 1 = sum of entire array
+min value of ans = case 2 = max element in array
+```
+
+This confirms why `start = max element` and `end = sum of array` for the binary search range.
+
+---
+
 ## Common Mistakes
 
 - Using `(start + end) / 2` for mid — can cause integer overflow for large arrays
