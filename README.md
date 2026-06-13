@@ -17,8 +17,8 @@ This repository focuses on consistent learning through concept implementation, s
 
 | Metric | Value |
 | :--- | :--- |
-| Topics Completed | 3 / 22 |
-| Implementations Written | 57 |
+| Topics Completed | 4 / 22 |
+| Implementations Written | 59 |
 | Current Focus | Searching Algorithms |
 | Target Completion | October 2026 |
 
@@ -76,7 +76,7 @@ This repository focuses on consistent learning through concept implementation, s
 - [x] Linear search
 - [x] Binary search fundamentals
 - [x] Modified binary search patterns
-- [ ] Binary search on 2D sorted arrays
+- [x] Binary search on 2D sorted arrays
 
 </details>
 

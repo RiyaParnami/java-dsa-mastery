@@ -398,6 +398,88 @@ This confirms why `start = max element` and `end = sum of array` for the binary 
 
 ---
 
+## Searching in Matrices (2D Arrays)
+
+### Brute Force — Linear Search in Matrix
+```java
+for (r = 0; r < n; r++) {
+    for (c = 0; c < n; c++) {
+        if (arr[r][c] == target) // ans;
+    }
+}
+return -1;
+```
+- Time Complexity: `N * N = N² = O(N²)` for square matrix, `O(N*M)` for general matrix (N = number of rows, M = number of columns)
+
+---
+
+### Search in a Row-wise and Column-wise Sorted Matrix
+Matrix is sorted both row-wise and column-wise. Start searching from `row = 0` and `column = last`.
+
+```
+[10  20  30  40]
+[15  25  35  45]
+[28  29  37  49]
+[33  34  38  50]
+
+target = 37
+```
+
+**Three cases:**
+1. If `matrix[r][c] == target` → answer found
+2. If `matrix[r][c] < target` → eliminate this row, move down → `r++`
+3. If `matrix[r][c] > target` → eliminate this column, move left → `c--`
+
+This reduces the search space by eliminating an entire row or column each step.
+
+```java
+static int[] search(int[][] matrix, int target) {
+    int r = 0;
+    int c = matrix.length - 1;
+
+    while (r < matrix.length && c >= 0) {
+        if (matrix[r][c] == target) {
+            return new int[]{r, c};
+        }
+        if (matrix[r][c] < target) {
+            r++;
+        } else {
+            c--;
+        }
+    }
+    return new int[]{-1, -1};
+}
+```
+
+**Complexity:**
+- `N + N = 2N` comparisons → Time Complexity = O(N)
+- Space Complexity = O(1)
+
+---
+
+### Search in a Sorted Matrix (Binary Search Approach)
+Each row and the matrix as a whole is sorted such that flattening it row by row gives a fully sorted sequence.
+
+```
+[1   2   3   4]
+[5   6   7   8]
+[9  10  11  12]
+[13 14  15  16]
+
+target = 2
+```
+
+**Algorithm — divide and conquer on columns:**
+1. Take the middle column and perform Binary Search on it
+2. If element == target → answer found
+3. If element > target → ignore rows after it (eliminate bottom-right region)
+4. If element < target → ignore rows above it (eliminate top-left region)
+5. In the end, 2 rows remain — check whether the middle column you're at contains the answer, then do a final linear/binary check on those 2 rows
+
+**Complexity:** O(log N + log M) — binary search on rows (N) then binary search on the remaining columns (M)
+
+---
+
 ## Common Mistakes
 
 - Using `(start + end) / 2` for mid — can cause integer overflow for large arrays
