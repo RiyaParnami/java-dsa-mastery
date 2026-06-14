@@ -18,8 +18,8 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 59 |
-| Current Focus | Searching Algorithms |
+| Implementations Written | 60 |
+| Current Focus | Sorting Algorithms |
 | Target Completion | October 2026 |
 
 ---
@@ -83,9 +83,9 @@ This repository focuses on consistent learning through concept implementation, s
 <details>
 <summary><b>5. Sorting Algorithms</b></summary>
 
-- [ ] Bubble sort
-- [ ] Selection sort
-- [ ] Insertion sort
+- [x] Bubble sort
+- [x] Selection sort
+- [x] Insertion sort
 - [ ] Cyclic sort
 - [ ] Count sort
 - [ ] Radix sort
