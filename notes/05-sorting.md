@@ -131,6 +131,127 @@ After:  10, 10, 20, 20, 30  (relative order of equal elements not preserved)
 
 ---
 
+## Selection Sort
+
+Select an element and put it on its correct index. Get the greatest element of the array and put it on its correct index — can also do vice-versa (select minimum and place it).
+
+### Example
+```
+i=0: [4, 5, 1, 2, 3] → swap → [4, 3, 1, 2, 5]
+i=1: [4, 3, 1, 2, 5] → swap → [2, 3, 1, 4, 5]
+i=2: [2, 3, 1, 4, 5] → swap → [2, 1, 3, 4, 5]
+i=3: [2, 1, 3, 4, 5] → swap → [1, 2, 3, 4, 5] → sorted!
+```
+Inner loop searches `N - i - 1` remaining elements for the max each pass.
+
+```java
+static void selection(int[] arr) {
+    for (int i = 0; i < arr.length; i++) {
+        int last = arr.length - i - 1;
+        int maxIndex = getMaxIndex(arr, 0, last);
+        swap(arr, maxIndex, last);
+    }
+}
+```
+
+### Complexity
+```
+Total comparisons = (n-1) + (n-2) + (n-3) + ... + 1 + 0
+                   = n(n-1)/2
+                   = (n² - n)/2
+                   → neglect less dominating and constant terms
+Worst Case = O(n²)
+Best Case  = O(n²)  ← even if sorted, still scans for max every pass
+```
+- Not a stable sorting algorithm
+- Performs well on small lists
+
+---
+
+## Insertion Sort
+
+For every index, put that index's element at the correct index of the LHS (left-hand side) — partially sorting the array as you go.
+
+### Example
+```
+1st pass → i=0: [5,3] sorted → [3,5,4,1,2]
+2nd pass → i=1: [3,5,4] sorted → [3,4,5,1,2]
+3rd pass → i=2: [3,4,5,1] sorted → [1,3,4,5,2]
+4th pass → i=3: [1,3,4,5,2] sorted → [1,2,3,4,5] → sorted!
+```
+
+### Detailed walkthrough
+```
+i=0: [3,4,5,1,2]
+  j: 1<5 swap → [3,4,1,5,2]
+     1<4 swap → [3,1,4,5,2]
+     1<3 swap → [1,3,4,5,2]
+
+i=1: [1,3,4,5,2]
+  j: 2<5 swap → [1,3,4,2,5]
+     2<4 swap → [1,3,2,4,5]
+     2<3 swap → [1,2,3,4,5]
+     already sorted → break!
+
+[1,2,3,4,5]
+```
+When `j` is not smaller than `j-1`, break the loop — because the previous (left) side array is already sorted, meaning if j starts within an element that means previous ones are already sorted.
+
+```java
+static void insertion(int[] arr) {
+    for (int i = 0; i < arr.length - 1; i++) {
+        for (int j = i + 1; j > 0; j--) {
+            if (arr[j] < arr[j-1]) {
+                swap(arr, j, j-1);
+            } else {
+                break;
+            }
+        }
+    }
+}
+```
+
+`i` runs from `0` to `n-2` — i.e. `i < (n-1)`.
+
+### Complexity
+```
+Worst Case (descending order) → O(n²)
+Best Case (already sorted) → O(n) — linear, only (n-1) comparisons
+```
+
+### Why use Insertion Sort?
+- **Adaptive** — steps get reduced if array is sorted. Number of swaps reduced compared to bubble sort (if `j` is not smaller than `j-1`, break the loop)
+- **Stable sorting algorithm**
+- Used for smaller values of `n` — works well when array is partially sorted
+- Takes part in **hybrid sorting algorithms**. The sorting algorithms studied so far (bubble, selection, insertion) work for small data, not big data — for that we study Quick Sort, Merge Sort etc.
+- Insertion sort can be combined with Quick Sort or Merge Sort when array is partially sorted
+
+---
+
+## Cyclic Sort
+
+Used when array elements are in a known range and continuous (e.g. 1 to n).
+
+```java
+static void sort(int[] arr) {
+    int i = 0;
+    while (i < arr.length) {
+        int correct = arr[i] - 1; // correct index = value - 1
+        if (arr[i] != arr[correct]) {
+            swap(arr, i, correct);
+        } else {
+            i++;
+        }
+    }
+}
+```
+
+- Place each element at its correct index directly using `value - 1` as the target index
+- If element is already at its correct index, move forward; otherwise swap
+- Works in O(n) time since each element is placed in at most one swap
+
+---
+
 ## Common Mistakes
 
 - Forgetting the `swapped` flag — without it, bubble sort always runs O(N²) even on a sorted array
