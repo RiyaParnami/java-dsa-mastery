@@ -252,6 +252,96 @@ static void sort(int[] arr) {
 
 ---
 
+### Cyclic Sort — Complexity
+```
+4 swaps made + 5 swaps made after sorting all at last
+= (N-1) + N
+= (2N - 1) swaps in worst case
+= O(N) — linear
+
+Best Case → O(n)
+```
+
+### Cyclic Sort Pattern — Different Cases
+
+| Pattern | Best | Average | Worst | Space |
+| :--- | :---: | :---: | :---: | :--- |
+| Cyclic Sort (range based) | O(n) | O(n) | O(n) | O(1) auxiliary |
+| General Cycle Sort (any data, comparison based) | O(n²) | O(n²) | O(n²) | O(1) auxiliary |
+
+General approach for cyclic sort problems: **Check → Swap → Move**
+
+### When to use Cyclic Sort
+- When given numbers are from a range **1 to N** → use cyclic sort
+- If range is `[0, N]` → every element will be at `index = value`
+- If range is `[1, N]` → every element will be at `index = value - 1`
+
+### Cyclic Sort Walkthrough
+```
+arr = [3, 5, 2, 1, 4], N = 5
+
+index = value - 1 (since range starts from 1)
+
+3,5,2,1,4 → swap 3 with index 2 → 2,5,3,1,4
+2,5,3,1,4 → swap 2 with index 1 → 5,2,3,1,4
+5,2,3,1,4 → swap 5 with index 4 → 4,2,3,1,5
+4,2,3,1,5 → swap 4 with index 3 → 1,2,3,4,5 → sorted!
+```
+
+---
+
+## Cyclic Sort Pattern Problems
+
+### Finding the Missing Number
+Numbers from 0 till N → total there will be N+1 numbers.
+
+```
+N = 4, arr = [4, 0, 2, 1]
+Sorted version would be [0,1,2,3,4] where element == index
+
+Tip: if range is [0,N], every element will be at index = value
+After cyclic sort: index where arr[i] != i is missing
+If no mismatch found → N+1 is the answer (missing number is N itself, since the array only has N elements but range is 0 to N)
+```
+
+### Set Mismatch (find duplicate and missing number both)
+```
+arr after cyclic sort: if arr[index] != index + 1
+→ the value at that index is the duplicate
+→ index + 1 is the missing number
+```
+
+```java
+for (int index = 0; index < arr.length; index++) {
+    if (arr[index] != index + 1) {
+        return new int[] {arr[index], index + 1}; // {duplicate, missing}
+    }
+}
+```
+
+### Find All Duplicates in an Array
+Same cyclic sort approach — after sorting, any index where `arr[index] != index + 1` holds a duplicate value.
+
+### First Missing Positive
+Important difference from standard cyclic sort:
+- Ignore negative numbers and numbers greater than array length (since only positive numbers within range matter)
+- Start checking from 1
+- Condition for swap: `arr[i] > 0 && arr[i] <= arr.length && arr[i] != arr[correct]`
+
+```java
+if (arr[i] > 0 && arr[i] <= arr.length && arr[i] != arr[correct]) {
+    swap(arr, i, correct);
+} else {
+    i++;
+}
+```
+
+Two cases for the answer:
+1. If a mismatch is found at some index → `index + 1` is the missing positive
+2. If no mismatch found (array is fully `1...n`) → answer is `arr.length + 1`
+
+---
+
 ## Common Mistakes
 
 - Forgetting the `swapped` flag — without it, bubble sort always runs O(N²) even on a sorted array
