@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 67 |
+| Implementations Written | 69 |
 | Current Focus | Sorting Algorithms |
 | Target Completion | October 2026 |
 
@@ -86,7 +86,7 @@ This repository focuses on consistent learning through concept implementation, s
 - [x] Bubble sort
 - [x] Selection sort
 - [x] Insertion sort
-- [ ] Cyclic sort
+- [x] Cyclic sort
 - [ ] Count sort
 - [ ] Radix sort
 
@@ -95,9 +95,9 @@ This repository focuses on consistent learning through concept implementation, s
 <details>
 <summary><b>6. Strings</b></summary>
 
-- [ ] String class introduction
-- [ ] Immutability and the string pool
-- [ ] Comparison methods (`==` vs `.equals()`)
+- [x] String class introduction
+- [x] Immutability and the string pool
+- [x] Comparison methods (`==` vs `.equals()`)
 - [ ] Standard string operations
 - [ ] `StringBuilder` and performance
 - [ ] `StringBuffer` and thread safety
