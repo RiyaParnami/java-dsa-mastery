@@ -7,7 +7,7 @@ public class Palindrome {
     }
 
     static boolean isPalindrome(String str){
-        if (str == null || str.length() == 0){
+        if (str == null || str.length() == 0){ // if we put str.length() == 0 first then null in string gives error
             return true;
         }
         str = str.toLowerCase();

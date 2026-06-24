@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 77 |
+| Implementations Written | 78 |
 | Current Focus | Sorting Algorithms |
 | Target Completion | October 2026 |
 
@@ -66,7 +66,7 @@ This repository focuses on consistent learning through concept implementation, s
 - [x] Memory management (stack vs heap allocation)
 - [x] Input and output with arrays
 - [x] Dynamic arrays (`ArrayList` introduction)
-- [ ] Pattern questions (nested loop logic)
+- [x] Pattern questions (nested loop logic)
 
 </details>
 
@@ -98,8 +98,8 @@ This repository focuses on consistent learning through concept implementation, s
 - [x] String class introduction
 - [x] Immutability and the string pool
 - [x] Comparison methods (`==` vs `.equals()`)
-- [ ] Standard string operations
-- [ ] `StringBuilder` and performance
+- [x] Standard string operations
+- [x] `StringBuilder` and performance
 - [ ] `StringBuffer` and thread safety
 
 </details>
