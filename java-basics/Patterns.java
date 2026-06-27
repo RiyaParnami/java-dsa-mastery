@@ -22,7 +22,9 @@ public class Patterns {
         n = 2 * n;
         for (int row = 0; row <= n; row++) {
             for (int col = 0; col <= n; col++) {
-                int atEveryIndex = originalN - Math.min(Math.min(row, col), Math.min(n - row, n - col));
+                // this will give 0,1,2,3 pattern -> Math.min(Math.min(row, col), Math.min(n - row, n - col))
+                int atEveryIndex = originalN - Math.min(Math.min(row, col), Math.min(n - row, n - col)); // this will give 4,3,2,1 pattern
+                // ex: 4 - 0 = 4, 4-1 = 3
                 System.out.print(atEveryIndex + " ");
             }
             System.out.println();
