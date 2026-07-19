@@ -11,7 +11,7 @@ public class Palindrome {
             return true;
         }
         str = str.toLowerCase();
-        for (int i = 0; i <= str.length() / 2; i++) {
+        for (int i = 0; i <= str.length() / 2; i++) { // using .length() as a function unlike .length in array
             char start = str.charAt(i);
             char end = str.charAt(str.length() - 1 - i);
 

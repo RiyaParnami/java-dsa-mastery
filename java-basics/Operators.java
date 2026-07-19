@@ -19,6 +19,6 @@ public class Operators {
         // it will not work on any random objects
         System.out.println(ans);
 
-        System.out.println("a" + 'b');
+        System.out.println("a" + 'b'); // if any character is string it will return string.
     }
 }
