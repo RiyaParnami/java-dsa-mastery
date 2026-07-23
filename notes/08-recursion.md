@@ -63,6 +63,8 @@ Every call of a function will take some memory.
 - Draw the tree and pointers **again and again**, using pen and paper.
 - Use a **debugger** to see the flow, and what type of values are being returned at each step.
 
+**Tip:** Make sure to return the result of a function call of the return type.
+
 ---
 
 ## Components of a Recursive Function (VVI)
@@ -73,12 +75,49 @@ Every function has three parts to think about:
 2. **Return type**
 3. **Body of function**
 
+The arguments (e.g. `s`, `e`, `m` — start, end, mid) are **specific to that particular call** and will go into the **next function call** as its own fresh set of arguments — each call has its own copies.
+
+---
+
+## Types of Recurrence Relation
+
+1. **Linear recurrence relation** → e.g. Fibonacci
+2. **Divide & Conquer recurrence relation** → e.g. Binary Search (input reduced by a factor each call)
+
 ---
 
 ## Binary Search with Recursion
 
 - **Comparing** → `O(1)`
 - **Dividing into 2 halves** each time
+
+### How the Search Space Shrinks
+
+At each recursive call, the search space is defined by `s` (start), `e` (end), and `m` (mid) — and each call passes a **narrower** `s...e` range into the next call:
+
+```
+s        m        e
+[__________|__________]
+        ↓
+     s   m  e
+     [____|____]
+        ↓
+    s m e
+    [__|__]
+```
+Each level is a **future function call** — `f()` calling into `f()²`, and so on, until the base case is hit.
+
+### Trace Example
+
+```
+main()                     0 ... 3                    → 6  // print/return
+       ↓
+                            4 ... 5                    → 6
+       ↓
+                              5                          → 6
+                                                        → returns
+```
+Each recursive call narrows the range (e.g. `0...3` → `4...5` → `5`), and once the base case is hit, the result (`6`) is returned back up through each level of the call stack.
 
 ### Recurrence Relation
 

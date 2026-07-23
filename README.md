@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 82 |
+| Implementations Written | 83 |
 | Current Focus | Sorting Algorithms |
 | Target Completion | October 2026 |
 
@@ -121,10 +121,10 @@ This repository focuses on consistent learning through concept implementation, s
 <details>
 <summary><b>8. Recursion and Divide and Conquer</b></summary>
 
-- [ ] **Recursion Fundamentals**
-  - [ ] Execution flow and stack visualization
-  - [ ] Function call tree building
-  - [ ] Tail recursion
+- [x] **Recursion Fundamentals**
+  - [x] Execution flow and stack visualization
+  - [x] Function call tree building
+  - [x] Tail recursion
 - [ ] **Sorting via Recursion**
   - [ ] Merge sort
   - [ ] Quick sort
