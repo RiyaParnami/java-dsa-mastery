@@ -2,11 +2,11 @@
 
 ## What is Time Complexity?
 
-**Time Complexity** is a function that measures how the runtime of an algorithm scales as the input size (`n`) grows. It gives us the relationship about how the time will grow as the input grows.
+**Time Complexity** describes how the running time of an algorithm grows as the input size (`n`) increases. It focuses on the **growth rate**, not the actual execution time.
 
 ---
 
-## Motivating Example
+## Why Not Measure Seconds?
 
 **Data:** 1,000,000 elements in an array.
 
@@ -21,32 +21,171 @@ Run the same algorithm on two different machines:
 
 At first glance it looks like the M1 MacBook has "better" performance — and it does, in terms of raw speed. But that's not what time complexity measures.
 
----
-
-## Time Complexity ≠ Time Taken
-
 > **Both machines have the same time complexity.**
 
-Even though the *time taken* is different (10 secs vs 1 sec), the **relationship between input size and time** is the same for both — i.e. **linear**. As input size doubles, the time taken on *each* machine roughly doubles too. The machines differ only in their constant factor (raw hardware speed), not in how their runtime *scales* with input size.
+Even though the *time taken* is different (10 secs vs 1 sec), the **relationship between input size and time** is the same for both — i.e. **linear**. As input size doubles, the time taken on *each* machine roughly doubles too.
 
-```
-Old Machine:            M1 MacBook:
-Time                     Time
- 10k |            /       10k |
-  5k |          /           5k |
- 200 |        /             200|
- 100 |      /                100|
-  10 | θ1 /                  10 | θ2  /
-     +----------------- Size      +------------------ Size
-     10  100  200  5k  10k         10  100  200  5k  10k
-```
-
-Both graphs are **straight lines** (linear growth) — they just have different slopes/starting points because of the machines' different raw speeds. The *shape* of the relationship (linear) is what time complexity captures — not the actual seconds on the clock.
+**Time Complexity ≠ Time Taken.**
 
 ---
 
-## Why This Matters
+## Hardware Independence
+
+```
+Time
+ ^
+ |              O(n)
+ |            /
+ |          /
+ |        /
+ |      /
+ +------------------------> Input Size (n)
+```
+
+Both machines produce a graph with the **same shape**. Faster hardware only changes the constant factor (the slope), not the order of growth.
 
 - Time complexity is about the **algorithm**, not the **hardware** it runs on.
 - It lets us compare algorithms independent of machine speed, language, or implementation details.
-- An algorithm with a *better* time complexity (e.g. O(log n)) will eventually always outperform one with a *worse* time complexity (e.g. O(n)) as input size grows — regardless of which machine either one runs on.
+
+---
+
+## Big-O Notation
+
+Big-O notation describes an **asymptotic upper bound** on an algorithm's growth rate. It is commonly used to express worst-case time complexity. It describes how the running time grows for sufficiently large input sizes.
+
+- `O(1)` → Constant
+- `O(log n)` → Logarithmic
+- `O(n)` → Linear
+- `O(n log n)` → Linearithmic
+- `O(n²)` → Quadratic
+- `O(2ⁿ)` → Exponential
+- `O(n!)` → Factorial
+
+---
+
+## Common Complexities
+
+| Complexity | Example |
+|---|---|
+| O(1) | Array indexing |
+| O(log n) | Binary Search |
+| O(n) | Linear Search |
+| O(n log n) | Merge Sort |
+| O(n²) | Bubble Sort |
+| O(2ⁿ) | Naive Fibonacci |
+| O(n!) | Permutations |
+
+**Order from best to worst:**
+
+```
+O(1)  <  O(log n)  <  O(n)  <  O(n log n)  <  O(n²)  <  O(2ⁿ)  <  O(n!)
+
+Best ────────────────────────────────────────────────────────► Worst
+```
+
+---
+
+## Worked Example — Linear Search vs Binary Search
+
+```
+Time
+ ^                                    O(N)  ← linear search
+ |                                  /
+ |                                /      O(logN) ← binary search
+ |                              /      _______________
+ |                            /   ____/
+ |                          / ___/
+ |                        /_/
+ +---------------------------------------------------------> Size
+              Smaller size              Large size
+```
+
+**Key observations:**
+
+1. **For smaller input sizes**, the time taken by linear search is *less* than the time taken by binary search.
+2. **For larger input sizes**, the time taken by linear search is *more* than binary search — and it keeps increasing relative to binary search as size grows.
+3. Time complexity focuses on how an algorithm scales as the input size (`n`) becomes large. Worst-case analysis is commonly used because it provides an upper bound on the running time.
+4. Thus, **Binary Search has a better asymptotic time complexity (`O(log n)`) than Linear Search (`O(n)`)**, so it scales much better as the input size grows.
+
+---
+
+## Cases of Time Complexity
+
+- **Best Case** — the minimum time an algorithm takes (most favorable input).
+- **Average Case** — the expected time over all possible inputs.
+- **Worst Case** — the maximum time an algorithm takes (least favorable input). This is what Big-O typically describes.
+
+**Example — Linear Search:**
+
+| Case | Complexity |
+|---|---|
+| Best | O(1) — target is the first element |
+| Average | O(n) |
+| Worst | O(n) — target is the last element or absent |
+
+---
+
+## Ignoring Constants
+
+When analyzing time complexity, constant factors are ignored — what matters is how the runtime scales, not the exact coefficient.
+
+```
+5n + 2        → O(n)
+1000n         → O(n)
+3n² + 10n + 7 → O(n²)
+```
+
+Another way to see it:
+
+```
+y = 2x
+y = x       }  All of these have linear growth → O(n)
+y = x/2
+```
+
+The actual time is different for each line, but in all cases the time is **growing linearly** as the input grows — so all of them are `O(N)`, regardless of the constant multiplier.
+
+This is one of the most commonly asked interview concepts.
+
+---
+
+## Ignoring Lower-Order Terms
+
+For large `n`, lower-order terms become insignificant compared to the fastest-growing term, so they're dropped as well:
+
+```
+n² + n        → O(n²)     (the "+ n" barely matters as n grows)
+n³ + n² + n   → O(n³)
+```
+
+**Worked example:**
+```
+O(N³ + log(N))
+
+for N = 1×10⁶ = 1 million:
+
+O((10⁶)³ + log(10⁶))
+= O((10⁶)³ + 6)
+```
+Here, `6` is very small compared to `(1 million)³` — that's why it's ignored:
+```
+~ O((10⁶)³)
+~ O(N³)
+```
+
+Only the **dominant term** is kept when expressing complexity in Big-O.
+
+---
+
+## Comparing Algorithms
+
+For sufficiently large inputs, an algorithm with a lower asymptotic complexity (such as O(log n)) will outperform one with a higher complexity (such as O(n)), assuming comparable implementations and hardware. Constant factors can still matter for small inputs, which is why "better complexity" doesn't always mean "faster in every situation" — but it always wins as input size grows large enough.
+
+---
+
+## Summary — Key Points When Dealing With Time Complexity
+
+1. Big-O analysis usually focuses on the **worst-case running time**.
+2. Consider how the algorithm behaves as the input size (`n`) becomes very large — analyze the growth rate as `n → ∞`.
+3. Don't care about the actual time — **ignore constants**.
+4. **Ignore lower-order terms** — keep only the dominant term.
