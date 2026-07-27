@@ -177,6 +177,55 @@ Only the **dominant term** is kept when expressing complexity in Big-O.
 
 ---
 
+## Formal Justification — The Limit Definition of Big-O
+
+The intuitive rules above ("ignore constants," "ignore lower-order terms") can be proven formally using limits.
+
+**Definition:**
+```
+f(n) = O(g(n))   if and only if   lim (n→∞) f(n)/g(n) < ∞
+```
+
+**Worked example:** Show that `6n³ + 3n + 5 = O(n³)`.
+
+```
+lim (n→∞)  (6n³ + 3n + 5) / n³
+```
+
+Divide every term by `n³`:
+```
+= lim (n→∞)  6 + 3/n² + 5/n³
+```
+
+As `n → ∞`:
+```
+= 6 + 3/∞ + 5/∞
+= 6 + 0 + 0
+= 6
+```
+
+Since the limit evaluates to a **finite constant** (`6 < ∞`), by definition `6n³ + 3n + 5 = O(n³)`.
+
+This is the formal reason **why we ignore constants and lower-order terms**: as `n → ∞`, the ratio between the full expression and its dominant term settles on a finite constant — the lower-order terms and coefficients don't change the *growth rate*, only the exact value.
+
+### One function, multiple valid Big-O bounds
+
+Since `6n³ + 3n + 5` grows asymptotically like `n³`, it is `O(n³)`. It is also technically `O(n⁴)`, `O(n⁵)`, and so on — but `O(n³)` is the **tightest** commonly used upper bound. An algorithm doesn't have only one valid Big-O; Big-O just describes *an* upper bound, and the tightest one is the most useful.
+
+### Big-O, Big-Omega, and Big-Theta
+
+Once limits are involved, it's worth distinguishing three related notations:
+
+| Notation | Meaning |
+|---|---|
+| `O(n³)` | Upper bound — grows *at most* this fast |
+| `Ω(n³)` | Lower bound — grows *at least* this fast |
+| `Θ(n³)` | Tight bound — grows *exactly* this fast (both upper and lower) |
+
+For `6n³ + 3n + 5`, the most precise classification is `Θ(n³)`, since it grows neither faster nor slower than `n³` asymptotically.
+
+---
+
 ## Comparing Algorithms
 
 For sufficiently large inputs, an algorithm with a lower asymptotic complexity (such as O(log n)) will outperform one with a higher complexity (such as O(n)), assuming comparable implementations and hardware. Constant factors can still matter for small inputs, which is why "better complexity" doesn't always mean "faster in every situation" — but it always wins as input size grows large enough.
