@@ -197,7 +197,7 @@ Divide every term by `n³`:
 = lim (n→∞)  6 + 3/n² + 5/n³
 ```
 
-As `n → ∞`:
+Substituting `n = ∞`:
 ```
 = 6 + 3/∞ + 5/∞
 = 6 + 0 + 0
@@ -212,15 +212,80 @@ This is the formal reason **why we ignore constants and lower-order terms**: as 
 
 Since `6n³ + 3n + 5` grows asymptotically like `n³`, it is `O(n³)`. It is also technically `O(n⁴)`, `O(n⁵)`, and so on — but `O(n³)` is the **tightest** commonly used upper bound. An algorithm doesn't have only one valid Big-O; Big-O just describes *an* upper bound, and the tightest one is the most useful.
 
-### Big-O, Big-Omega, and Big-Theta
+### The Full Family of Asymptotic Notations
 
-Once limits are involved, it's worth distinguishing three related notations:
+Once limits are involved, it's worth distinguishing all five related notations — not just Big-O.
 
-| Notation | Meaning |
-|---|---|
-| `O(n³)` | Upper bound — grows *at most* this fast |
-| `Ω(n³)` | Lower bound — grows *at least* this fast |
-| `Θ(n³)` | Tight bound — grows *exactly* this fast (both upper and lower) |
+#### Big-O — `O(g)` (upper bound)
+
+- **Words:** `f` grows *no faster than* `g` (already covered above).
+- **Math:**
+```
+f = O(g)   ⟺   lim (n→∞) f(n)/g(n) < ∞
+```
+- **Relation:** `f ≤ g` (asymptotically)
+
+#### Big-Omega — `Ω(g)` (lower bound)
+
+The **opposite** of Big-O.
+
+- **Words:** `f` grows *at least as fast as* `g` — a lower bound.
+- **Math:**
+```
+f = Ω(g)   ⟺   lim (n→∞) f(n)/g(n) > 0
+```
+- **Relation:** `f ≥ g` (asymptotically)
+
+#### Big-Theta — `Θ(g)` (tight bound, combining both)
+
+- **Words:** Both the upper bound and lower bound are the same — e.g. if an algorithm has `O(N²)` **and** `Ω(N²)`, then it is `Θ(N²)`.
+- **Math:**
+```
+f = Θ(g)   ⟺   0 < lim (n→∞) f(n)/g(n) < ∞
+```
+- **Worked example:** If an algorithm has an upper bound of `O(N²)` and a lower bound of `Ω(N²)`, both bounds are `N²`, so the algorithm is `Θ(N²)`.
+
+#### Little-o — `o(g)` (strict/loose upper bound)
+
+This is also giving an upper bound — but it's a **stronger statement** than Big-O.
+
+- **Big-O:** `f = O(g)` means `f ≤ g` (f could grow at the *same* rate as g, or slower).
+- **Little-o:** `f = o(g)` means `f < g` **strictly** — `f` grows **strictly slower** than `g`, never at the same rate.
+- **Math:**
+```
+f = o(g)   ⟺   lim (n→∞) f(n)/g(n) = 0
+```
+- **Worked example:** Let `f = N²` and `g = N³`.
+```
+lim (n→∞)  N²/N³  =  lim (n→∞)  1/N  =  0
+```
+Since the limit is `0`, `f = o(g)` — i.e. `N²` is strictly slower-growing than `N³`.
+
+#### Little-omega — `ω(g)` (strict/loose lower bound)
+
+The opposite of little-o.
+
+- **Big-Ω:** `f = Ω(g)` means `f ≥ g` (f could grow at the same rate as g, or faster).
+- **Little-ω:** `f = ω(g)` means `f > g` **strictly** — `f` grows **strictly faster** than `g`, never at the same rate.
+- **Math:**
+```
+f = ω(g)   ⟺   lim (n→∞) f(n)/g(n) = ∞
+```
+- **Worked example:**
+```
+lim (n→∞)  N³/N²  =  lim (n→∞)  N  =  ∞
+```
+Since the limit is `∞`, `f = ω(g)` — i.e. `N³` grows strictly faster than `N²`.
+
+### Summary Table
+
+| Notation | Meaning | Relation | Limit condition |
+|---|---|---|---|
+| `O(g)` | Upper bound (grows no faster than) | `f ≤ g` | `lim < ∞` |
+| `Ω(g)` | Lower bound (grows no slower than) | `f ≥ g` | `lim > 0` |
+| `Θ(g)` | Tight bound (grows exactly as fast) | `f = g` | `0 < lim < ∞` |
+| `o(g)` | Strict upper bound (grows strictly slower) | `f < g` | `lim = 0` |
+| `ω(g)` | Strict lower bound (grows strictly faster) | `f > g` | `lim = ∞` |
 
 For `6n³ + 3n + 5`, the most precise classification is `Θ(n³)`, since it grows neither faster nor slower than `n³` asymptotically.
 
