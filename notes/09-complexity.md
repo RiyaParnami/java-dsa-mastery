@@ -177,7 +177,7 @@ Only the **dominant term** is kept when expressing complexity in Big-O.
 
 ---
 
-## Formal Justification — The Limit Definition of Big-O
+## Using Limits to Justify Big-O
 
 The intuitive rules above ("ignore constants," "ignore lower-order terms") can be proven formally using limits.
 
@@ -197,7 +197,7 @@ Divide every term by `n³`:
 = lim (n→∞)  6 + 3/n² + 5/n³
 ```
 
-Substituting `n = ∞`:
+As `n → ∞`:
 ```
 = 6 + 3/∞ + 5/∞
 = 6 + 0 + 0
@@ -297,7 +297,70 @@ For sufficiently large inputs, an algorithm with a lower asymptotic complexity (
 
 ---
 
-## Summary — Key Points When Dealing With Time Complexity
+## Space Complexity vs Auxiliary Space
+
+- **Auxiliary Space** is the extra or temporary space used by an algorithm (beyond the input itself).
+- **Space Complexity** of an algorithm is the *total* space taken by the algorithm with respect to the input size — it includes **both** the auxiliary space **and** the space used by the input.
+
+**Example — comparing sorting algorithms by space:**
+
+If we want to compare standard sorting algorithms on the basis of space, **Auxiliary Space is a better criterion than Space Complexity**:
+
+- Merge Sort uses `O(n)` auxiliary space.
+- Insertion Sort and Heap Sort use `O(1)` auxiliary space.
+- But the **space complexity** of all three is `O(n)` (since they all still need to store the input array itself).
+
+If we only compared space complexity, all three would look identical (`O(n)`) — but auxiliary space reveals the real difference: Insertion Sort and Heap Sort need no extra space beyond the input, while Merge Sort needs an additional `O(n)` for merging.
+
+---
+
+## Worked Example — Nested Loop with a Step Increment
+
+```java
+for (i = 1; i <= N; i = i + k) {
+    for (j = 1; j <= k; j++) {
+        // some operation that takes time t
+    }
+}
+```
+
+### Step 1 — Inner loop
+
+The inner loop always runs exactly `k` times, and each iteration does an operation taking time `t`:
+```
+Inner loop = O(k·t) time
+```
+
+### Step 2 — How many times does the outer loop run?
+
+The outer loop doesn't increment by 1 — it increments by `k` each time:
+```
+i = 1, 1+k, 1+2k, 1+3k, 1+4k, ..., 1+xk
+```
+
+The loop keeps running as long as `1 + xk ≤ N`:
+```
+1 + xk ≤ N
+xk ≤ N - 1
+x ≤ (N-1)/k
+```
+
+So the outer loop executes **approximately `N/k` times** — more precisely, `⌊(N-1)/k⌋ + 1` times, but since this is Big-O analysis the exact count doesn't matter:
+```
+Number of outer loop iterations = Θ(N/k)
+```
+
+### Step 3 — Combine
+
+Total work = (cost of inner loop) × (number of times outer loop runs):
+```
+O(k·t) × N/k
+= O(k·t·N / k)
+```
+
+**Answer:** Since `k` is treated as a constant, it is ignored in Big-O notation, leaving `O(N·t)`.
+
+---
 
 1. Big-O analysis usually focuses on the **worst-case running time**.
 2. Consider how the algorithm behaves as the input size (`n`) becomes very large — analyze the growth rate as `n → ∞`.
