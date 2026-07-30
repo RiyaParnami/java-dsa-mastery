@@ -362,7 +362,97 @@ O(k·t) × N/k
 
 ---
 
-1. Big-O analysis usually focuses on the **worst-case running time**.
+## Sorting Algorithms — Complexity Comparison
+
+### Bubble Sort
+
+Repeatedly steps through the array, compares adjacent elements, and swaps them if they're in the wrong order — the largest element "bubbles up" to its correct position each pass.
+
+```
+Step 1
+[4, 9, 5, 1, 0]
+   ↑  ↑  no swap
+
+Iteration 1: [4, 9, 5, 1, 0] → swap 9,5 → [4, 5, 9, 1, 0]
+Iteration 2: [4, 5, 9, 1, 0] → swap 9,1 → [4, 5, 1, 9, 0]
+Iteration 3: [4, 5, 1, 9, 0] → swap 9,0 → [4, 5, 1, 0, 9]
+Iteration 4: [4, 5, 1, 0, 9]  (sorted)
+```
+
+| Property | Value |
+|---|---|
+| Worst & Average Time | `O(n²)` — occurs when array is reverse sorted |
+| Best Time | `O(n)` — occurs when array is already sorted |
+| Auxiliary Space | `O(1)` |
+| Sorting In Place | Yes |
+| Stable | Yes |
+
+**Boundary case:** Bubble sort takes minimum time (`O(n)`) when elements are already sorted.
+
+---
+
+### Selection Sort
+
+Repeatedly selects the minimum (or maximum) element from the unsorted portion and swaps it into its correct position.
+
+| Property | Value |
+|---|---|
+| Worst Complexity | `n²` |
+| Average Complexity | `n²` |
+| Best Complexity | `n²` |
+| Space Complexity | `O(1)` |
+| Stable | No |
+
+**Note:** Unlike Bubble/Insertion Sort, Selection Sort has **no best-case improvement** — even a sorted array still takes `O(n²)`, because it always scans the remaining unsorted portion to find the minimum, regardless of the array's current order.
+
+The good thing about selection sort is it **never makes more than `O(n)` swaps**, which can be useful when memory writes are a costly operation (e.g. flash memory).
+
+---
+
+### Insertion Sort
+
+Builds the sorted array one element at a time — takes each element and inserts it into its correct position among the already-sorted elements to its left.
+
+```
+Insertion Sort Execution Example
+[4, 3, 2, 10, 12, 1, 5, 6]
+ ↓ insert 3 before 4
+[3, 4, 2, 10, 12, 1, 5, 6]
+ ↓ insert 2 before 3
+[2, 3, 4, 10, 12, 1, 5, 6]
+ ↓ 10 already in place
+[2, 3, 4, 10, 12, 1, 5, 6]
+ ↓ 12 already in place
+[2, 3, 4, 10, 12, 1, 5, 6]
+ ↓ insert 1 at the front
+[1, 2, 3, 4, 10, 12, 5, 6]
+ ↓ insert 5 before 10
+[1, 2, 3, 4, 5, 10, 12, 6]
+ ↓ insert 6 before 10
+[1, 2, 3, 4, 5, 6, 10, 12]
+```
+
+| Property | Value |
+|---|---|
+| Time Complexity | `O(n²)` |
+| Auxiliary Space | `O(1)` |
+| Sorting In Place | Yes |
+
+**Boundary cases:** Insertion sort takes maximum time to sort if elements are sorted in **reverse order**, and minimum time (`O(n)`) when elements are **already sorted**.
+
+---
+
+### Quick Comparison
+
+| Algorithm | Best | Average | Worst | Space | Stable |
+|---|---|---|---|---|---|
+| Bubble Sort | O(n) | O(n²) | O(n²) | O(1) | Yes |
+| Selection Sort | O(n²) | O(n²) | O(n²) | O(1) | No |
+| Insertion Sort | O(n) | O(n²) | O(n²) | O(1) | Yes |
+
+---
+
+## Summary — Key Points When Dealing With Time Complexity
 2. Consider how the algorithm behaves as the input size (`n`) becomes very large — analyze the growth rate as `n → ∞`.
 3. Don't care about the actual time — **ignore constants**.
 4. **Ignore lower-order terms** — keep only the dominant term.
