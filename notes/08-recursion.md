@@ -213,3 +213,57 @@ This is known as a **recurrence relation** — one problem is divided into two s
 Time Complexity:  O(2^N)
 Space Complexity: O(N)
 ```
+
+---
+
+## Understanding the Recursion Tree Call Order
+
+For a recursive function like `f(4) = f(3) + f(2)`, tracing the exact order in which calls are made (and returned) makes the tree much easier to reason about.
+
+```
+Call order:
+1: f(4)
+ ├── 2: f(3)
+ │    ├── 3: f(2)
+ │    │    ├── 4: f(1)
+ │    │    └── 5: f(0)
+ │    └── 6: f(1)
+ └── 7: f(2)
+      ├── 8: f(1)
+      └── 9: f(0)
+```
+
+**Trick:** Only the calls that are **interlinked** (i.e. lie along the *current active path* from the root down to the call currently executing) will be on the stack **at the same time**. The rest of the tree either hasn't been called yet, or has already finished and been popped off.
+
+This is the key insight that separates **time complexity** from **space complexity** in a recursion tree:
+
+- **Time complexity** depends on the **total number of nodes/calls** in the tree (every node does some work).
+- **Space complexity** depends only on the **height of the tree** — i.e. the single longest path from root to a leaf — because that's the maximum number of stack frames that are ever live at once.
+
+```
+Space Complexity = Height of the tree (the active path)
+```
+
+For `f(4)` above, the tree has 9 total calls (contributing to time complexity), but the deepest path (`f(4) → f(3) → f(2) → f(1)`) is only 4 calls deep — so the space complexity is proportional to that height, not the full node count.
+
+---
+
+## Two Types of Recursion (by Recurrence Relation Shape)
+
+### 1. Linear Recursion
+
+Each call branches into a **constant number of calls**, each on a slightly smaller input — but the total number of calls still grows large because of branching (e.g. Fibonacci-style branching into 2 calls per level).
+
+```
+F(N) = F(N-1) + F(N-2)
+```
+
+### 2. Divide & Conquer Recursion
+
+Each call splits the input into a **fraction** of its original size (typically half) — leading to much better time complexity.
+
+```
+F(N) = F(N/2) + O(1)
+```
+
+This is the same shape of recurrence seen in Binary Search above — dividing the problem size at each step rather than just decrementing it.
