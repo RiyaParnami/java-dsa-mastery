@@ -297,6 +297,170 @@ For sufficiently large inputs, an algorithm with a lower asymptotic complexity (
 
 ---
 
+## Recurrence Relations for Complexity Analysis
+
+Recursive algorithms don't have a simple loop to count — their running time is naturally expressed as a **recurrence relation**: the time for input size `n` in terms of the time for smaller inputs.
+
+```
+T(n) = T(n/2) + O(1)        // e.g. Binary Search
+T(n) = 2T(n/2) + O(n)       // e.g. Merge Sort
+```
+
+- The recursive term(s) (`T(n/2)`, `2T(n/2)`, etc.) represent the work done by the **recursive sub-calls**.
+- The extra term (`O(1)`, `O(n)`, etc.) represents the work done **at the current level**, outside of the recursive calls (comparisons, merging, splitting, etc.).
+
+**General rule:** `T(n) = (what you get back from the recursive calls) + (what you do yourself at this level, and how long that takes)`.
+
+To get an actual time complexity like `O(log n)` or `O(n log n)` out of a recurrence, it needs to be **solved** — a recurrence relation on its own is just a description of the algorithm's structure, not yet a closed-form complexity.
+
+### General Form of a Divide & Conquer Recurrence
+
+Any divide-and-conquer recurrence can be written in this general form:
+
+```
+T(n) = a₁T(b₁n + ε₁(n)) + a₂T(b₂n + ε₂(n)) + ... + aₖT(bₖn + εₖ(n)) + g(n),   for n ≥ n₀
+```
+
+This general form is known as an **Akra–Bazzi recurrence** (Akra & Bazzi, 1996).
+
+- `aᵢ` — how many sub-calls of that "branch" are made
+- `bᵢ` — the fraction of `n` passed into that sub-call
+- `εᵢ(n)` — a small perturbation term (often `0`, included for full generality)
+- `g(n)` — the extra work done *at the current level*, outside of the recursive calls
+
+**Matching a familiar recurrence to this form** — for `T(N) = T(N/2) + C`:
+```
+a₁ = 1
+b₁ = 1/2
+ε₁(n) = 0
+g(n) = C     (constant)
+```
+
+**Example — deriving a recurrence from splitting an array in half:** if a problem of size `N` is split into two halves of size `N/2` each, and merging them back together takes `(N-1)` time:
+```
+T(N) = T(N/2) + T(N/2) + (N-1)
+     = 2·T(N/2) + (N-1)      // recurrence relation
+```
+
+---
+
+## How to Actually Solve a Recurrence to Get Complexity
+
+Once you have a recurrence relation like `F(N) = F(N/2) + C`, there are three common ways to solve it:
+
+1. **Plug & Chug (substitution method)** — repeatedly substitute the recurrence into itself and look for the pattern:
+```
+F(N) = F(N/2) + C
+```
+2. **Master's Theorem** — a direct formula for solving recurrences of the form `T(n) = a·T(n/b) + f(n)`, without manual expansion.
+3. **Akra–Bazzi (1996)** — a more general method that solves the full general form shown above, covering cases the Master Theorem can't (e.g. unequal-sized sub-problems).
+
+---
+
+## Akra–Bazzi Theorem — Formal Statement
+
+For a recurrence of the general form shown earlier, the Akra–Bazzi theorem states:
+
+```
+T(x) = Θ( x^p  +  x^p · ∫[1 to x]  g(u)/u^(p+1)  du )
+```
+
+### What is `p`?
+
+`p` is the **unique real number** that satisfies:
+```
+a₁b₁^p + a₂b₂^p + ... + aₖbₖ^p = 1
+
+i.e.   Σ(i=1 to k)  aᵢbᵢ^p = 1
+```
+
+Once `p` is found, plug it into the formula above along with `g(u)` and evaluate the integral to get the final time complexity.
+
+---
+
+## Worked Example — Solving Merge Sort's Recurrence with Akra–Bazzi
+
+**Recurrence:**
+```
+T(N) = 2T(N/2) + (N-1)
+```
+
+### Step 1 — Identify the coefficients
+
+```
+a₁ = 2
+b₁ = 1/2
+g(n) = n - 1
+```
+
+### Step 2 — Solve for `p`
+
+```
+a₁ · b₁^p = 1
+2 · (1/2)^p = 1
+```
+Solving this gives:
+```
+p = 1
+```
+(check: `2 · (1/2)¹ = 2 · 1/2 = 1` ✓)
+
+### Step 3 — Plug `p` into the Akra–Bazzi formula
+
+```
+T(x) = Θ( x¹ + x¹ · ∫[1 to x]  (u-1)/u^(1+1)  du )
+```
+
+### Step 4 — Simplify the integrand
+
+```
+(u-1)/u²  =  1/u - 1/u²
+```
+
+So:
+```
+T(x) = Θ( x + x · ∫[1 to x] (1/u - 1/u²) du )
+     = Θ( x + x · [ ∫[1 to x] du/u  -  ∫[1 to x] du/u² ] )
+```
+
+### Step 5 — Evaluate the integrals
+
+```
+∫ du/u   = log u
+∫ du/u²  = -1/u     (since u⁻¹ / -1 = -1/u)
+```
+
+So the bracket becomes:
+```
+[ log u + 1/u ]  evaluated from 1 to x
+```
+
+### Step 6 — Substitute the limits
+
+```
+= [ log x + 1/x ]  -  [ log 1 + 1/1 ]
+= log x + 1/x - 1        (since log 1 = 0)
+```
+
+### Step 7 — Substitute back into `T(x)`
+
+```
+T(x) = Θ( x + x·(log x + 1/x - 1) )
+     = Θ( x + x·log x + 1 - x )
+     = Θ( x·log x + 1 )
+```
+
+### Step 8 — Drop the lower-order term
+
+`1` is negligible compared to `x·log x`, so:
+```
+T(x) = Θ(x · log x)     // Time Complexity
+```
+
+**Conclusion:** For an array of size `N`, **Merge Sort's time complexity is `Θ(N log N)`** — confirmed via the Akra–Bazzi theorem, matching what's already known from the Master Theorem.
+
+---
+
 ## Space Complexity vs Auxiliary Space
 
 - **Auxiliary Space** is the extra or temporary space used by an algorithm (beyond the input itself).
