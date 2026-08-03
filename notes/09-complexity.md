@@ -472,6 +472,26 @@ Hence, ans = O(g(n))
 
 This shortcut only applies when `p` is strictly smaller than `g(n)`'s exponent — otherwise you still need to evaluate the integral (as in the Merge Sort example above, where `p = 1` matched `g(n) = n - 1`'s degree).
 
+### Why the shortcut works (formal derivation)
+
+Starting from the Akra–Bazzi formula with `g(n) = n²`:
+```
+T(x) = Θ( x^p + x^p · ∫₁ˣ u²/u^(p+1) du )
+```
+Simplify the integrand:
+```
+= Θ( x^p + x^p · ∫₁ˣ u^(1-p) du )
+```
+Evaluating the integral (roughly `x^(2-p)`) and multiplying back by `x^p`:
+```
+= Θ( x^p + x² )
+```
+Now compare the two terms, `x^p` and `x²`. If `p < 2`, then `x^p` is the **less-dominating term**, so it gets ignored — leaving just:
+```
+Ans = O(x²) = O(g(n))
+```
+This is exactly why the shortcut holds: whenever `p` is smaller than `g(n)`'s exponent, the `x^p` term from the recursive branching is dominated by `g(n)` itself, so `g(n)` alone determines the final complexity.
+
 ---
 
 ## Worked Example — Two-Term Divide & Conquer Recurrence
@@ -535,6 +555,67 @@ T(n) = 3·T(n/3) + 4·T(n/4) + n²
 `7/12 < 1` → now the sum is too small.
 
 **Conclusion:** the correct `p` lies **between 1 and 2** — it isn't always a clean integer, and pinning it down exactly may require further trial and error or a numerical method.
+
+---
+
+## Solving Linear (Homogeneous) Recurrences — Characteristic Equation Method
+
+Akra–Bazzi solves **divide & conquer** recurrences (where `n` gets divided). A different technique is needed for **linear (homogeneous)** recurrences, where `n` just gets *decremented* — like Fibonacci.
+
+**Example:**
+```
+F(N) = F(N-1) + F(N-2)
+```
+
+### General Form
+
+```
+f(n) = a₁·f(n-1) + a₂·f(n-2) + a₃·f(n-3) + ... + aₙ·f(n-n)
+
+f(n) = Σ(i=1 to n)  aᵢ·f(n-i),   where aᵢ are fixed and n is the order of the recurrence
+```
+
+### Steps to Solve — Worked Example (Fibonacci)
+
+**Recurrence:**
+```
+f(n) = f(n-1) + f(n-2)    ... (1)
+```
+
+**Step 1 — Assume a solution of the form `f(n) = αⁿ`**, for some constant `α`.
+
+Substituting into (1):
+```
+αⁿ = αⁿ⁻¹ + αⁿ⁻²
+```
+
+**Step 2 — Divide through by `αⁿ⁻²`** to eliminate the exponent:
+```
+αⁿ/αⁿ⁻²  =  αⁿ⁻¹/αⁿ⁻²  +  αⁿ⁻²/αⁿ⁻²
+α²        =  α            +  1
+```
+
+This gives the **characteristic equation** of the recurrence:
+```
+α² - α - 1 = 0
+```
+
+**Step 3 — Solve the characteristic equation** using the quadratic formula:
+```
+α = ( -b ± √(b² - 4ac) ) / 2a
+```
+For `α² - α - 1 = 0` (so `a=1, b=-1, c=-1`):
+```
+α = ( 1 ± √5 ) / 2
+```
+
+This gives two roots:
+```
+α₁ = (1 + √5) / 2     ≈ 1.618   (the golden ratio, φ)
+α₂ = (1 - √5) / 2     ≈ -0.618
+```
+
+**Note:** `α₁ = (1+√5)/2` is the famous **golden ratio**, and it's no coincidence — Fibonacci growth is fundamentally tied to it. This confirms the well-known result that Fibonacci numbers grow as `Θ(φⁿ)`.
 
 ---
 
