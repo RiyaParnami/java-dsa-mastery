@@ -461,6 +461,83 @@ T(x) = Θ(x · log x)     // Time Complexity
 
 ---
 
+## Shortcut — When You Don't Need the Integral
+
+**When `p` is less than the power (exponent) of the dominant term in `g(n)`, the integral can be skipped entirely — the answer is simply `O(g(n))`.**
+
+**Example:** if `g(n) = n²` and you solve for `p` and find `p < 2` (i.e. `p` is less than the power of `g(n)`):
+```
+Hence, ans = O(g(n))
+```
+
+This shortcut only applies when `p` is strictly smaller than `g(n)`'s exponent — otherwise you still need to evaluate the integral (as in the Merge Sort example above, where `p = 1` matched `g(n) = n - 1`'s degree).
+
+---
+
+## Worked Example — Two-Term Divide & Conquer Recurrence
+
+```
+T(N) = 2·T(N/2) + (8/9)·T(3N/4) + N²
+```
+
+### Step 1 — Identify the coefficients
+
+```
+a₁ = 2,   b₁ = 1/2
+a₂ = 8/9, b₂ = 3/4
+g(n) = n²
+```
+
+### Step 2 — Solve for `p`
+
+```
+a₁·b₁^p + a₂·b₂^p = 1
+2·(1/2)^p + (8/9)·(3/4)^p = 1
+```
+Try `p = 2`:
+```
+2·(1/4) + (8/9)·(9/16) = 1
+1/2 + 1/2 = 1   ✓
+```
+So **`p = 2`**.
+
+### Step 3 — Apply the formula
+
+Here `p` (`= 2`) is **equal to** the power of `g(n) = n²`, so the shortcut above doesn't apply — the integral still needs to be evaluated:
+```
+T(n) = Θ( n² + n²·∫₁ⁿ u²/u³ du )
+     = Θ( n² + n²·ln n )
+     = Θ( n²·ln n )
+```
+
+---
+
+## Worked Example — Finding `p` by Trial and Error
+
+Not every recurrence gives a clean integer `p` on the first guess. Sometimes you have to search for it.
+
+```
+T(n) = 3·T(n/3) + 4·T(n/4) + n²
+```
+
+**Try `p = 1`:**
+```
+3·(1/3)¹ + 4·(1/4)¹ = 1 + 1 = 2
+```
+`2 > 1` → the sum is too large. Since each `bᵢ < 1`, raising `bᵢ` to a **higher power** makes `bᵢ^p` **smaller** — so increasing `p` shrinks the sum back down.
+
+∴ `p > 1`
+
+**Try `p = 2`:**
+```
+3·(1/3)² + 4·(1/4)² = 1/3 + 1/4 = 7/12
+```
+`7/12 < 1` → now the sum is too small.
+
+**Conclusion:** the correct `p` lies **between 1 and 2** — it isn't always a clean integer, and pinning it down exactly may require further trial and error or a numerical method.
+
+---
+
 ## Space Complexity vs Auxiliary Space
 
 - **Auxiliary Space** is the extra or temporary space used by an algorithm (beyond the input itself).
