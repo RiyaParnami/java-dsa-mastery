@@ -617,6 +617,71 @@ This gives two roots:
 
 **Note:** `α₁ = (1+√5)/2` is the famous **golden ratio**, and it's no coincidence — Fibonacci growth is fundamentally tied to it. This confirms the well-known result that Fibonacci numbers grow as `Θ(φⁿ)`.
 
+### Step 4 — General Solution
+
+When a characteristic equation has **2 roots** (`α₁`, `α₂`), the general solution to the recurrence is a linear combination of both:
+```
+f(n) = c₁·α₁ⁿ + c₂·α₂ⁿ            ... (2)
+```
+This satisfies the recurrence: `f(n) = f(n-1) + f(n-2)`.
+
+### Step 5 — Solve for the Constants Using Initial Conditions
+
+**Fact:** the number of roots equals the number of "answers" (initial conditions) you need to already know.
+
+Here we have **2 roots** (`α₁`, `α₂`), so we need **2 known values** of the sequence. For Fibonacci:
+```
+f(0) = 0   and   f(1) = 1
+```
+
+**Using `f(0) = 0`:**
+```
+f(0) = 0 = c₁ + c₂   ⟹   c₁ = -c₂     ... (5)
+```
+
+**Using `f(1) = 1`:**
+```
+f(1) = 1 = c₁·( (1+√5)/2 ) + c₂·( (1-√5)/2 )
+```
+Substituting `c₂ = -c₁` from (5):
+```
+1 = c₁·( (1+√5)/2 ) - c₁·( (1-√5)/2 )
+```
+Solving:
+```
+c₁ = 1/√5
+c₂ = -1/√5
+```
+
+### Step 6 — Final Closed-Form Formula
+
+Substituting `c₁` and `c₂` back into (2):
+```
+f(n) = (1/√5)·( (1+√5)/2 )ⁿ  -  (1/√5)·( (1-√5)/2 )ⁿ
+```
+
+**This is the closed-form formula for the nth Fibonacci number** — known as **Binet's Formula**.
+
+### Step 7 — Deriving the Time Complexity from the Closed Form
+
+```
+f(n) = (1/√5)·[ ( (1+√5)/2 )ⁿ  -  ( (1-√5)/2 )ⁿ ]
+```
+
+As `n → ∞`, the second term — `( (1-√5)/2 )ⁿ` — shrinks toward `0`, since `(1-√5)/2 ≈ -0.618` and any fraction with magnitude `< 1` raised to a growing power vanishes. Hence, this is the **less-dominating term**, and it's ignored.
+
+That leaves:
+```
+Time Complexity = O( ( (1+√5)/2 )ⁿ )
+```
+
+Since `(1+√5)/2` is the **golden ratio (`φ ≈ 1.618`)**:
+```
+T(N) = O(1.6180ⁿ)
+```
+
+So the naive recursive Fibonacci algorithm runs in **exponential time**, with a base equal to the golden ratio — a tighter bound than the commonly cited (and looser) `O(2ⁿ)`.
+
 ---
 
 ## Space Complexity vs Auxiliary Space
