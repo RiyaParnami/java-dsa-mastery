@@ -684,6 +684,84 @@ So the naive recursive Fibonacci algorithm runs in **exponential time**, with a 
 
 ---
 
+## Special Case — Repeated (Equal) Roots
+
+The Fibonacci example above had **two distinct roots**. But what happens if the characteristic equation gives the **same root twice**?
+
+### Worked Example
+
+```
+f(n) = 2·f(n-1) - f(n-2)
+```
+
+**Step 1 — Substitute `f(n) = αⁿ`:**
+```
+αⁿ = 2·αⁿ⁻¹ - αⁿ⁻²
+```
+
+**Step 2 — Rearrange and divide through by `αⁿ⁻²`:**
+```
+αⁿ - 2·αⁿ⁻¹ - αⁿ⁻² = 0
+─────────────────────────    (dividing both sides by αⁿ⁻²)
+        αⁿ⁻²
+
+⟹  α² - 2α + 1 = 0
+```
+
+**Step 3 — Solve the characteristic equation:**
+```
+α² - 2α + 1 = 0
+(α - 1)² = 0
+⟹  α = 1     (a double root)
+```
+
+### Why the General Solution Changes
+
+When a root is **repeated**, using `c₁αⁿ + c₂αⁿ` doesn't actually give two independent solutions — they'd collapse into one, since both terms are just multiples of the same `αⁿ`. To get a valid general solution, the second term needs an extra factor of `n`:
+
+```
+The two independent solutions become:  αⁿ  and  n·αⁿ
+```
+
+So the general solution is:
+```
+f(n) = c₁·αⁿ + c₂·n·αⁿ
+```
+
+**General rule:** if a root `α` is repeated `r` times, then:
+```
+αⁿ, n·αⁿ, n²·αⁿ, ..., n^(r-1)·αⁿ
+```
+are **all** independent solutions to the recurrence.
+
+### Applying Initial Conditions
+
+Since `α = 1` here, the general solution simplifies:
+```
+f(n) = c₁·(1)ⁿ + c₂·n·(1)ⁿ
+     = c₁ + c₂·n
+```
+
+Using `f(0) = 0` and `f(1) = 1`:
+```
+f(0) = 0 = c₁                       ⟹  c₁ = 0
+f(1) = 1 = c₁ + c₂                  ⟹  c₂ = 1
+```
+
+**Closed form:**
+```
+f(n) = n
+```
+
+**Time Complexity:**
+```
+O(n)
+```
+
+Unlike the Fibonacci case (which grew exponentially, `O(φⁿ)`), this repeated-root recurrence grows only **linearly**, `O(n)` — a good reminder that the *shape* of the characteristic roots (distinct vs. repeated, and their magnitude) is what determines the growth rate, not just the recurrence "looking" similar to Fibonacci.
+
+---
+
 ## Space Complexity vs Auxiliary Space
 
 - **Auxiliary Space** is the extra or temporary space used by an algorithm (beyond the input itself).
