@@ -762,6 +762,51 @@ Unlike the Fibonacci case (which grew exponentially, `O(φⁿ)`), this repeated-
 
 ---
 
+## Non-Homogeneous Linear Recurrences
+
+**Form:**
+```
+f(n) = a₁f(n-1) + a₂f(n-2) + ... + a_d·f(n-d) + g(n)
+```
+The extra `g(n)` term makes it **non-homogeneous**.
+
+### How to Solve
+
+1. **Homogeneous part** — replace `g(n)` with `0`, solve as usual to get `f(n) = c₁·αⁿ`.
+2. **Particular part** — guess a solution matching the shape of `g(n)`:
+   - `g(n)` exponential (e.g. `cⁿ`) → guess `f(n) = a·cⁿ`
+   - `g(n)` polynomial of degree `d` → guess a polynomial of the same degree
+   - `g(n)` = exponential + polynomial → guess a combination of both
+   - **If a guess fails** (matches the homogeneous root — makes both sides cancel out to something wrong), multiply the guess by `n`. If that also fails, increase the degree again (`n²`, etc).
+3. **General solution** = homogeneous + particular.
+4. Use initial conditions to solve for the constants.
+
+### Worked Example 1
+
+```
+f(n) = 2f(n-1) + 2ⁿ,   f(0) = 1
+```
+- Homogeneous: `α = 2` → `f(n) = c₁·2ⁿ`
+- Guess `f(n) = a·2ⁿ` for particular → fails (`2` is already the homogeneous root)
+- Retry `f(n) = (an+b)·2ⁿ` → gives `a = 1` (b discarded)
+- Particular solution: `f(n) = n·2ⁿ`
+- General: `f(n) = c₁·2ⁿ + n·2ⁿ`, and `f(0)=1 ⟹ c₁=1`
+
+**Answer:** `f(n) = 2ⁿ + n·2ⁿ`   →   **Complexity: `O(n·2ⁿ)`**
+
+### Worked Example 2
+
+```
+f(n) = 4f(n-1) + 3ⁿ,   f(1) = 1
+```
+- Homogeneous: `α = 4` → `f(n) = c₁·4ⁿ`
+- Guess `f(n) = c·3ⁿ` for particular → solving gives `c = -3`, so particular `f(n) = -3ⁿ⁺¹`
+- General: `f(n) = c₁·4ⁿ - 3ⁿ⁺¹`, and `f(1)=1 ⟹ c₁ = 5/2`
+
+**Answer:** `f(n) = (5/2)·4ⁿ - 3ⁿ⁺¹`
+
+---
+
 ## Space Complexity vs Auxiliary Space
 
 - **Auxiliary Space** is the extra or temporary space used by an algorithm (beyond the input itself).

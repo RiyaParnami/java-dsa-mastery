@@ -11,7 +11,8 @@ public class Fibo {
 
     static int fiboFormula(int n){
          // just for demo, use long instead
-        return (int) ((Math.pow(((1+Math.sqrt(5))/2),n)-Math.pow(((1-Math.sqrt(5))/2),n))/Math.sqrt(5));
+        return (int) ((Math.pow(((1+Math.sqrt(5))/2),n)-Math.pow(((1-Math.sqrt(5))/2),n))/Math.sqrt(5)); 
+        // can remove less dominating term doesn't affect the result much
     }
 
     static int fibo(int n) {
