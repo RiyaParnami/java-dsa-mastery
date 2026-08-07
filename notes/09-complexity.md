@@ -346,11 +346,11 @@ T(N) = T(N/2) + T(N/2) + (N-1)
 
 ## How to Actually Solve a Recurrence to Get Complexity
 
-Once you have a recurrence relation like `F(N) = F(N/2) + C`, there are three common ways to solve it:
+Once you have a recurrence relation like `T(N) = T(N/2) + C`, there are three common ways to solve it:
 
 1. **Plug & Chug (substitution method)** — repeatedly substitute the recurrence into itself and look for the pattern:
 ```
-F(N) = F(N/2) + C
+T(N) = T(N/2) + C
 ```
 2. **Master's Theorem** — a direct formula for solving recurrences of the form `T(n) = a·T(n/b) + f(n)`, without manual expansion.
 3. **Akra–Bazzi (1996)** — a more general method that solves the full general form shown above, covering cases the Master Theorem can't (e.g. unequal-sized sub-problems).
@@ -664,6 +664,8 @@ f(n) = (1/√5)·( (1+√5)/2 )ⁿ  -  (1/√5)·( (1-√5)/2 )ⁿ
 
 ### Step 7 — Deriving the Time Complexity from the Closed Form
 
+**Note on what this represents:** `f(n)` here is the *value* of the nth Fibonacci number, not the running time of an algorithm. But since `f(n)` itself grows as `Θ(φⁿ)`, and the naive recursive algorithm does roughly one unit of work per unit `f(n)` grows by, the *value's* growth rate and the *naive algorithm's* time complexity turn out to share the same asymptotic form — which is why the same closed-form expression is reused below to describe the algorithm's running time.
+
 ```
 f(n) = (1/√5)·[ ( (1+√5)/2 )ⁿ  -  ( (1-√5)/2 )ⁿ ]
 ```
@@ -963,6 +965,7 @@ Insertion Sort Execution Example
 ---
 
 ## Summary — Key Points When Dealing With Time Complexity
+1. Big-O analysis usually focuses on the **worst-case running time**.
 2. Consider how the algorithm behaves as the input size (`n`) becomes very large — analyze the growth rate as `n → ∞`.
 3. Don't care about the actual time — **ignore constants**.
 4. **Ignore lower-order terms** — keep only the dominant term.
