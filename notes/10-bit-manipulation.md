@@ -140,3 +140,75 @@ a << b  =  a × 2^b
 ```
 
 **Note:** `>>` and `<<` are essentially fast bitwise equivalents of division and multiplication by powers of 2, respectively.
+
+---
+
+## Application — Check if a Number is Odd or Even
+
+**Key point:** every number is stored in binary internally — so parity (odd/even) can be determined directly from its bits, without using `%`.
+
+### Building the Intuition
+
+```
+  1100
++ 0111
+------
+ 10011   → (19)₁₀
+```
+Verify: `10011 = 16 + 2 + 1 = 19` ✓
+
+Any binary number is really just a sum of powers of 2:
+```
+(10011)₂ = 1×2⁴ + 0×2³ + 0×2² + 1×2¹ + 1×2⁰
+          = 16   +  0   +  0   +  2   +  1
+```
+
+**Note:** every power of 2 *except* `2⁰` is itself even (`2, 4, 8, 16, ...`). So the **only** bit that determines whether the whole number is odd or even is the very last bit — the `2⁰` place.
+
+- If the last bit = `1` → the number is **odd**
+- If the last bit = `0` → the number is **even**
+
+This last bit is called the **LSB — Least Significant Bit**.
+
+### The Trick: `n & 1`
+
+ANDing a number with `1` isolates just the LSB, since `1` in binary is `...0001` — every other bit gets zeroed out by the AND:
+
+```
+  10010     (n)
+& 00001     (1)
+--------
+  00000     → LSB = 0 → even
+```
+
+```
+  10011     (n)
+& 00001     (1)
+--------
+  00001     → LSB = 1 → odd
+```
+
+**Sum up:** `n & 1 == 1` → odd, else → even.
+
+### Java Implementation
+
+```java
+package com.riya;
+
+public class OddEven {
+
+    public static void main(String[] args) {
+        int n = 68;
+        System.out.println(isOdd(n));
+    }
+
+    static boolean isOdd(int n){
+        return (n & 1) == 1;
+    }
+}
+```
+
+**Time Complexity:** `O(1)`
+**Space Complexity:** `O(1)`
+
+This is a classic bit-manipulation trick — faster and more direct than `n % 2 == 1`, and it's the foundation for many other bit-level problems (checking/setting/clearing arbitrary bits, counting set bits, etc.).
