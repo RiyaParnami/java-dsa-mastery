@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 84 |
+| Implementations Written | 85 |
 | Current Focus | Sorting Algorithms |
 | Target Completion | October 2026 |
 
@@ -107,7 +107,7 @@ This repository focuses on consistent learning through concept implementation, s
 <details>
 <summary><b>7. Mathematics for DSA</b></summary>
 
-- [ ] Complete bitwise operators (AND, OR, XOR, shifts)
+- [x] Complete bitwise operators (AND, OR, XOR, shifts)
 - [ ] Range of numbers and two's complement
 - [ ] Prime numbers and Sieve of Eratosthenes
 - [ ] Newton's square root method
@@ -143,11 +143,11 @@ This repository focuses on consistent learning through concept implementation, s
 <details>
 <summary><b>9. Space and Time Complexity Analysis</b></summary>
 
-- [ ] **Asymptotic Analysis**
-  - [ ] Big-O, Big-Omega, Big-Theta notations
-  - [ ] Little notations
-  - [ ] Best, average, and worst case comparisons
-  - [ ] Space complexity and auxiliary space
+- [x] **Asymptotic Analysis**
+  - [x] Big-O, Big-Omega, Big-Theta notations
+  - [x] Little notations
+  - [x] Best, average, and worst case comparisons
+  - [x] Space complexity and auxiliary space
 - [ ] **Recurrence Relations**
   - [ ] Solving linear recurrences
   - [ ] Solving divide and conquer recurrences (Master Theorem)
