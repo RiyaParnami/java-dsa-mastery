@@ -84,6 +84,97 @@ a  = 10110
 
 ---
 
+## Negative Numbers in Binary — Two's Complement
+
+`1 byte = 8 bits`. In signed binary representation:
+
+```
+  MSB                            LSB
+[ 0 | 0 | 0 | 0 | 1 | 0 | 1 | 0 ]
+  ↑                            ↑
+tells sign                  value of the number
+```
+
+- **MSB (Most Significant Bit)** — tells us if the number is positive or negative:
+  ```
+  1 → negative
+  0 → positive
+  ```
+- The remaining bits represent the magnitude.
+
+### Steps to Find the Negative of a Number (2's Complement Method)
+
+1. Take the **complement** of the number (flip every bit).
+2. **Add 1** to the result.
+
+### Worked Example — Find `-10`
+
+```
+(10)₁₀ = (00001010)₂
+```
+**Step 1 — Complement:**
+```
+00001010 → 11110101
+```
+**Step 2 — Add 1:**
+```
+  11110101
++        1
+----------
+  11110110
+```
+**Answer:** `(-10)₁₀ = (11110110)₂`
+
+### Why Does This Work?
+
+This relies on a binary identity: a `1` followed by `n` zeros always equals `n` ones plus `1`:
+```
+100000000  =  11111111 + 1        (i.e. 2⁸ = (2⁸ - 1) + 1)
+```
+So, working modulo `2⁸` (for a byte):
+```
+-N = 100000000 - N
+   = (11111111 - N) + 1
+   = complement(N) + 1
+   = ~N + 1
+```
+This is exactly the 2's complement recipe: **flip the bits, then add 1** — because subtracting `N` from all-1s is the same as flipping every bit of `N`.
+
+---
+
+## Application — Find the Position of the Rightmost Set Bit
+
+**Problem:** Given a number, find the position of its rightmost `1` bit (counting from the right, starting at `1`).
+
+**Example:** `N = 101101100`
+```
+101101(1)00
+   a    b
+```
+Splitting `N` around its rightmost set bit: `N = a · 1 · b`, where `a` is everything before that bit and `b` is the trailing zeros after it.
+
+**Answer:** position `4` (counting from the right, 1-indexed).
+
+### Formula: `N & (-N)`
+
+**Key insight:** in 2's complement, negating a number **flips every bit before the rightmost set bit, but leaves the rightmost set bit and all trailing zeros unchanged**:
+```
+ N  =  a  1  b
+-N  = ~a  1  b
+```
+ANDing these together cancels out everything in `a` (since `a` and `~a` never agree), leaving only the rightmost set bit isolated:
+```
+N & (-N)  =  0...0  1  b
+```
+
+**General formula:**
+```
+Ans = N & (-N)
+```
+This isolates the rightmost set bit — a handy building block for problems like counting set bits, finding the lowest power of 2 dividing a number, or iterating over set bits one at a time.
+
+---
+
 ## Bitwise AND (`&`), OR (`|`), XOR (`^`)
 
 | a | b | a & b | a \| b | a ^ b |
@@ -190,25 +281,93 @@ ANDing a number with `1` isolates just the LSB, since `1` in binary is `...0001`
 
 **Sum up:** `n & 1 == 1` → odd, else → even.
 
-### Java Implementation
+This is a classic bit-manipulation trick — faster and more direct than `n % 2 == 1`, and it's the foundation for many other bit-level problems (checking/setting/clearing arbitrary bits, counting set bits, etc.). See `OddEven.java` for the implementation.
 
-```java
-package com.riya;
+---
 
-public class OddEven {
+## Application — Find the Unique Number Among Duplicates
 
-    public static void main(String[] args) {
-        int n = 68;
-        System.out.println(isOdd(n));
-    }
+**Problem:** Given an array where every number appears twice except one, find the one that doesn't repeat.
 
-    static boolean isOdd(int n){
-        return (n & 1) == 1;
-    }
-}
+**Key properties of XOR that make this work:**
+```
+a ^ a = 0        (a number XORed with itself cancels out)
+a ^ 0 = a
+```
+XOR is also **commutative and associative** — the order and grouping of the XOR operations doesn't matter, just like multiplication:
+```
+(5×3) × (5×4) = 5×5×3×4 = 5×4×3×5 = ...
+```
+regardless of how the terms are grouped or reordered, the product is the same. The same freedom applies to XOR.
+
+**Approach:** XOR all the numbers in the array together. Every duplicate pair cancels out to `0` (in any order, thanks to the property above), leaving only the unique number.
+
+**Example:**
+```
+arr = [2, 3, 4, 1, 2, 1, 3, 6, 4]
+
+2^3^4^1^2^1^3^6^4 = 6
+```
+**Answer:** `6` — the only number without a pair.
+
+---
+
+## Application — Find, Set, and Reset the `i`th Bit
+
+These three operations form the building blocks of most bit-manipulation problems. All of them rely on building a **mask**: a number with a single `1` bit at the target position and `0`s everywhere else.
+
+```
+mask = 1 << (i-1)      // 1-indexed from the right (LSB = bit 1)
 ```
 
-**Time Complexity:** `O(1)`
-**Space Complexity:** `O(1)`
+### Find the `i`th Bit
 
-This is a classic bit-manipulation trick — faster and more direct than `n % 2 == 1`, and it's the foundation for many other bit-level problems (checking/setting/clearing arbitrary bits, counting set bits, etc.).
+**Rule:** AND the number with the mask — if the result is non-zero, that bit is `1`.
+
+```
+Ans = n & (1 << (i-1))
+```
+
+**Example:** `n = 10110110`, find the **5th bit**.
+```
+mask =        00010000      (1 << 4)
+n & mask = 10110110
+         & 00010000
+         -----------
+           00010000     → non-zero → 5th bit is 1
+```
+
+### Set the `i`th Bit (turn it to `1`)
+
+**Rule:** `0 → 1` and `1 → 1` (stays `1`) — this is exactly what **OR** does.
+
+```
+Ans = n | (1 << (i-1))
+```
+
+**Example:** `n = 1010110`, set the **4th bit**.
+```
+  1010110
+| 0001000     (mask)
+----------
+  1011110     → set
+```
+
+### Reset the `i`th Bit (turn it to `0`)
+
+**Rule:** `1 → 0` and `0 → 0` (stays `0`) — this is what **AND with the complement of the mask** does.
+
+```
+Ans = n & ~(1 << (i-1))
+```
+
+**Example:** `n = 1010110`, reset the **5th bit**.
+```
+mask      = 0010000
+~mask     = 1101111     (complement)
+
+  1010110
+& 1101111
+----------
+  1000110     → reset
+```
