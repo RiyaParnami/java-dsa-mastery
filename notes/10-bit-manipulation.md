@@ -142,6 +142,52 @@ This is exactly the 2's complement recipe: **flip the bits, then add 1** — bec
 
 ---
 
+## Range of Numbers Representable with `n` Bits
+
+**General Range Formula (for signed numbers, `n` bits):**
+```
+-2^(n-1)   to   2^(n-1) - 1
+```
+
+**Why?** One bit (the MSB) is reserved for the **sign**, so only `n-1` bits are left to represent the actual magnitude. That gives `2^(n-1)` distinct magnitudes, split across the negative and non-negative sides.
+
+### Worked Example — 1 Byte (8 bits)
+
+```
+[ sign | 7 bits for the actual number ]
+```
+- Total combinations across all 8 bits: `2×2×2×...` (8 times) `= 2⁸ = 256`
+- 1 bit is used for the **sign**, leaving **7 bits** for the actual number
+- Numbers representable from those 7 bits: `2⁷ = 128`
+
+**Range:** `-128` to `127`
+
+**Note:** `0` is counted on the non-negative side — that's why the range isn't symmetric (`-128` to `127`, not `-127` to `127`): `128` negative values (`-128` to `-1`) + `128` non-negative values (`0` to `127`) = `256` total, matching `2⁸`.
+
+### Verifying `-0 = 0` (via Two's Complement)
+
+```
+0 = 00000000
+```
+**Step 1 — Complement:**
+```
+00000000 → 11111111
+```
+**Step 2 — Add 1:**
+```
+  11111111
++        1
+----------
+ 100000000
+```
+This needs **9 bits**, but only **8 bits** are available (1 byte) — so the extra 9th bit is **discarded**:
+```
+100000000 → 00000000     (9th bit discarded)
+```
+**Result:** `-0 = 0` ✓ — zero maps back to itself under 2's complement, which is exactly why the range comes out asymmetric (`-128 to 127`) rather than symmetric.
+
+---
+
 ## Application — Find the Position of the Rightmost Set Bit
 
 **Problem:** Given a number, find the position of its rightmost `1` bit (counting from the right, starting at `1`).
