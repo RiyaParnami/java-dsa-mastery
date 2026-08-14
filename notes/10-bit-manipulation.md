@@ -462,3 +462,91 @@ Answer = 0×5¹ + 1×5² + 1×5³
        = 150
 ```
 **The 6th magic number is `150`.**
+
+---
+
+## Application — Find the Number of Digits in Base `b`
+
+**Problem:** Given a number `n` (in decimal), find how many digits it has when written in base `b`.
+
+**Example:** `(6)₁₀` in binary `= (110)₂` → **2 digits? No — 3 digits.**
+```
+(6)₁₀ = (110)₂  →  3 digits
+```
+
+### Building the Formula
+
+We want to relate the number of digits directly to `n` and `b`, without actually doing the conversion.
+
+Start from the change-of-base idea: if `n = b^x`, then `x = log_b(n)`.
+
+**Example:** `log₂(6) = x  ⇒  6 = 2^x`
+
+Since `2³ = 8` and `2² = 4`, `x` lies between `2` and `3` — i.e. `log₂(6) ≈ 2.58`.
+
+**Key observation:** the integer part of `log_b(n)`, plus `1`, gives the number of digits. Intuitively: `log₁₀(10) = 1`, but `10` has `2` digits — so the digit count is always **one more** than the log (taking the floor/int part first).
+
+```
+log₁₀(2) = 0.301...
+
+10 = 2^(3.32...)   (since log₂(10) = 1 / log₁₀(2) = 3.32...)
+```
+Taking `int(3.32) + 1 = 3 + 1 = 4` → number of digits in base `b` for that power.
+
+### Final Formula
+
+```
+No. of digits of n in base b  =  int( log_b(n) ) + 1
+```
+
+---
+
+## Change of Base Formula
+
+To compute `log_b(a)` using logarithms of a different base `x` (e.g. natural log or log base 10, since most calculators/languages only provide those directly):
+
+```
+log_b(a)  =  log_x(a) / log_x(b)
+```
+
+This lets the "Number of digits in base `b`" formula above be computed using any convenient logarithm base (commonly base `10` or base `e`):
+
+```
+No. of digits of n in base b  =  int( log(n) / log(b) ) + 1
+```
+
+---
+
+## Application — Pascal's Triangle: Sum of the `n`th Row
+
+**Pascal's Triangle:**
+```
+          1
+        1   1
+      1   2   1
+    1   3   3   1
+  1   4   6   4   1
+1   5  10  10   5   1
+```
+
+**Problem:** Find the sum of the elements in the `n`th row.
+
+### Deriving the Formula
+
+Each row `n` of Pascal's Triangle corresponds to the binomial coefficients:
+```
+Sum of row = ⁿC₀ + ⁿC₁ + ⁿC₂ + ... + ⁿCₙ = 2ⁿ
+```
+
+This is a standard identity — the sum of all binomial coefficients for a given `n` equals `2ⁿ` (it's just the binomial expansion of `(1+1)ⁿ`).
+
+**Note on indexing:** if rows are indexed starting from `n = 1` (i.e. the row `[1, 1]` is row 1, not row 0), then the sum of the `n`th row is:
+```
+Sum = 2^(n-1)
+```
+
+### Answer
+
+```
+Sum of nth row (1-indexed) = 2^(n-1)
+```
