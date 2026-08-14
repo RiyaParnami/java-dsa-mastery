@@ -27,7 +27,7 @@
 
 **Example — Hexadecimal to Decimal:**
 ```
-(12)₁₀ = (C)₁₆      // since C = 12 in hex digits
+(12)₁₀ = (C)₁₆      // since C = 12 in hex digits
 ```
 
 ---
@@ -38,8 +38,8 @@
 
 **Example — Decimal to Octal:**
 ```
-17 ÷ 8 = 2  remainder 1
- 2 ÷ 8 = 0  remainder 2
+17 ÷ 8 = 2  remainder 1
+ 2 ÷ 8 = 0  remainder 2
 
 Read remainders bottom-up: (21)₈
 ```
@@ -47,11 +47,11 @@ Verify: `2×8 + 1 = 17` ✓
 
 **Example — Decimal to Binary:**
 ```
-17 ÷ 2 = 8  remainder 1
- 8 ÷ 2 = 4  remainder 0
- 4 ÷ 2 = 2  remainder 0
- 2 ÷ 2 = 1  remainder 0
- 1 ÷ 2 = 0  remainder 1
+17 ÷ 2 = 8  remainder 1
+ 8 ÷ 2 = 4  remainder 0
+ 4 ÷ 2 = 2  remainder 0
+ 2 ÷ 2 = 1  remainder 0
+ 1 ÷ 2 = 0  remainder 1
 
 Read remainders bottom-up: (10001)₂
 ```
@@ -67,8 +67,8 @@ Since `8 = 2³` and `16 = 2⁴`, octal and hex digits map **directly** to fixed-
 
 **Example — Octal to Binary:**
 ```
-(21)₈ → 2 = 010,  1 = 001
-      → (010 001)₂ = (10001)₂
+(21)₈ → 2 = 010,  1 = 001
+      → (010 001)₂ = (10001)₂
 ```
 
 ---
@@ -78,7 +78,7 @@ Since `8 = 2³` and `16 = 2⁴`, octal and hex digits map **directly** to fixed-
 Flips every bit — `1 → 0` and `0 → 1`.
 
 ```
-a  = 10110
+a  = 10110
 ~a = 01001
 ```
 
@@ -89,17 +89,17 @@ a  = 10110
 `1 byte = 8 bits`. In signed binary representation:
 
 ```
-  MSB                            LSB
+  MSB                            LSB
 [ 0 | 0 | 0 | 0 | 1 | 0 | 1 | 0 ]
-  ↑                            ↑
-tells sign                  value of the number
+  ↑                            ↑
+tells sign                  value of the number
 ```
 
 - **MSB (Most Significant Bit)** — tells us if the number is positive or negative:
-  ```
-  1 → negative
-  0 → positive
-  ```
+  ```
+  1 → negative
+  0 → positive
+  ```
 - The remaining bits represent the magnitude.
 
 ### Steps to Find the Negative of a Number (2's Complement Method)
@@ -118,10 +118,10 @@ tells sign                  value of the number
 ```
 **Step 2 — Add 1:**
 ```
-  11110101
-+        1
+  11110101
++        1
 ----------
-  11110110
+  11110110
 ```
 **Answer:** `(-10)₁₀ = (11110110)₂`
 
@@ -129,14 +129,14 @@ tells sign                  value of the number
 
 This relies on a binary identity: a `1` followed by `n` zeros always equals `n` ones plus `1`:
 ```
-100000000  =  11111111 + 1        (i.e. 2⁸ = (2⁸ - 1) + 1)
+100000000  =  11111111 + 1        (i.e. 2⁸ = (2⁸ - 1) + 1)
 ```
 So, working modulo `2⁸` (for a byte):
 ```
 -N = 100000000 - N
-   = (11111111 - N) + 1
-   = complement(N) + 1
-   = ~N + 1
+   = (11111111 - N) + 1
+   = complement(N) + 1
+   = ~N + 1
 ```
 This is exactly the 2's complement recipe: **flip the bits, then add 1** — because subtracting `N` from all-1s is the same as flipping every bit of `N`.
 
@@ -146,7 +146,7 @@ This is exactly the 2's complement recipe: **flip the bits, then add 1** — bec
 
 **General Range Formula (for signed numbers, `n` bits):**
 ```
--2^(n-1)   to   2^(n-1) - 1
+-2^(n-1)   to   2^(n-1) - 1
 ```
 
 **Why?** One bit (the MSB) is reserved for the **sign**, so only `n-1` bits are left to represent the actual magnitude. That gives `2^(n-1)` distinct magnitudes, split across the negative and non-negative sides.
@@ -175,14 +175,14 @@ This is exactly the 2's complement recipe: **flip the bits, then add 1** — bec
 ```
 **Step 2 — Add 1:**
 ```
-  11111111
-+        1
+  11111111
++        1
 ----------
- 100000000
+ 100000000
 ```
 This needs **9 bits**, but only **8 bits** are available (1 byte) — so the extra 9th bit is **discarded**:
 ```
-100000000 → 00000000     (9th bit discarded)
+100000000 → 00000000     (9th bit discarded)
 ```
 **Result:** `-0 = 0` ✓ — zero maps back to itself under 2's complement, which is exactly why the range comes out asymmetric (`-128 to 127`) rather than symmetric.
 
@@ -195,7 +195,7 @@ This needs **9 bits**, but only **8 bits** are available (1 byte) — so the ext
 **Example:** `N = 101101100`
 ```
 101101(1)00
-   a    b
+   a    b
 ```
 Splitting `N` around its rightmost set bit: `N = a · 1 · b`, where `a` is everything before that bit and `b` is the trailing zeros after it.
 
@@ -205,12 +205,12 @@ Splitting `N` around its rightmost set bit: `N = a · 1 · b`, where `a` is ever
 
 **Key insight:** in 2's complement, negating a number **flips every bit before the rightmost set bit, but leaves the rightmost set bit and all trailing zeros unchanged**:
 ```
- N  =  a  1  b
--N  = ~a  1  b
+ N  =  a  1  b
+-N  = ~a  1  b
 ```
 ANDing these together cancels out everything in `a` (since `a` and `~a` never agree), leaving only the rightmost set bit isolated:
 ```
-N & (-N)  =  0...0  1  b
+N & (-N)  =  0...0  1  b
 ```
 
 **General formula:**
@@ -237,9 +237,9 @@ This isolates the rightmost set bit — a handy building block for problems like
 ### Useful XOR Observations
 
 ```
-a ^ 1 = ā     (complement of a)
-a ^ 0 = a     (no change)
-a ^ a = 0     (a number XORed with itself is 0)
+a ^ 1 = ā     (complement of a)
+a ^ 0 = a     (no change)
+a ^ a = 0     (a number XORed with itself is 0)
 ```
 
 These identities come up constantly in bit-manipulation problems (e.g. finding the single non-duplicate element in an array using XOR).
@@ -251,13 +251,13 @@ These identities come up constantly in bit-manipulation problems (e.g. finding t
 Shifts all bits to the right by `n` positions. Bits shifted out from the right are **dropped**.
 
 ```
-a >> b  =  a / 2^b      (floor division)
+a >> b  =  a / 2^b      (floor division)
 ```
 
 **Example:** `12 >> 2`
 ```
 12 = 00001100
-12 >> 2 = 00000011 = 3        // same as floor(12 / 2²) = floor(12/4) = 3
+12 >> 2 = 00000011 = 3        // same as floor(12 / 2²) = floor(12/4) = 3
 ```
 
 ---
@@ -267,13 +267,13 @@ a >> b  =  a / 2^b      (floor division)
 Shifts all bits to the left by `n` positions, filling in `0`s from the right.
 
 ```
-a << b  =  a × 2^b
+a << b  =  a × 2^b
 ```
 
 **Example:** `3 << 2`
 ```
 3 = 00000011
-3 << 2 = 00001100 = 12        // same as 3 × 2² = 3 × 4 = 12
+3 << 2 = 00001100 = 12        // same as 3 × 2² = 3 × 4 = 12
 ```
 
 **Note:** `>>` and `<<` are essentially fast bitwise equivalents of division and multiplication by powers of 2, respectively.
@@ -287,17 +287,17 @@ a << b  =  a × 2^b
 ### Building the Intuition
 
 ```
-  1100
+  1100
 + 0111
 ------
- 10011   → (19)₁₀
+ 10011   → (19)₁₀
 ```
 Verify: `10011 = 16 + 2 + 1 = 19` ✓
 
 Any binary number is really just a sum of powers of 2:
 ```
 (10011)₂ = 1×2⁴ + 0×2³ + 0×2² + 1×2¹ + 1×2⁰
-          = 16   +  0   +  0   +  2   +  1
+          = 16   +  0   +  0   +  2   +  1
 ```
 
 **Note:** every power of 2 *except* `2⁰` is itself even (`2, 4, 8, 16, ...`). So the **only** bit that determines whether the whole number is odd or even is the very last bit — the `2⁰` place.
@@ -312,17 +312,17 @@ This last bit is called the **LSB — Least Significant Bit**.
 ANDing a number with `1` isolates just the LSB, since `1` in binary is `...0001` — every other bit gets zeroed out by the AND:
 
 ```
-  10010     (n)
-& 00001     (1)
+  10010     (n)
+& 00001     (1)
 --------
-  00000     → LSB = 0 → even
+  00000     → LSB = 0 → even
 ```
 
 ```
-  10011     (n)
-& 00001     (1)
+  10011     (n)
+& 00001     (1)
 --------
-  00001     → LSB = 1 → odd
+  00001     → LSB = 1 → odd
 ```
 
 **Sum up:** `n & 1 == 1` → odd, else → even.
@@ -337,7 +337,7 @@ This is a classic bit-manipulation trick — faster and more direct than `n % 2 
 
 **Key properties of XOR that make this work:**
 ```
-a ^ a = 0        (a number XORed with itself cancels out)
+a ^ a = 0        (a number XORed with itself cancels out)
 a ^ 0 = a
 ```
 XOR is also **commutative and associative** — the order and grouping of the XOR operations doesn't matter, just like multiplication:
@@ -358,59 +358,12 @@ arr = [2, 3, 4, 1, 2, 1, 3, 6, 4]
 
 ---
 
-Application — Find the Unique Number Using XOR (Worked Example)
-
-Problem: Given an array where every number appears twice except one number, find the number that appears only once.
-
-Example from the handwritten notes
-
-arr = [2, 2, 3, 2, 7, 7, 8, 7, 6, 8]
-
-Here, 3 is the number that does not have a duplicate.
-
-Step 1 — Convert the numbers to binary
-
-The relevant values can be represented as:
-
-2  → 0010
-3  → 0011
-6  → 0110
-7  → 0111
-8  → 1000
-
-Step 2 — XOR all the numbers
-
-XOR has the important properties:
-
-a ^ a = 0
-a ^ 0 = a
-
-Therefore, every duplicate pair cancels out, leaving only the unique number:
-
-2 ^ 2 ^ 3 ^ 2 ^ 7 ^ 7 ^ 8 ^ 7 ^ 6 ^ 8
-= 0011
-= 3
-
-Bit-by-bit XOR intuition
-
-When the numbers are written in binary and XORed column by column, the duplicate values cancel and the remaining bits are:
-
-0011
-
-So the final result is:
-
-0011 = 3
-
-Answer: 3 — it is the only number without a duplicate.
-
-Why it works: Because XOR is commutative and associative, the order of the numbers does not matter. Every repeated value appears twice and cancels to 0, while the single value remains.
-
 ## Application — Find, Set, and Reset the `i`th Bit
 
 These three operations form the building blocks of most bit-manipulation problems. All of them rely on building a **mask**: a number with a single `1` bit at the target position and `0`s everywhere else.
 
 ```
-mask = 1 << (i-1)      // 1-indexed from the right (LSB = bit 1)
+mask = 1 << (i-1)      // 1-indexed from the right (LSB = bit 1)
 ```
 
 ### Find the `i`th Bit
@@ -423,11 +376,11 @@ Ans = n & (1 << (i-1))
 
 **Example:** `n = 10110110`, find the **5th bit**.
 ```
-mask =        00010000      (1 << 4)
+mask =        00010000      (1 << 4)
 n & mask = 10110110
-         & 00010000
-         -----------
-           00010000     → non-zero → 5th bit is 1
+         & 00010000
+         -----------
+           00010000     → non-zero → 5th bit is 1
 ```
 
 ### Set the `i`th Bit (turn it to `1`)
@@ -440,10 +393,10 @@ Ans = n | (1 << (i-1))
 
 **Example:** `n = 1010110`, set the **4th bit**.
 ```
-  1010110
-| 0001000     (mask)
+  1010110
+| 0001000     (mask)
 ----------
-  1011110     → set
+  1011110     → set
 ```
 
 ### Reset the `i`th Bit (turn it to `0`)
@@ -456,11 +409,56 @@ Ans = n & ~(1 << (i-1))
 
 **Example:** `n = 1010110`, reset the **5th bit**.
 ```
-mask      = 0010000
-~mask     = 1101111     (complement)
+mask      = 0010000
+~mask     = 1101111     (complement)
 
-  1010110
+  1010110
 & 1101111
 ----------
-  1000110     → reset
+  1000110     → reset
 ```
+
+---
+
+## Application — Find the `n`th Magic Number
+
+**Problem:** A "magic number" is defined by writing `n` in binary, and for every set bit at position `i` (1-indexed from the LSB), adding `5^i` to the result.
+
+### Pattern
+
+| n | Binary (S³ S² S¹) | Magic No. |
+|---|---|---|
+| 1 | 001 | 5¹ = **5** |
+| 2 | 010 | 5² = **25** |
+| 3 | 011 | 5¹ + 5² = 5 + 25 = **30** |
+| 4 | 100 | 5³ = **125** |
+| 5 | 101 | 5³ + 5¹ = 125 + 5 = **130** |
+
+**Rule:** treat each bit of `n`'s binary representation as a "switch" — if bit `i` is `1`, include `5^i` in the sum; if `0`, skip it.
+
+### Algorithm
+
+Loop through the bits of `n` using the same `& 1` / `>> 1` combo seen earlier:
+```
+n & 1     →  gives the last digit in binary (the current LSB)
+n >> 1    →  shifts right, moving on to the next bit
+```
+At each step, if the extracted bit is `1`, add `5^i` (where `i` is the current bit position, starting at `1`) to the running total.
+
+### Worked Example — `n = 6`
+
+```
+n = 6 = 110₂
+```
+Processing bit by bit (position `1` = LSB):
+```
+bit 1 = 0   →  0 × 5¹
+bit 2 = 1   →  1 × 5²
+bit 3 = 1   →  1 × 5³
+```
+```
+Answer = 0×5¹ + 1×5² + 1×5³
+       = 0 + 25 + 125
+       = 150
+```
+**The 6th magic number is `150`.**
