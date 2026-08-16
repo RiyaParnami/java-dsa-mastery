@@ -465,88 +465,106 @@ Answer = 0×5¹ + 1×5² + 1×5³
 
 ---
 
-## Application — Find the Number of Digits in Base `b`
-
-**Problem:** Given a number `n` (in decimal), find how many digits it has when written in base `b`.
-
-**Example:** `(6)₁₀` in binary `= (110)₂` → **2 digits? No — 3 digits.**
-```
-(6)₁₀ = (110)₂  →  3 digits
-```
-
-### Building the Formula
-
-We want to relate the number of digits directly to `n` and `b`, without actually doing the conversion.
-
-Start from the change-of-base idea: if `n = b^x`, then `x = log_b(n)`.
-
-**Example:** `log₂(6) = x  ⇒  6 = 2^x`
-
-Since `2³ = 8` and `2² = 4`, `x` lies between `2` and `3` — i.e. `log₂(6) ≈ 2.58`.
-
-**Key observation:** the integer part of `log_b(n)`, plus `1`, gives the number of digits. Intuitively: `log₁₀(10) = 1`, but `10` has `2` digits — so the digit count is always **one more** than the log (taking the floor/int part first).
+## Application — Sum of the `n`th Row of Pascal's Triangle
 
 ```
-log₁₀(2) = 0.301...
-
-10 = 2^(3.32...)   (since log₂(10) = 1 / log₁₀(2) = 3.32...)
-```
-Taking `int(3.32) + 1 = 3 + 1 = 4` → number of digits in base `b` for that power.
-
-### Final Formula
-
-```
-No. of digits of n in base b  =  int( log_b(n) ) + 1
+Row 1:          1
+Row 2:         1 1
+Row 3:        1 2 1
+Row 4:       1 3 3 1
+Row 5:      1 4 6 4 1
+Row 6:    1 5 10 10 5 1
 ```
 
----
+Each row `n` (1-indexed) consists of binomial coefficients: `ⁿC₀, ⁿC₁, ..., ⁿCₙ`.
 
-## Change of Base Formula
-
-To compute `log_b(a)` using logarithms of a different base `x` (e.g. natural log or log base 10, since most calculators/languages only provide those directly):
-
+**Known identity:**
 ```
-log_b(a)  =  log_x(a) / log_x(b)
+ⁿC₀ + ⁿC₁ + ⁿC₂ + ... + ⁿCₙ = 2ⁿ
 ```
 
-This lets the "Number of digits in base `b`" formula above be computed using any convenient logarithm base (commonly base `10` or base `e`):
-
-```
-No. of digits of n in base b  =  int( log(n) / log(b) ) + 1
-```
-
----
-
-## Application — Pascal's Triangle: Sum of the `n`th Row
-
-**Pascal's Triangle:**
-```
-          1
-        1   1
-      1   2   1
-    1   3   3   1
-  1   4   6   4   1
-1   5  10  10   5   1
-```
-
-**Problem:** Find the sum of the elements in the `n`th row.
-
-### Deriving the Formula
-
-Each row `n` of Pascal's Triangle corresponds to the binomial coefficients:
-```
-Sum of row = ⁿC₀ + ⁿC₁ + ⁿC₂ + ... + ⁿCₙ = 2ⁿ
-```
-
-This is a standard identity — the sum of all binomial coefficients for a given `n` equals `2ⁿ` (it's just the binomial expansion of `(1+1)ⁿ`).
-
-**Note on indexing:** if rows are indexed starting from `n = 1` (i.e. the row `[1, 1]` is row 1, not row 0), then the sum of the `n`th row is:
+**For the `n`th row (1-indexed as shown above):**
 ```
 Sum = 2^(n-1)
 ```
 
-### Answer
+Using the left-shift operator (a fast way to compute powers of 2):
+```
+Ans = 1 << (n-1)
+```
+
+---
+
+## Application — Number of Digits of a Number in Base `b`
+
+**Problem:** Given a number `n`, find how many digits it has when written in base `b`.
+
+**Example:** `(6)₁₀ = (110)₂` → 3 digits.
+
+### Deriving the Formula
+
+Starting from the logarithm identity:
+```
+log_b(a) = x   ⟺   a = b^x
+```
+
+For `n = 6`, base `2`:
+```
+log₂(6) = x   →   6 = 2^x   →   x ≈ 2.58
+```
+```
+floor(x) + 1 = floor(2.58) + 1 = 2 + 1 = 3     ✓ matches (110)₂ having 3 digits
+```
+
+### Change of Base Formula
+
+Most calculators/languages only give `log` in base 10 or base `e`, so use the change-of-base identity to compute a log in any base:
+```
+log_b(a) = log_x(a) / log_x(b)
+```
+
+**Example:** `log₂(10)`
+```
+log₂(10) = log(10) / log(2) ≈ 3.32
+```
+```
+floor(3.32) + 1 = 3 + 1 = 4 digits     ✓ matches (10)₁₀ = (1010)₂ having 4 digits
+```
+
+### General Formula
 
 ```
-Sum of nth row (1-indexed) = 2^(n-1)
+Number of digits of n in base b  =  int( log_b(n) ) + 1
+```
+
+---
+
+## Application — Check if a Number is a Power of 2
+
+**Problem:** Given a number, determine whether it is a power of 2.
+
+**Key insight:** any power of 2 has exactly **one** set bit in binary — a `1` followed by all zeros:
+```
+n = 10000000
+```
+
+**Why `n & (n-1) == 0` works:** subtracting `1` from a power of 2 flips that lone `1` to `0` and turns every bit after it into `1`:
+```
+  n   = 10000000
+  n-1 = 01111111
+```
+These two values share **no common set bits** — so ANDing them together always gives `0`:
+```
+  10000000
+& 01111111
+----------
+  00000000
+```
+
+If `n` is **not** a power of 2 (i.e. it has more than one set bit), then `n` and `n-1` will still overlap in at least one bit position, and `n & (n-1)` will be **non-zero**.
+
+### Formula
+
+```
+If  n & (n-1) == 0   →  n is a power of 2
 ```
