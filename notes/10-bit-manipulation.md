@@ -568,3 +568,58 @@ If `n` is **not** a power of 2 (i.e. it has more than one set bit), then `n` and
 ```
 If  n & (n-1) == 0   →  n is a power of 2
 ```
+
+---
+
+## Application — Fast Exponentiation (Binary Exponentiation)
+
+**Problem:** Calculate `a^b`.
+
+**Naive approach:** multiply `a` by itself `b` times — `O(b)`.
+```
+3⁶ = 3×3×3×3×3×3     // O(b)
+```
+
+**Faster approach — using the binary representation of the exponent:**
+```
+3⁶ = 3^(110₂) = 3^(2+4) = 3² × 3⁴
+```
+Instead of multiplying `a` by itself `b` times, break the exponent `b` into powers of 2 (its binary representation) and combine only the pieces where a bit is set.
+
+### Algorithm
+
+```
+ans = 1
+base = a
+
+while (n > 0):
+    if (n & 1) == 1:
+        ans = ans × base
+    base = base × base
+    n = n >> 1
+
+return ans
+```
+
+At each step: check the current LSB with `n & 1` (does this power-of-2 term contribute?), square the base (moving to the next power of 2: `a¹ → a² → a⁴ → a⁸ ...`), then shift `n` right to move to the next bit.
+
+### Worked Example — `3⁶`
+
+```
+n = 6 = 110₂
+```
+
+| Step | `n` (binary) | `n & 1` | Action | `base` after squaring |
+|---|---|---|---|---|
+| 1 | `110` | `0` | skip (bit not set) | `3² = 9` |
+| 2 | `11`  | `1` | `ans = 1 × 9 = 9`     | `9² = 81` |
+| 3 | `1`   | `1` | `ans = 9 × 81 = 729`  | loop ends (`n = 0`) |
+
+**Answer:** `3⁶ = 729`
+
+### Complexity
+
+```
+Time Complexity = O(log b)
+```
+Since the loop runs once per **bit** of `b`, not once per unit of `b` — a massive improvement over the naive `O(b)` approach for large exponents.
