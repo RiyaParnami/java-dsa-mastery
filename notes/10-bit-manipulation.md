@@ -623,3 +623,71 @@ n = 6 = 110₂
 Time Complexity = O(log b)
 ```
 Since the loop runs once per **bit** of `b`, not once per unit of `b` — a massive improvement over the naive `O(b)` approach for large exponents.
+
+---
+
+## Application — Count the Number of Set Bits
+
+**Problem:** Given a number `n`, find how many `1` bits (set bits) it has.
+
+**Example:** `n = 9 = 1001₂` → **2 set bits**.
+
+### Key Idea: Remove the Rightmost Set Bit, One at a Time
+
+Recall the earlier formula for isolating the rightmost set bit:
+```
+n & (-n)  →  isolates the rightmost set bit
+```
+
+**Removing** that bit (instead of just isolating it) is done by subtracting it out:
+```
+n - (n & (-n))  →  clears the rightmost set bit, leaves everything else unchanged
+```
+
+If we keep applying this — clear the rightmost set bit, repeat — the number eventually becomes `0`. The number of times we had to repeat is exactly the number of set bits.
+
+### Worked Example — `n = 9`
+
+```
+n = 1001
+```
+
+**Iteration 1:**
+```
+n & (-n) = 0001                     (isolate rightmost set bit)
+
+n - (n & (-n)):
+  1001
+- 0001
+------
+  1000
+```
+
+**Iteration 2:**
+```
+n = 1000
+n & (-n) = 1000                     (isolate rightmost set bit — it's the only one)
+
+n - (n & (-n)):
+  1000
+- 1000
+------
+  0000                              → n is now 0, stop
+```
+
+**Result:** it took **2 iterations** to reduce `n` to `0`.
+
+### Formula / Algorithm
+
+```
+count = 0
+while (n != 0):
+    n = n - (n & (-n))     // clear the rightmost set bit
+    count = count + 1
+
+return count
+```
+
+**Rule:** `No. of set bits = No. of iterations` until `n` becomes `0`.
+
+**Note:** this is a variant of the classic **Brian Kernighan's Algorithm**, which more commonly clears the rightmost set bit via `n = n & (n-1)` — both approaches remove one set bit per iteration and run in `O(number of set bits)`, which is faster than checking all `n` bits one by one.
