@@ -691,3 +691,48 @@ return count
 **Rule:** `No. of set bits = No. of iterations` until `n` becomes `0`.
 
 **Note:** this is a variant of the classic **Brian Kernighan's Algorithm**, which more commonly clears the rightmost set bit via `n = n & (n-1)` — both approaches remove one set bit per iteration and run in `O(number of set bits)`, which is faster than checking all `n` bits one by one.
+
+---
+
+## Application — Find XOR of All Numbers from 0 to `a`
+
+**Problem:** Given a number `a`, find `0 ^ 1 ^ 2 ^ ... ^ a`.
+
+### Spotting the Pattern
+
+| a | XOR from 0 to a |
+|---|---|
+| 0 | 0 |
+| 1 | 0^1 = 1 |
+| 2 | 0^1^2 = 3 |
+| 3 | 0 |
+| 4 | 4 |
+| 5 | 1 |
+| 6 | 7 |
+| 7 | 0 |
+| 8 | 8 |
+| 9 | 1 |
+
+The result **repeats in a cycle of 4**, based on `a % 4`:
+
+```
+a % 4 == 0   →   answer = a
+a % 4 == 1   →   answer = 1
+a % 4 == 2   →   answer = a + 1
+a % 4 == 3   →   answer = 0
+```
+
+**Verifying against the table:** `a = 6` → `6 % 4 = 2` → `answer = a+1 = 7` ✓. `a = 9` → `9 % 4 = 1` → `answer = 1` ✓.
+
+### Why This Works
+
+XORing four consecutive integers whose first term is a multiple of 4 always cancels down to `0` (a property of how the low bits cycle every 4 numbers). This means the XOR of `0` to `a` only depends on **where `a` falls in its group of 4**, not on `a`'s actual size — which is why the whole range collapses into a constant-time formula instead of needing a loop.
+
+### Formula (constant time, `O(1)`)
+
+```
+Ans = a % 4 == 0 ? a
+    : a % 4 == 1 ? 1
+    : a % 4 == 2 ? a + 1
+    : 0
+```
