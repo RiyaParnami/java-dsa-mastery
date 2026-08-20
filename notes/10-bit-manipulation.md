@@ -736,3 +736,43 @@ Ans = a % 4 == 0 ? a
     : a % 4 == 2 ? a + 1
     : 0
 ```
+
+---
+
+## Application — Find XOR of All Numbers Between `a` and `b`
+
+**Problem:** Given `a` and `b`, find `a ^ (a+1) ^ (a+2) ^ ... ^ b`.
+
+**Example:** `a = 3, b = 9` → find `3^4^5^6^7^8^9`.
+
+### Building on the Previous Formula
+
+Let `f(n)` denote **XOR of all numbers from `0` to `n`** (the `O(1)` formula derived in the previous section).
+
+Write out XOR from `0` to `b`:
+```
+0^1^2 ^ 3^4^5^6^7^8^9
+```
+The numbers `0, 1, 2` (i.e. `0` to `a-1`) are **extras** that don't belong to the range `[a, b]` we actually want.
+
+Since `x ^ x = 0`, XORing those same extras back in a second time **cancels them out**, leaving only the range `[a, b]`:
+```
+f(b) ^ f(a-1)
+  = (0^1^2 ^ 3^4^5^6^7^8^9) ^ (0^1^2)
+  = 3^4^5^6^7^8^9                        // the 0^1^2 pairs cancel via x^x = 0
+```
+
+### Formula
+
+```
+Ans = f(b) ^ f(a-1)
+```
+where `f(n)` is the XOR-from-`0`-to-`n` function defined earlier:
+```
+f(n) = n % 4 == 0 ? n
+     : n % 4 == 1 ? 1
+     : n % 4 == 2 ? n + 1
+     : 0
+```
+
+**Note:** this whole computation is `O(1)`, since `f(n)` itself is `O(1)`.
