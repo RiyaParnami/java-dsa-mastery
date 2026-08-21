@@ -776,3 +776,50 @@ f(n) = n % 4 == 0 ? n
 ```
 
 **Note:** this whole computation is `O(1)`, since `f(n)` itself is `O(1)`.
+
+---
+
+## Application — Flipping an Image
+
+**Problem:** Given a binary matrix (each cell is `0` or `1`), "flip" it: reverse each row, then invert every bit (`0 → 1`, `1 → 0`).
+
+**Example:**
+```
+Original:          Reversed rows:      Flipped (inverted):
+1 1 0               0 1 1                1 0 0
+1 0 1       →        1 0 1        →      0 1 0
+0 0 0                0 0 0                1 1 1
+```
+
+### Step 1 — Reverse Each Row
+
+Simply reverse the order of elements within each row:
+```
+1 1 0  →  0 1 1
+1 0 1  →  1 0 1
+0 0 0  →  0 0 0
+```
+
+### Step 2 — Invert Every Bit
+
+Inverting a bit (`0 → 1`, `1 → 0`) is the same **XOR with 1** trick seen earlier:
+```
+0 ^ 1 = 1
+1 ^ 1 = 0
+```
+Applying this to every cell of the reversed matrix:
+```
+0 1 1        1 0 0
+1 0 1   ^1   0 1 0
+0 0 0        1 1 1
+```
+
+### Formula
+
+```
+For each row:
+    reversed_row = reverse(row)
+    flipped_row  = [cell ^ 1 for cell in reversed_row]
+```
+
+**Note:** since each row only contains `0`s and `1`s, `cell ^ 1` is a fast, branch-free way to invert a bit — equivalent to `1 - cell` but using a bitwise operator instead of arithmetic.
