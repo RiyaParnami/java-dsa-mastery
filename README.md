@@ -18,8 +18,8 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 87 |
-| Current Focus | Sorting Algorithms |
+| Implementations Written | 88 |
+| Current Focus | Mathematics for DSA |
 | Target Completion | October 2026 |
 
 ---
