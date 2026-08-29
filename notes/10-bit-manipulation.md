@@ -823,3 +823,69 @@ For each row:
 ```
 
 **Note:** since each row only contains `0`s and `1`s, `cell ^ 1` is a fast, branch-free way to invert a bit — equivalent to `1 - cell` but using a bitwise operator instead of arithmetic.
+
+---
+
+## Application — Check if a Number is Prime
+
+**Prime numbers:** `2, 3, 5, 7, 13, ...` — divisible only by `1` and themselves.
+
+**Example:** in the range `2` to `13`, every number except `13` has a factor other than `1` and itself; `13` is prime.
+
+### Brute Force Approach
+
+```
+for (i = 2; i < N; i++) {
+    if (N % i == 0)  →  not prime
+}
+→ prime
+```
+**Time Complexity:** `O(N)`
+
+### Optimized — Only Check Up To `√N`
+
+**Key insight:** factors of a number always come in **pairs**, and those pairs mirror around `√N`.
+
+**Example — `N = 36`:**
+```
+1 × 36
+2 × 18
+3 × 12
+4 × 9
+6 × 6      ← this is √36, the midpoint
+9 × 4      ← same pair as (4, 9), just reversed
+12 × 3     ← same pair as (3, 12)
+18 × 2     ← same pair as (2, 18)
+36 × 1     ← same pair as (1, 36)
+```
+After the pair `(6, 6)` at `√N`, every subsequent pair is just a **repeat** of an earlier pair in reverse order (`3 × 12` is the same factor pair as `12 × 3`). So checking divisors beyond `√N` is redundant — if no factor exists up to `√N`, none exists beyond it either.
+
+### Deriving the Bound
+
+We want the loop variable `c` to stop once it exceeds `√N`:
+```
+c ≤ √N
+```
+Squaring both sides avoids computing a square root at all (which is slower and can introduce floating-point error):
+```
+c × c ≤ N
+```
+
+### Optimized Algorithm
+
+```
+static boolean isPrime(int n) {
+    if (n <= 1) return false;
+
+    int c = 2;
+    while (c * c <= n) {
+        if (n % c == 0) return false;
+        c++;
+    }
+    return true;
+}
+```
+
+**Time Complexity:** `O(√N)` — a significant improvement over the brute-force `O(N)`, especially for large `N`.
+
+See `Prime.java` for the implementation.
