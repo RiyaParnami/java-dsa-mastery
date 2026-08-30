@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 92 |
+| Implementations Written | 93 |
 | Current Focus | Mathematics for DSA |
 | Target Completion | October 2026 |
 
