@@ -889,3 +889,79 @@ static boolean isPrime(int n) {
 **Time Complexity:** `O(√N)` — a significant improvement over the brute-force `O(N)`, especially for large `N`.
 
 See `Prime.java` for the implementation.
+
+---
+
+## Application — Sieve of Eratosthenes (Find All Primes up to `N`)
+
+**Problem:** Given `N`, find all prime numbers from `2` to `N` — not just check one number, but generate the whole list efficiently.
+
+**Example — `N = 40`:**
+```
+2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37
+```
+
+### The Idea
+
+Rather than testing each number individually with `isPrime()` (which costs `O(√N)` per number), **mark off multiples** of every prime as they're found:
+
+```
+0 → marked "not prime" (composite / crossed out)
+X → marked "not prime"
+```
+
+1. Start with `2` — it's prime. Cross out every multiple of `2` (`4, 6, 8, ...`).
+2. Move to the next unmarked number — `3` is prime. Cross out every multiple of `3` (`6, 9, 12, ...`).
+3. `4` is already crossed out (multiple of `2`) — skip.
+4. `5` is unmarked → prime. Cross out multiples of `5`.
+5. Continue up to `N`. Whatever is **never crossed out** is prime.
+
+**Walking through `N = 40`:**
+```
+2  3  X  5  X  7  X  X  X 10
+11 X 13  X 15  X 17  X 19 X
+X  X 23  X  X  X  X  X 29 X
+31 X  X  X  X  X 37  X  X 40
+```
+(`X` = crossed out as a multiple of some earlier prime; numbers left unmarked are prime.)
+
+**Result:** `2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37`
+
+### Time Complexity
+
+For each prime `p`, marking its multiples up to `N` takes roughly `N/p` steps:
+```
+N/2 + N/3 + N/5 + N/7 + ...
+```
+Factor out `N`:
+```
+N × (1/2 + 1/3 + 1/5 + 1/7 + ...)
+```
+The sum `1/2 + 1/3 + 1/5 + 1/7 + ...` (the **harmonic-like progression over primes**) grows extremely slowly — it's known to approximate:
+```
+log(log N)
+```
+
+**Total Time Complexity:**
+```
+O(N × log(log N))
+```
+This is very close to linear — dramatically faster than checking each of the `N` numbers individually with the `O(√N)` primality test (which would cost `O(N × √N)` overall).
+
+### Algorithm
+
+```
+isComposite = array of size N+1, all initialized to false
+
+for (p = 2; p <= N; p++) {
+    if (!isComposite[p]) {           // p is prime
+        for (multiple = p*p; multiple <= N; multiple += p) {
+            isComposite[multiple] = true
+        }
+    }
+}
+
+// every index p from 2..N where isComposite[p] is false → p is prime
+```
+
+**Note:** the inner loop can safely start at `p*p` instead of `2*p`, since all smaller multiples of `p` (like `2p, 3p, ..., (p-1)p`) have already been marked by smaller primes.
