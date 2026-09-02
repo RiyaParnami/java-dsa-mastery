@@ -965,3 +965,115 @@ for (p = 2; p <= N; p++) {
 ```
 
 **Note:** the inner loop can safely start at `p*p` instead of `2*p`, since all smaller multiples of `p` (like `2p, 3p, ..., (p-1)p`) have already been marked by smaller primes.
+
+---
+
+## Application — Finding the Square Root of a Number
+
+**Problem:** Given `N`, find `√N` (to some required precision).
+
+There are two natural approaches: a **digit-by-digit search** (binary search for the integer part, then linear search for each decimal place), and the much faster **Newton-Raphson method**.
+
+### Method 1 — Binary Search for the Integer Part
+
+We want the largest integer `m` such that `m × m ≤ N`.
+
+**Binary search** on the range `[0, N]`:
+```
+low = 0, high = N
+
+while (low <= high):
+    m = (low + high) / 2
+
+    if (m * m > N):
+        high = m - 1          // m too big, search left half
+    else:
+        ans = m                // valid candidate, try to find a bigger one
+        low = m + 1            // search right half
+```
+
+This gives the **integer part** of `√N` in `O(log N)`.
+
+### Method 2 — Linear Search for Decimal Digits
+
+Once the integer part is known, find each decimal digit one at a time by **trying `0` through `9`** at that decimal place.
+
+**Example — `√40`:**
+
+Integer part (from binary search): `6`, since `6×6 = 36 ≤ 40 < 49 = 7×7`.
+
+**First decimal digit:** try `6.1, 6.2, 6.3, 6.4, ...`
+```
+6.3 × 6.3 = 39.69  ≤ 40
+6.4 × 6.4 = 40.96  >  40   → stop, first decimal digit is 3
+```
+**Second decimal digit:** repeat the same idea at the next place — try `6.31, 6.32, 6.33, ...` until the square first exceeds `N`.
+
+```
+6.32 × 6.32 = 39.94...  ≤ 40
+6.33 × 6.33 = 40.06...  >  40   → second decimal digit is 2
+```
+
+**Result:** `√40 ≈ 6.32`
+
+**Cost:** each decimal digit costs a linear scan over (at most) `10` candidates, so finding `d` decimal digits of precision costs `O(10 × d) = O(d)` — on top of the `O(log N)` binary search for the integer part.
+
+### Method 3 — Newton-Raphson Method (Much Faster)
+
+**General Newton-Raphson formula** (for finding a root of any function `y(x)`):
+```
+x_new = x - y(x) / y'(x)
+```
+
+**Applying it to square roots:** we want `x` such that `x² = N`, i.e. a root of:
+```
+y(x) = x² - N          →  y'(x) = 2x
+```
+Substituting into the general formula:
+```
+x_new = x - (x² - N) / (2x)
+      = (2x² - x² + N) / (2x)
+      = (x² + N) / (2x)
+      = (x + N/x) / 2
+```
+
+**Formula:**
+```
+root = (x + N/x) / 2
+```
+
+### Why the Formula Works
+
+Here `x` is the **guess** you've assumed for `√N`, and `N/x` is a **second approximation** of `√N` derived from that guess (since if `x` were exactly `√N`, then `N/x` would also equal `√N`). Averaging the two pulls the estimate closer to the true value.
+
+**Sanity check — if `x` is already the exact root:**
+```
+√N = (√N + N/√N) / 2
+   = (√N + √N) / 2
+   = 2√N / 2
+   = √N          ✓
+```
+The formula returns the same value once it reaches the true root — confirming `√N` is a **fixed point** of this update rule.
+
+### Algorithm
+
+```
+1. Assign x = N               // initial guess
+2. Loop:
+       root = (x + N/x) / 2
+       error = |root - x|
+       x = root               // update guess for next iteration
+   until error < ε            // e.g. ε = tolerance like 0.00001
+3. Return root
+```
+
+**You'll find your answer once `error < ε`** — the guess has converged to the desired precision.
+
+### Complexity
+
+```
+O((log N) × f(N))
+```
+where `f(N)` is the cost of computing `y(x) / y'(x)` (i.e. `x + N/x`, essentially a division) to `n`-digit precision.
+
+**Why `log N` iterations?** Newton-Raphson has **quadratic convergence** — the number of correct digits roughly **doubles** with each iteration. So reaching `n` digits of precision only takes `O(log n)` iterations, making this dramatically faster than the digit-by-digit linear search approach in Method 2.
