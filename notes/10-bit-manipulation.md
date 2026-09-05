@@ -1130,3 +1130,71 @@ for (i = 1; i * i <= N; i++) {
 **Note:** the `i != N/i` check avoids printing a **perfect square's** middle factor twice — e.g. for `N = 36`, `i = 6` gives the pair `(6, 6)`, which should only be printed once.
 
 **Time Complexity:** `O(√N)` — the same improvement seen in the prime-checking application, since both problems rely on the identical factor-pair mirroring around `√N`.
+
+---
+
+## Properties of Modulo (`%`)
+
+These identities let large expressions be simplified using modulo **at each step**, instead of computing a huge product/sum first and taking `% m` only at the end (which avoids overflow for large numbers).
+
+```
+(a + b) % m  =  ( (a % m) + (b % m) ) % m
+
+(a - b) % m  =  ( (a % m) - (b % m) + m ) % m      // "+ m" keeps the result non-negative
+
+(a × b) % m  =  ( (a % m) × (b % m) ) % m
+
+(a / b) % m  =  ( (a % m) × (b⁻¹ % m) ) % m
+```
+
+**Other useful identities:**
+```
+(a % m) % m  =  a % m              // taking % twice changes nothing
+
+m^x % m  =  0                       // for any positive integer x
+```
+
+### Why Subtraction Needs the `+ m`
+
+Since `a % m` and `b % m` are both computed independently, `(a % m) - (b % m)` can come out **negative** even when `a - b` itself is non-negative. Adding `m` before the final `% m` corrects this, since adding any multiple of `m` doesn't change a value's residue mod `m`.
+
+### Division Needs a Multiplicative Modulo Inverse (MMI)
+
+Division doesn't distribute over `%` the same simple way multiplication does — `a / b` isn't generally an integer, so instead of dividing directly, division is replaced with **multiplying by the modular inverse** of `b`:
+```
+b⁻¹ % m   →   the Multiplicative Modulo Inverse (MMI) of b, modulo m
+```
+
+**Definition:** `b⁻¹ % m` is the value `y` such that:
+```
+(b × y) % m = 1
+```
+
+**Note:** an MMI only exists when `b` and `m` are **co-prime** (i.e. `gcd(b, m) = 1`).
+
+### Worked Example — Find the MMI of `6` mod `7`
+
+**Problem:** `(6 × y) % 7 = 1` — find `y`.
+
+Since `6` and `7` are co-prime, an MMI exists. Testing `y = 6`:
+```
+(6 × 6) % 7 = 36 % 7 = 1     ✓
+```
+**Answer:** `y = 6⁻¹ % 7 = 6`
+
+### Extra — Fermat's Little Theorem
+
+**Statement:** if `p` is a **prime number** that does **not** divide `b`, then:
+```
+(a × b^(p-1)) % p  =  a % p
+```
+
+This holds because Fermat's Little Theorem guarantees `b^(p-1) % p = 1` whenever `p` is prime and `gcd(b, p) = 1` — so multiplying `a` by `b^(p-1)` doesn't change its residue mod `p` (it's effectively multiplying by `1`).
+
+**Why this matters for MMI:** rearranging `b^(p-1) ≡ 1 (mod p)` gives:
+```
+b × b^(p-2)  ≡  1 (mod p)
+```
+which means `b^(p-2) % p` **is** the multiplicative modulo inverse of `b` — computable directly using the **Fast Exponentiation** technique covered earlier, in `O(log p)` time, without needing to search for it by trial.
+
+**How/why this works in full is covered in a more advanced course.**
