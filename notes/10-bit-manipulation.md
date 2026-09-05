@@ -1077,3 +1077,56 @@ O((log N) × f(N))
 where `f(N)` is the cost of computing `y(x) / y'(x)` (i.e. `x + N/x`, essentially a division) to `n`-digit precision.
 
 **Why `log N` iterations?** Newton-Raphson has **quadratic convergence** — the number of correct digits roughly **doubles** with each iteration. So reaching `n` digits of precision only takes `O(log n)` iterations, making this dramatically faster than the digit-by-digit linear search approach in Method 2.
+
+---
+
+## Application — Find All Factors of a Number
+
+**Problem:** Given `N`, find all its factors (divisors).
+
+**Example — `N = 20`:**
+```
+Factors: 1, 2, 4, 5, 10, 20
+```
+
+### Naive Approach
+
+Check every number from `1` to `N`:
+```
+for (i = 1; i <= N; i++) {
+    if (N % i == 0) print(i)
+}
+```
+**Time Complexity:** `O(N)`
+
+### Optimized — Using the Same Factor-Pair Mirroring as the Prime Check
+
+Just like in the **primality check**, factors always come in **pairs** `(i, N/i)` that multiply to give `N`:
+```
+20 % 1  == 0  →  1 × 20 = 20
+20 % 2  == 0  →  2 × 10 = 20
+20 % 4  == 0  →  4 × 5  = 20
+```
+Once `i` passes `√N` (`√20 ≈ 4.47`), the pairs start **repeating in reverse**:
+```
+20 % 5  == 0  →  5 × 4 = 20     ← repeated (already found as the pair for i = 4)
+20 % 10 == 0  →  10 × 2 = 20    ← repeated (already found as the pair for i = 2)
+```
+So there's no need to check divisors beyond `√N` — every factor `> √N` has already been captured as the **paired factor** (`N/i`) of some smaller divisor `i ≤ √N`.
+
+### Algorithm
+
+```
+for (i = 1; i * i <= N; i++) {
+    if (N % i == 0) {
+        print(i)
+        if (i != N / i) {
+            print(N / i)          // the paired factor
+        }
+    }
+}
+```
+
+**Note:** the `i != N/i` check avoids printing a **perfect square's** middle factor twice — e.g. for `N = 36`, `i = 6` gives the pair `(6, 6)`, which should only be printed once.
+
+**Time Complexity:** `O(√N)` — the same improvement seen in the prime-checking application, since both problems rely on the identical factor-pair mirroring around `√N`.
