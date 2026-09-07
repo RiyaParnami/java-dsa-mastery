@@ -1198,3 +1198,155 @@ b × b^(p-2)  ≡  1 (mod p)
 which means `b^(p-2) % p` **is** the multiplicative modulo inverse of `b` — computable directly using the **Fast Exponentiation** technique covered earlier, in `O(log p)` time, without needing to search for it by trial.
 
 **How/why this works in full is covered in a more advanced course.**
+
+---
+
+## Application — GCD (HCF) as the Minimum Linear Combination (Bézout's Identity)
+
+**Problem:** For integers `a, b`, what values can `ax + by` take, if `x` and `y` are allowed to be **any integers** (positive, negative, or zero)?
+
+### Building Intuition
+
+**Example — `2x + 4y = 5`:**
+```
+2(x + 2y) = 5
+   x + 2y = 2.5      ← not an integer!
+```
+Since `x + 2y` must be an integer whenever `x, y` are integers, there's **no integer solution** — `5` is simply not reachable this way.
+
+**Example — `3x + 6y = 9`:**
+```
+3(x + 2y) = 9
+   x + 2y = 3         ← a valid integer, so this IS solvable
+```
+
+**Example — `3x + 5y = 17`:**
+```
+1 × (3x + 5y) = 17     ← trivially solvable, since gcd(3,5) = 1
+```
+
+**Note:** whatever `gcd(a, b)` comes out to be, that value will always come out as the **common factor** of every reachable result. In other words: `2x + 4y` can only ever produce multiples of `gcd(2,4) = 2` — and `5` isn't one, which is exactly why the first example failed.
+
+### The Theorem
+
+```
+min positive value of (a·x + b·y), over all integers x, y   =   gcd(a, b)
+```
+
+Equivalently: the set of all values `{a·x + b·y : x, y ∈ ℤ}` is **exactly** the set of all (positive and negative) multiples of `gcd(a, b)`.
+
+### Worked Example — Minimum Positive Value of `3x + 5y`
+
+**Problem:** With `x, y` as integers, what is the minimum **positive** value `3x + 5y` can take?
+
+Trying `x = -3, y = 2`:
+```
+3(-3) + 5(2) = -9 + 10 = 1
+```
+**Answer:** `1` — which matches `gcd(3, 5) = 1`. This is exactly what the theorem predicts.
+
+**This minimum value is called the HCF (Highest Common Factor), a.k.a. GCD:**
+```
+HCF(a, b) = min positive value of (a·x + b·y), where x, y are integers
+```
+
+### Worked Example — HCF(4, 18) and Minimum Value of `3x + 9y`
+
+**Finding HCF(4, 18) via factor lists:**
+```
+Factors of 4:  1, 2, 4
+Factors of 18: 1, 2, 3, 6, 9, 18
+
+Common factors: 1, 2   →   HCF(4, 18) = 2
+```
+
+**Finding HCF(3, 9) via factor lists:**
+```
+Factors of 3: 1, 3
+Factors of 9: 1, 3, 9
+
+Common factors: 1, 3   →   HCF(3, 9) = 3
+```
+
+**Verifying against the theorem:** the minimum positive value of `3x + 9y` should equal `HCF(3, 9) = 3`. Trying `x = -2, y = 1`:
+```
+3(-2) + 9(1) = -6 + 9 = 3     ✓
+```
+
+### Proof — Why `gcd(a, b)` Is the Minimum Positive Linear Combination
+
+Let `L` be the **smallest positive** value in the set `{a·x + b·y : x, y ∈ ℤ}`, achieved at some specific integers `s', t'`:
+```
+L = a·s' + b·t'
+```
+
+**Step 1 — `L` divides `a`:**
+
+By the division algorithm, divide `a` by `L`:
+```
+a = q·L + r,     where 0 ≤ r < L
+```
+Substitute `L = a·s' + b·t'`:
+```
+r = a - q·L
+  = a - q(a·s' + b·t')
+  = a·(1 - q·s') + b·(-q·t')
+```
+So `r` is **also** expressible as a linear combination of `a` and `b`. But `L` was defined as the **smallest positive** such combination, and `0 ≤ r < L` — so `r` cannot be positive without contradicting `L`'s minimality.
+```
+∴ r = 0   →   L divides a
+```
+By the identical argument (dividing `b` by `L`), `L` divides `b` as well.
+
+**Step 2 — `L ≤ gcd(a, b)`:**
+
+Since `L` divides both `a` and `b`, `L` is a common divisor of `a` and `b` — and every common divisor divides `gcd(a, b)`. So:
+```
+L | gcd(a, b)   →   L ≤ gcd(a, b)
+```
+
+**Step 3 — `gcd(a, b) ≤ L`:**
+
+Since `gcd(a, b)` divides both `a` and `b`, it also divides **any** linear combination of them — including `L = a·s' + b·t'` itself:
+```
+gcd(a, b) | L   →   gcd(a, b) ≤ L
+```
+
+**Combining Steps 2 and 3:**
+```
+L = gcd(a, b)     ∎
+```
+
+---
+
+## Application — The "Die Hard" Water Jug Problem
+
+**Problem:** Given two jugs — one holding `3` litres (`a`) and one holding `5` litres (`b`) — measure out exactly `4` litres, using only these operations: fill a jug completely, empty a jug completely, or pour from one jug into the other (until the source is empty or the destination is full).
+
+**Why this connects to GCD:** since `gcd(3, 5) = 1`, Bézout's identity guarantees that **every** integer amount (within the jugs' combined capacity) is reachable through some sequence of fills, empties, and pours — including `4`.
+
+### Working Through It — State `(a, b)`
+
+Track the water levels as a pair `(amount in a, amount in b)`, starting from `(0, 0)`:
+
+**1st round:**
+```
+(0, 0) → fill a  → (3, 0) → pour a into b → (0, 3)
+```
+
+**2nd round:**
+```
+(0, 3) → fill a → (3, 3) → pour a into b → (1, 5)
+       → empty b → (1, 0) → pour a into b → (0, 1)
+```
+(Pouring `a`'s `3` litres into `b`, which already has `3`, only `2` litres fit before `b` hits its `5`-litre capacity — leaving `1` litre behind in `a`. Emptying `b` and pouring that leftover `1` litre across resets things with a useful `1`-litre "remainder" sitting in `b`.)
+
+**3rd round:**
+```
+(0, 1) → fill a → (3, 1) → pour a into b → (0, 4)     ← Answer!
+```
+Jug `b` now holds exactly `4` litres.
+
+### The Underlying Idea
+
+Every fill/pour/empty operation adds or removes a whole multiple of `3` or `5` litres from the total held across both jugs — so the reachable water levels are exactly the integer values expressible as `3x + 5y` (for some integers `x, y`, representing net fills and empties of each jug). Since `gcd(3, 5) = 1`, **every** integer amount up to the larger jug's capacity is reachable — which is exactly why a solution for `4` litres exists.
