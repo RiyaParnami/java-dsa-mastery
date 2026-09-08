@@ -1350,3 +1350,39 @@ Jug `b` now holds exactly `4` litres.
 ### The Underlying Idea
 
 Every fill/pour/empty operation adds or removes a whole multiple of `3` or `5` litres from the total held across both jugs — so the reachable water levels are exactly the integer values expressible as `3x + 5y` (for some integers `x, y`, representing net fills and empties of each jug). Since `gcd(3, 5) = 1`, **every** integer amount up to the larger jug's capacity is reachable — which is exactly why a solution for `4` litres exists.
+
+---
+
+## Application — Euclid's Algorithm for GCD
+
+**Formula:**
+```
+gcd(a, b)  =  gcd( rem(b, a), a )
+```
+i.e. the GCD of `a` and `b` equals the GCD of `a` and the **remainder** of `b` divided by `a`.
+
+### Worked Example — `gcd(105, 224)`
+
+```
+gcd(105, 224) = gcd( rem(224, 105), 105 )
+              = gcd(14, 105)                  // since 224 = 2×105 + 14
+```
+(Continuing this same step repeatedly, replacing the pair with `(remainder, smaller number)` each time, eventually reduces down to the answer — the classic recursive Euclidean algorithm.)
+
+### Why This Works
+
+This relies directly on the **Bézout's identity** result from the previous section: `gcd(a, b)` always divides **any** linear combination `a·x + b·y`.
+
+The remainder itself is exactly such a linear combination. Writing `b = q·a + rem` (the division algorithm) and rearranging:
+```
+rem = b - q·a  =  1·b + (-q)·a
+```
+This is a linear combination of `a` and `b`! So `gcd(a, b)`, which divides both `a` and `b`, must also divide `rem`. That means swapping `b` for `rem(b, a)` doesn't change the GCD at all — `gcd(a, b) = gcd(rem(b,a), a)` — because both pairs share exactly the same set of common divisors.
+
+### Why "Subtract"?
+
+Computing a remainder is really just **repeated subtraction** of the smaller number from the larger, stopping once the result drops below the smaller number:
+```
+224 - 2×105 = 14     (rem)
+```
+Each subtraction removes one more copy of `105` (i.e. `a`) from the running total — which is exactly why the remainder ends up in the form `1·b + (-q)·a`, a linear combination of the two original numbers.
