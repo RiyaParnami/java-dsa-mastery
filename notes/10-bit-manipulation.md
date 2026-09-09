@@ -1386,3 +1386,86 @@ Computing a remainder is really just **repeated subtraction** of the smaller num
 224 - 2×105 = 14     (rem)
 ```
 Each subtraction removes one more copy of `105` (i.e. `a`) from the running total — which is exactly why the remainder ends up in the form `1·b + (-q)·a`, a linear combination of the two original numbers.
+
+---
+
+## Application — LCM (Least Common Multiple) and Its Relationship with GCD
+
+**Definition:**
+```
+lcm(a, b)  =  the minimum number divisible by both a and b
+```
+
+**Examples:**
+```
+lcm(2, 4) = 4
+lcm(3, 7) = 21
+```
+
+### Setting Up the Relationship
+
+Let `d = gcd(a, b)`, and define:
+```
+f = a / d,     g = b / d       →      a = f·d,     b = g·d
+```
+
+**Key claim: `f` and `g` are always coprime** (share no common factor other than `1`).
+
+**Why?** If `f` and `g` had some common factor `k > 1`, then `d × k` would divide **both** `a` and `b` (since `a = f·d = (f/k × k) × d` and similarly for `b`) — meaning `d × k` would be a **bigger** common divisor of `a` and `b` than `d`. That contradicts `d` being the **greatest** common divisor. So no such `k` can exist — `f` and `g` must be coprime.
+
+### Why the Divisor Must Be the *True* GCD
+
+**Worked example — `a = 9, b = 18`:**
+
+Using the actual GCD, `d = gcd(9, 18) = 9`:
+```
+f = 9/9  = 1
+g = 18/9 = 2
+```
+`f = 1` and `g = 2` are coprime ✓ — exactly as the claim predicts.
+
+**Counter-example — using a common divisor that is *not* the GCD:**
+
+Try `d = 3` instead (a valid common divisor of `9` and `18`, but not the *greatest* one):
+```
+f = 9/3  = 3
+g = 18/3 = 6
+```
+But `gcd(3, 6) = 3` — **`f` and `g` are not coprime!** This confirms the claim only holds when `d` is the **true** GCD; any smaller common divisor leaves `f` and `g` still sharing a leftover factor.
+
+### Deriving the LCM Formula
+
+Since `f` and `g` are coprime, the smallest number divisible by both `a = f·d` and `b = g·d` is:
+```
+lcm(a, b) = f × g × d
+```
+(Intuitively: the result needs the `f` from `a` and the `g` from `b`, plus the shared `d` — and since `f, g` share nothing, neither factor can be reduced further.)
+
+**Verifying with `a = 9, b = 18`:**
+```
+lcm(9, 18) = f × g × d = 1 × 2 × 9 = 18     ✓
+```
+(Plugging in the *wrong* `d = 3` instead would incorrectly give `3 × 6 × 3 = 54`, confirming why the true GCD is required.)
+
+### Connecting LCM and GCD Directly
+
+Multiply `a` and `b` together:
+```
+a × b = (f·d) × (g·d) = f × g × d × d = (f × g × d) × d
+```
+Recognize `f × g × d` as `lcm(a, b)`, and the remaining `d` as `gcd(a, b)`:
+```
+a × b  =  lcm(a, b) × gcd(a, b)
+```
+
+### Final Formula
+
+```
+lcm(a, b) = (a × b) / gcd(a, b)
+```
+
+**Special case — coprime numbers:** if `gcd(a, b) = 1` (e.g. `a = 17, b = 19`), the formula collapses to simply:
+```
+lcm(a, b) = a × b = 17 × 19 = 323
+```
+since there's no shared factor `d` to divide out.
