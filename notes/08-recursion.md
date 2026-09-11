@@ -43,6 +43,55 @@ base case
 
 Every call of a function will take some memory.
 
+### Worked Example — Tracing the Full Push and Pop Order
+
+**Problem:** print the numbers `5` down to `1`, using recursion.
+
+```
+fun(n) {
+    print(n)
+    fun(n - 1)
+
+    if (n == 1) {
+        print(1)
+        return
+    }
+}
+```
+
+**Call trace for `N = 5`:**
+```
+fun(5) → fun(4) → fun(3) → fun(2) → fun(1)
+   5        4         3         2       1
+```
+Each call **prints its own `n`, then immediately calls itself with `n-1`** — so the numbers `5, 4, 3, 2, 1` are printed on the way **down** the call chain, before the base case is ever reached.
+
+**What the stack looks like at its deepest point** (all 5 calls pushed, none finished yet):
+```
+┌─────────┐
+│ fun(5)  │  ← pushed first, bottom of the stack
+├─────────┤
+│ fun(4)  │
+├─────────┤
+│ fun(3)  │
+├─────────┤
+│ fun(2)  │
+├─────────┤
+│ fun(1)  │  ← pushed last, currently executing (base case hit here)
+└─────────┘
+```
+
+**Popping order (unwinding), once the base case returns:**
+```
+fun(1) finishes → popped first   (last one pushed, first one popped — LIFO)
+fun(2) finishes → popped next
+fun(3) finishes → popped next
+fun(4) finishes → popped next
+fun(5) finishes → popped last    (first one pushed, last one popped)
+```
+
+**Key takeaway:** the call stack always behaves as **LIFO (Last In, First Out)** — whichever function call was pushed most recently is always the one that gets popped off first, regardless of how many calls are stacked up.
+
 ---
 
 ## How to Understand & Approach a Recursion Problem (VVI)
