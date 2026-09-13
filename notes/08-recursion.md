@@ -318,3 +318,96 @@ F(N) = F(N/2) + O(1)
 This is the same shape of recurrence seen in Binary Search above — dividing the problem size at each step rather than just decrementing it.
 
 > **Note:** Recurrence relations like these describe *how* a recursive algorithm's work is structured. For how to actually **solve** them (Master Theorem, Akra–Bazzi, deriving full time complexities like Merge Sort's `Θ(N log N)`), see [`complexity/time-complexity-notes.md`](../complexity/time-complexity-notes.md) — that's algorithm *analysis*, a separate topic from recursion itself.
+
+---
+
+## Application — Printing N to 1, 1 to N, and Both Directions
+
+These three variants show how **where** you place the `print` statement relative to the recursive call completely changes the output order — a direct, concrete illustration of Head vs Tail recursion.
+
+### Print N Down to 1 (Tail-style — print, *then* recurse)
+
+```java
+static void fun(int n) {
+    if (n == 0) {
+        return;
+    }
+    System.out.println(n);
+    fun(n - 1);
+}
+```
+```
+fun(5) → prints 5, 4, 3, 2, 1     (on the way DOWN, before the base case)
+```
+
+### Print 1 to N (Head-style — recurse first, *then* print)
+
+```java
+static void funRev(int n) {
+    if (n == 0) {
+        return;
+    }
+    funRev(n - 1);
+    System.out.println(n);
+}
+```
+```
+funRev(5) → prints 1, 2, 3, 4, 5     (on the way BACK UP, after each call returns)
+```
+**Why this reverses the order:** every call reaches the base case (`n == 0`) *before* printing anything — so `funRev(1)` is the first to actually print (it's the first to *return*), and `funRev(5)` is the last to print (it's the last to return, at the very top of the unwind).
+
+### Print Both Directions (N down to 1, then back up to N)
+
+```java
+static void funBoth(int n) {
+    if (n == 0) {
+        return;
+    }
+    System.out.println(n);
+    funBoth(n - 1);
+    System.out.println(n);
+}
+```
+```
+funBoth(5) → prints 5, 4, 3, 2, 1, 1, 2, 3, 4, 5
+              ↑___________↑  ↑___________↑
+              going down       coming back up
+```
+Each level prints its `n` **once on the way down** (before the recursive call) and **once on the way back up** (after the recursive call returns) — combining both patterns above into a single "palindrome-shaped" output.
+
+---
+
+## Pitfall — `n--` vs `--n` in a Recursive Call
+
+**A subtle bug that causes infinite recursion:**
+
+```java
+static void concept(int n) {
+    if (n == 0) {
+        return;
+    }
+    System.out.println(n);
+    concept(n--);      // ⚠️ BUG: passes n's ORIGINAL value, decrements AFTER
+}
+```
+
+**Why this breaks:** `n--` is **post-decrement** — the *current* value of `n` is used first (passed into the recursive call as-is), and only *after* the expression is evaluated does `n` get decremented. So `concept(n--)` is equivalent to:
+```
+concept(n)      // passes the ORIGINAL n, unchanged
+n = n - 1       // decrement happens too late to matter
+```
+The next call receives the **exact same value of `n`** as the current call — so `n` never actually decreases, the base case (`n == 0`) is never reached, and the function recurses **forever**, eventually causing a `StackOverflowError`.
+
+**The fix — use pre-decrement instead:**
+```java
+static void concept(int n) {
+    if (n == 0) {
+        return;
+    }
+    System.out.println(n);
+    concept(--n);      // ✓ correct: decrement happens FIRST, then the new value is passed
+}
+```
+`--n` is **pre-decrement** — `n` is decremented *immediately*, and the **already-updated** value is what gets passed into the recursive call. This guarantees `n` shrinks by `1` on every call, so the base case is eventually reached.
+
+**Rule of thumb:** when passing a decremented/incremented variable directly into a recursive call, always use the **pre**-increment/decrement form (`--n` / `++n`) — never the post form (`n--` / `n++`) — since the post form silently passes the *old* value, which can hide an infinite-recursion bug.
