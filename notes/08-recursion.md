@@ -411,3 +411,142 @@ static void concept(int n) {
 `--n` is **pre-decrement** — `n` is decremented *immediately*, and the **already-updated** value is what gets passed into the recursive call. This guarantees `n` shrinks by `1` on every call, so the base case is eventually reached.
 
 **Rule of thumb:** when passing a decremented/incremented variable directly into a recursive call, always use the **pre**-increment/decrement form (`--n` / `++n`) — never the post form (`n--` / `n++`) — since the post form silently passes the *old* value, which can hide an infinite-recursion bug.
+
+---
+
+## Application — Factorial of a Number
+
+**Problem:** find `N!` (N factorial) — the product of all integers from `N` down to `1`.
+
+**Example — `N = 5`:**
+```
+5! = 5 × 4 × 3 × 2 × 1 = 120
+```
+
+### Spotting the Recursive Structure
+
+Notice that `5!` can be rewritten in terms of a **smaller factorial**:
+```
+5! = 5 × 4!
+4! = 4 × 3!
+```
+This is exactly the recursive pattern: each factorial is defined in terms of the **next smaller** factorial.
+
+### Recurrence Relation
+
+```
+F(N) = N × F(N-1)
+F(1) = 1                    // base case
+```
+
+### Code
+
+```java
+static int fact(int n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * fact(n - 1);
+}
+```
+
+**Why `n <= 1` instead of `n == 1`?** Using `<= 1` as the base case also correctly handles `n = 0` (since `0! = 1` by definition), without needing a separate check. It also guards against negative input accidentally skipping past the base case and recursing forever. See `Fact.java` for the implementation.
+
+### Worked Example — Tracing `fact(5)`
+
+**Going down** (building up the chain of pending multiplications):
+```
+fact(5) = 5 × fact(4)
+fact(4) = 4 × fact(3)
+fact(3) = 3 × fact(2)
+fact(2) = 2 × fact(1)
+fact(1) = 1                  ← base case reached
+```
+
+**Coming back up** (each call resolves once its recursive call returns):
+```
+F(1) = 1
+F(2) = 2 × F(1) = 2 × 1  = 2
+F(3) = 3 × F(2) = 3 × 2  = 6
+F(4) = 4 × F(3) = 4 × 6  = 24
+F(5) = 5 × F(4) = 5 × 24 = 120
+```
+
+**Answer:** `fact(5) = 120` ✓ — matching the direct calculation `5 × 4 × 3 × 2 × 1`.
+
+**Note:** just like the Fibonacci example earlier, no actual multiplication happens on the way *down* — every call just sets up a pending `n × fact(n-1)` expression. The real computation only happens on the way **back up**, once the base case provides a concrete starting value to multiply against.
+
+---
+
+## Application — Sum of Digits of a Number
+
+**Problem:** given a number `N`, find the sum of its digits.
+
+**Example — `N = 1342`:**
+```
+1 + 3 + 4 + 2 = 10
+```
+
+### Spotting the Recursive Structure
+
+The sum can be peeled apart one digit at a time — take the **first** digit and add it to the sum of the rest:
+```
+sum(1342) = 1 + sum(342)
+sum(342)  = 3 + sum(42)
+```
+
+In code, it's easier to peel digits from the **right** instead, using two operations:
+```
+rem = N % 10      →  extracts the LAST digit
+N   = N / 10      →  removes the last digit (integer division)
+```
+
+**Example — `N = 1342`:**
+```
+1342 % 10 = 2        ← last digit extracted
+1342 / 10 = 134      ← last digit removed
+```
+
+### Recurrence Relation
+
+```
+F(N) = F(N/10) + (N % 10)
+```
+i.e. the sum of digits of `N` equals the **last digit** (`N % 10`) plus the sum of digits of **everything before it** (`N / 10`).
+
+**Base case:** when `N` reaches `0`, there are no digits left to add, so return `0`.
+
+### Code
+
+```java
+static int sumOfDigits(int n) {
+    if (n == 0) {
+        return 0;
+    }
+    return (n % 10) + sumOfDigits(n / 10);
+}
+```
+
+### Worked Example — Tracing `f(1342)`
+
+**Going down** (peeling one digit per call):
+```
+f(1342) = 2 + f(134)
+f(134)  = 4 + f(13)
+f(13)   = 3 + f(1)
+f(1)    = 1 + f(0)
+f(0)    = 0             ← base case reached
+```
+
+**Coming back up:**
+```
+f(0)    = 0
+f(1)    = 1 + 0 = 1
+f(13)   = 3 + 1 = 4
+f(134)  = 4 + 4 = 8
+f(1342) = 2 + 8 = 10
+```
+
+**Answer:** `10` ✓ — matching the direct calculation `1 + 3 + 4 + 2`.
+
+**Note:** the `% 10` / `/ 10` pair here plays the same role that `& 1` / `>> 1` played in the bit-manipulation problems — extract the last unit, then shift everything over to move on to the next one. The only difference is the base: `10` for decimal digits, `2` for binary bits.
