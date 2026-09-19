@@ -550,3 +550,67 @@ f(1342) = 2 + 8 = 10
 **Answer:** `10` ✓ — matching the direct calculation `1 + 3 + 4 + 2`.
 
 **Note:** the `% 10` / `/ 10` pair here plays the same role that `& 1` / `>> 1` played in the bit-manipulation problems — extract the last unit, then shift everything over to move on to the next one. The only difference is the base: `10` for decimal digits, `2` for binary bits.
+
+---
+
+## Application — Reverse a Number
+
+**Problem:** given a number `N`, reverse its digits.
+
+**Example:**
+```
+N = 1824  →  4281
+```
+
+### Why the "Sum of Digits" Recurrence Doesn't Work Here
+
+It might seem tempting to reuse the exact same recurrence from the previous problem:
+```
+F(N) = (N % 10) + F(N / 10)      ← this is the SUM-OF-DIGITS formula, not reversal!
+```
+This only **adds** each extracted digit — it never accounts for the digit's new **position** in the reversed number. Reusing it here would just recompute the digit sum again, not build a reversed number.
+
+### The Correct Approach — Build the Result with an Accumulator
+
+Instead, keep a running accumulator (`sum`) **outside** the recursive calls, and at each step:
+```
+rem = n % 10          // extract the last digit
+sum = sum × 10 + rem  // shift the accumulator left by one digit, then append the new digit
+```
+Multiplying `sum` by `10` before adding `rem` is what correctly gives the newly extracted digit the **right positional weight** — each existing digit in `sum` gets pushed one place further left, making room for the new digit at the units place.
+
+### Code
+
+```java
+static int sum = 0;
+
+static void fun(int n) {
+    if (n == 0) {
+        return;
+    }
+    int rem = n % 10;
+    sum = sum * 10 + rem;
+    fun(n / 10);
+}
+```
+
+### Worked Example — Tracing `fun(1342)`
+
+| Call | `n` | `rem = n % 10` | `sum = sum×10 + rem` | `n / 10` (next call) |
+|---|---|---|---|---|
+| 1 | 1342 | 2 | `0×10 + 2 = 2` | 134 |
+| 2 | 134  | 4 | `2×10 + 4 = 24` | 13 |
+| 3 | 13   | 3 | `24×10 + 3 = 243` | 1 |
+| 4 | 1    | 1 | `243×10 + 1 = 2431` | 0 |
+| 5 | 0    | — | base case, return | — |
+
+**Answer:** `sum = 2431` — the reverse of `1342` ✓
+
+**Quick check — `N = 1824`:**
+```
+rem sequence: 4, 2, 8, 1
+sum: 0×10+4=4  →  4×10+2=42  →  42×10+8=428  →  428×10+1=4281
+```
+**Answer:** `4281` — the reverse of `1824` ✓
+
+**Note:** unlike the sum-of-digits and factorial examples, this pattern computes the answer entirely on the way **down** (updating a shared accumulator each call), rather than combining values on the way back **up** — closer in spirit to the tail-recursive `tailFactorial` example covered earlier.
