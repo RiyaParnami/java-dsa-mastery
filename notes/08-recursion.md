@@ -614,3 +614,53 @@ sum: 0×10+4=4  →  4×10+2=42  →  42×10+8=428  →  428×10+1=4281
 **Answer:** `4281` — the reverse of `1824` ✓
 
 **Note:** unlike the sum-of-digits and factorial examples, this pattern computes the answer entirely on the way **down** (updating a shared accumulator each call), rather than combining values on the way back **up** — closer in spirit to the tail-recursive `tailFactorial` example covered earlier.
+
+### Method 2 — Reversing a Number Without an External Accumulator (Pure Recursion)
+
+Method 1 relies on a **shared external variable** (`sum`) updated as a side effect on every call. A more "pure" recursive style avoids external state entirely and returns the answer directly — but that means each digit must be weighted with the **correct power of 10** *before* it's even known how many digits remain below it.
+
+**The trick:** pass an **extra parameter** — the number of digits still left to process — so each call knows exactly what power of `10` to multiply its extracted digit by.
+
+**Example — `N = 1234` (4 digits):**
+```
+4 × 1000 + 123            ← the leading digit 4 needs weight 10³, since 3 digits follow it
+```
+Generalizing `1000 = 10^3` as `10^(digitCount - 1)`:
+```
+4 × 10^(4-1) + f(123)
+```
+
+### Formula
+
+```
+F(N, arg) = (N % 10) × 10^(arg-1)  +  F(N/10, arg-1)
+```
+where `arg` is the **count of digits remaining** in `N` (starts at the total digit count, and decreases by `1` each call).
+
+**Base case:** `F(0, 0) = 0`
+
+**Note:** the initial value of `arg` is exactly the "number of digits" formula from the base-conversion notes: `int(log₁₀(N)) + 1`.
+
+### Worked Example — Tracing `F(1234, 4)`
+
+**Going down:**
+```
+F(1234, 4) = 4 × 10^3 + F(123, 3)
+F(123, 3)  = 3 × 10^2 + F(12, 2)
+F(12, 2)   = 2 × 10^1 + F(1, 1)
+F(1, 1)    = 1 × 10^0 + F(0, 0)
+F(0, 0)    = 0                     ← base case reached
+```
+
+**Coming back up:**
+```
+F(0, 0)    = 0
+F(1, 1)    = 1×1   + 0   = 1
+F(12, 2)   = 2×10  + 1   = 21
+F(123, 3)  = 3×100 + 21  = 321
+F(1234, 4) = 4×1000 + 321 = 4321
+```
+
+**Answer:** `4321` — the reverse of `1234` ✓
+
+**Trade-off:** this avoids mutable shared state, but needs the total digit count computed **upfront** (an extra pass or formula), and involves computing `10^(arg-1)` at every call — Method 1's accumulator approach is simpler and needs neither.
