@@ -615,6 +615,120 @@ sum: 0×10+4=4  →  4×10+2=42  →  42×10+8=428  →  428×10+1=4281
 
 **Note:** unlike the sum-of-digits and factorial examples, this pattern computes the answer entirely on the way **down** (updating a shared accumulator each call), rather than combining values on the way back **up** — closer in spirit to the tail-recursive `tailFactorial` example covered earlier.
 
+### Alternative Approach — Without a Global Accumulator
+
+The accumulator approach above relies on a **shared mutable variable** (`sum`) living outside the function. It's possible to get the same result purely through **return values**, by passing an extra argument that tracks each digit's **positional weight** as the recursion goes deeper.
+
+**Formula:**
+```
+F(N, arg) = rem × 10^(arg-1) + F(N/10, arg-1)
+```
+where `arg` is the number of digits **remaining** to be placed, and `rem = N % 10` is the current last digit.
+
+**Base case:** `F(0, arg) = 0` — no digits left, nothing to add.
+
+**Where does `arg` start?** It's simply the **total number of digits** in `N` — which can be computed directly using the "Number of Digits of a Number in Base `b`" formula from the bit-manipulation notes: `int(log₁₀(N)) + 1`.
+
+### Worked Example — Tracing `F(1234, 4)`
+
+`N = 1234` has `4` digits, so `arg` starts at `4`.
+
+```
+F(1234, 4) = 4 × 10³ + F(123, 3)      = 4000 + F(123, 3)
+F(123, 3)  = 3 × 10²  + F(12, 2)      =  300 + F(12, 2)
+F(12, 2)   = 2 × 10¹  + F(1, 1)       =   20 + F(1, 1)
+F(1, 1)    = 1 × 10⁰  + F(0, 0)       =    1 + F(0, 0)
+F(0, 0)    = 0                        ← base case reached
+```
+
+**Summing back up:**
+```
+F(0, 0)    = 0
+F(1, 1)    = 1 + 0    = 1
+F(12, 2)   = 20 + 1   = 21
+F(123, 3)  = 300 + 21 = 321
+F(1234, 4) = 4000 + 321 = 4321
+```
+
+**Answer:** `4321` — the reverse of `1234` ✓
+
+**Why this works:** each digit's contribution is weighted by exactly the right power of `10` for its **new** position in the reversed number — the last digit of `N` (which becomes the *first* digit of the reversal) gets the largest weight (`10^(arg-1)`), and each subsequent digit gets a correspondingly smaller weight as `arg` decreases. This achieves the same result as the accumulator method, but as a **pure function** with no shared state between calls.
+
+---
+
+## Important Concept — Passing an Accumulator *Inside* the Argument
+
+So far, values have been combined **on the way back up** the call stack (factorial, sum of digits) — each call waits for its recursive call to return, then does some work with the result.
+
+There's a different pattern: pass a **running accumulator as an argument**, updating it **on the way down** instead. Once the base case is hit, the accumulator already holds the final answer — so every call on the way back up just needs to **return that same value unchanged**, without combining or modifying anything further.
+
+### Application — Number of Steps to Reduce N to Zero
+
+**Problem:** starting from `N`, repeatedly apply this rule until it reaches `0` — if the number is **even**, divide it by `2`; if it's **odd**, subtract `1`. Count how many steps this takes.
+
+**Recurrence, with the step count passed as an argument `c`:**
+```
+f(N, c):
+    if N == 0: return c
+
+    if N is even: return f(N / 2, c + 1)
+    else:         return f(N - 1, c + 1)
+```
+
+### Worked Example — Tracing `f(41, 0)`
+
+```
+(41, 0)  → 41 is odd  → (40, 1)
+(40, 1)  → 40 is even → (20, 2)
+(20, 2)  → 20 is even → (10, 3)
+(10, 3)  → 10 is even → (5, 4)
+(5, 4)   → 5 is odd   → (4, 5)
+(4, 5)   → 4 is even  → (2, 6)
+(2, 6)   → 2 is even  → (1, 7)
+(1, 7)   → 1 is odd   → (0, 8)
+(0, 8)   → base case, return 8
+```
+**Answer:** `8` steps.
+
+**Key observation:** once `(0, 8)` is reached, **every call above it simply returns `8` straight through**, unchanged — `f(1,7)` returns `8`, `f(2,6)` returns `8`, and so on, all the way up to the original call. None of them do any additional work with the returned value; they just pass it along.
+
+### Application — Count the Number of Zeros in a Number
+
+**Problem:** given `N`, count how many of its digits are `0`.
+
+**Example — `N = 30204`:**
+```
+Digits: 3, 0, 2, 0, 4   →   two zeros   →   Ans = 2
+```
+
+### Recurrence — Counting via an Argument
+
+```
+f(N, c):
+    if N == 0: return c
+
+    digit = N % 10
+    if digit == 0: return f(N / 10, c + 1)
+    else:          return f(N / 10, c)
+```
+Here `c` is the running **count of zeros seen so far**, updated on the way down. As in the previous example, once the base case (`N == 0`) is reached, the accumulated `c` **is** the final answer.
+
+### Worked Example — Tracing `f(30204, 0)`
+
+```
+(30204, 0) → last digit 4 (not 0) → (3020, 0)
+(3020, 0)  → last digit 0 (zero!) → (302, 1)
+(302, 1)   → last digit 2 (not 0) → (30, 1)
+(30, 1)    → last digit 0 (zero!) → (3, 2)
+(3, 2)     → last digit 3 (not 0) → (0, 2)
+(0, 2)     → base case, return 2
+```
+**Answer:** `2` zeros ✓
+
+**Special note — returning the same value all the way up:** just like the previous example, once `(0, 2)` returns, **every parent call above it just returns `2` unchanged** — `f(3,2)` returns `2`, `f(30,1)` returns `2`, and so on. The counting work is entirely finished by the time the base case is reached; the trip back up the stack is just plumbing to deliver the answer to the original caller.
+
+**Contrast with the earlier factorial/sum-of-digits pattern:** there, each call did real work on the way back up (`n × fact(n-1)`, `rem + f(N/10)`). Here, all the real work happens on the way **down** (deciding whether to increment `c`), and the way up does nothing but relay the final value — the same distinction seen earlier with the "Reverse a Number" accumulator approach.
+
 ### Method 2 — Reversing a Number Without an External Accumulator (Pure Recursion)
 
 Method 1 relies on a **shared external variable** (`sum`) updated as a side effect on every call. A more "pure" recursive style avoids external state entirely and returns the answer directly — but that means each digit must be weighted with the **correct power of 10** *before* it's even known how many digits remain below it.
