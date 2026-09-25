@@ -713,6 +713,30 @@ f(N, c):
 ```
 Here `c` is the running **count of zeros seen so far**, updated on the way down. As in the previous example, once the base case (`N == 0`) is reached, the accumulated `c` **is** the final answer.
 
+### Code — The Wrapper + Helper Pattern
+
+Since the accumulator `c` needs to start at `0`, but callers shouldn't have to remember to pass that `0` in themselves, this is usually split into a **public wrapper** (the clean, simple API) and a **private helper** (which does the actual recursion with the extra argument):
+
+```java
+static int count(int n) {
+    return helper(n, 0);       // kicks off the recursion with c = 0
+}
+
+private static int helper(int n, int c) {
+    if (n == 0) {
+        return c;
+    }
+
+    int rem = n % 10;
+    if (rem == 0) {
+        return helper(n / 10, c + 1);
+    }
+    return helper(n / 10, c);
+}
+```
+
+**Why split it this way?** The caller just calls `count(30210004)` — clean and simple — without needing to know or care that an accumulator argument exists internally. See `CountZeros.java` for the full implementation.
+
 ### Worked Example — Tracing `f(30204, 0)`
 
 ```
@@ -725,9 +749,71 @@ Here `c` is the running **count of zeros seen so far**, updated on the way down.
 ```
 **Answer:** `2` zeros ✓
 
+**Second example — `N = 30210004`:**
+```
+Digits: 3, 0, 2, 1, 0, 0, 0, 4   →   four zeros   →   count(30210004) = 4
+```
+
 **Special note — returning the same value all the way up:** just like the previous example, once `(0, 2)` returns, **every parent call above it just returns `2` unchanged** — `f(3,2)` returns `2`, `f(30,1)` returns `2`, and so on. The counting work is entirely finished by the time the base case is reached; the trip back up the stack is just plumbing to deliver the answer to the original caller.
 
 **Contrast with the earlier factorial/sum-of-digits pattern:** there, each call did real work on the way back up (`n × fact(n-1)`, `rem + f(N/10)`). Here, all the real work happens on the way **down** (deciding whether to increment `c`), and the way up does nothing but relay the final value — the same distinction seen earlier with the "Reverse a Number" accumulator approach.
+
+---
+
+## Application — Check if an Array is Sorted
+
+**Problem:** given an array, determine whether it's sorted in non-decreasing order, using recursion.
+
+**Example — sorted:** `[1, 2, 4, 8, 9, 12]`
+**Example — not sorted:** `[1, 2, 4, 3, 8, 9]` (the `4, 3` pair breaks the order)
+
+### The Recursive Idea
+
+Track a moving index `i`, and compare each element to its **next neighbour**:
+```
+arr[i] < arr[i+1]
+```
+If this holds for **every** adjacent pair (checked recursively, moving `i` forward one step at a time), the array is sorted.
+
+**Base case:** once `i` reaches the **last index** of the array, there's no `arr[i+1]` left to compare against — a single remaining element is trivially "sorted" on its own, so return `true`.
+
+### Code
+
+```java
+static boolean isSorted(int[] arr, int i) {
+    if (i == arr.length - 1) {
+        return true;
+    }
+    return arr[i] < arr[i + 1] && isSorted(arr, i + 1);
+}
+```
+
+### Worked Example — Sorted Array `[1, 2, 4, 8, 9, 12]`
+
+```
+f(arr, 0): 1 < 2   && f(arr, 1)
+f(arr, 1): 2 < 4   && f(arr, 2)
+f(arr, 2): 4 < 8   && f(arr, 3)
+f(arr, 3): 8 < 9   && f(arr, 4)
+f(arr, 4): 9 < 12  && f(arr, 5)
+f(arr, 5): i == last index → base case → return true
+```
+Every comparison holds, so the chain of `&&`s collapses to `true` all the way up.
+
+**Answer:** `true` — the array is sorted.
+
+### Worked Example — Unsorted Array `[1, 2, 4, 3, 8, 9]`
+
+```
+f(arr, 0): 1 < 2  →  true  && f(arr, 1)
+f(arr, 1): 2 < 4  →  true  && f(arr, 2)
+f(arr, 2): 4 < 3  →  false && f(arr, 3)      ← violation found!
+```
+**Answer:** `false` — the array is not sorted.
+
+### Why the Recursion Stops Early Here
+
+`&&` in Java (and most languages) **short-circuits**: as soon as the left-hand side of `&&` evaluates to `false`, the right-hand side is **never evaluated** at all. So at `f(arr, 2)`, once `4 < 3` evaluates to `false`, the recursive call `f(arr, 3)` is **never made** — the recursion stops immediately rather than needlessly checking the rest of the array. This is a nice, free optimization that falls straight out of using `&&` to chain the recursive case.
 
 ### Method 2 — Reversing a Number Without an External Accumulator (Pure Recursion)
 
