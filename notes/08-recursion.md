@@ -815,6 +815,59 @@ f(arr, 2): 4 < 3  →  false && f(arr, 3)      ← violation found!
 
 `&&` in Java (and most languages) **short-circuits**: as soon as the left-hand side of `&&` evaluates to `false`, the right-hand side is **never evaluated** at all. So at `f(arr, 2)`, once `4 < 3` evaluates to `false`, the recursive call `f(arr, 3)` is **never made** — the recursion stops immediately rather than needlessly checking the rest of the array. This is a nice, free optimization that falls straight out of using `&&` to chain the recursive case.
 
+---
+
+## Application — Linear Search Using Recursion
+
+**Problem:** given an array and a `target` value, determine whether `target` exists anywhere in the array — using recursion instead of a loop.
+
+**Example:**
+```
+arr = [3, 2, 1, 18, 9]   (indices 0, 1, 2, 3, 4)
+target = 18
+```
+
+### The Recursive Idea
+
+Check the **current** index against `target`; if it doesn't match, move on to the **next** index and try again:
+```
+arr[i] == target  ||  f(arr, target, i + 1)
+```
+
+**Base case:** if `i` runs **off the end** of the array (`i == arr.length`) without ever matching, `target` isn't in the array at all — return `false`.
+
+### Code
+
+```java
+static boolean linearSearch(int[] arr, int target, int i) {
+    if (i == arr.length) {
+        return false;                 // ran out of bounds — target not found
+    }
+    return arr[i] == target || linearSearch(arr, target, i + 1);
+}
+```
+
+### Worked Example — Tracing `f(arr, 18, 0)`
+
+```
+f(arr, 18, 0): arr[0] = 3  ≠ 18  →  false || f(arr, 18, 1)
+f(arr, 18, 1): arr[1] = 2  ≠ 18  →  false || f(arr, 18, 2)
+f(arr, 18, 2): arr[2] = 1  ≠ 18  →  false || f(arr, 18, 3)
+f(arr, 18, 3): arr[3] = 18 == 18 →  true                      ← match found!
+```
+**Answer:** `true` — `18` exists in the array (at index `3`).
+
+### Why the Recursion Stops Early Here Too
+
+Just like the sorted-array check used `&&`'s short-circuit behaviour, this uses `||`'s short-circuit behaviour — but in the **opposite direction**: as soon as the left-hand side of `||` evaluates to `true`, the right-hand side is **never evaluated**. So the moment `arr[3] == target` comes back `true`, the recursive call `f(arr, target, 4)` is **never made** — there's no need to keep searching once a match has already been found.
+
+**Side-by-side comparison:**
+
+| Pattern | Operator | Short-circuits on | Stops recursion when... |
+|---|---|---|---|
+| Is Array Sorted | `&&` | `false` | a violation is found |
+| Linear Search | `\|\|` | `true` | a match is found |
+
 ### Method 2 — Reversing a Number Without an External Accumulator (Pure Recursion)
 
 Method 1 relies on a **shared external variable** (`sum`) updated as a side effect on every call. A more "pure" recursive style avoids external state entirely and returns the answer directly — but that means each digit must be weighted with the **correct power of 10** *before* it's even known how many digits remain below it.
