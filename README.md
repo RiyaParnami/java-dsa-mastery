@@ -19,7 +19,7 @@ This repository focuses on consistent learning through concept implementation, s
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
 | Implementations Written | 107 |
-| Current Focus | Mathematics for DSA |
+| Current Focus | Recursion and Divide and Conquer |
 | Target Completion | October 2026 |
 
 ---
@@ -41,7 +41,7 @@ This repository focuses on consistent learning through concept implementation, s
 <summary><b>2. Java Language Fundamentals</b></summary>
 
 - [x] **Introduction to Java**
-  - [X] JVM, JRE, JDK architecture and how it works
+  - [x] JVM, JRE, JDK architecture and how it works
   - [x] Setup and environment installation
   - [x] Input and Output (`Scanner`, `BufferedReader`)
   - [x] Data types (Primitives vs Reference)
@@ -113,7 +113,7 @@ This repository focuses on consistent learning through concept implementation, s
 - [ ] Newton's square root method
 - [ ] Factor finding optimization
 - [ ] Modulo arithmetic properties
-- [ ] HCF and LCM (Euclidean algorithm)
+- [x] HCF and LCM (Euclidean algorithm)
 - [ ] `BigInteger` and `BigDecimal`
 
 </details>
