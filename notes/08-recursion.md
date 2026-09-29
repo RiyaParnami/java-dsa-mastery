@@ -917,3 +917,124 @@ F(1234, 4) = 4×1000 + 321 = 4321
 **Answer:** `4321` — the reverse of `1234` ✓
 
 **Trade-off:** this avoids mutable shared state, but needs the total digit count computed **upfront** (an extra pass or formula), and involves computing `10^(arg-1)` at every call — Method 1's accumulator approach is simpler and needs neither.
+
+---
+
+## Application — Find All Indices of a Target (Search Returning a List)
+
+**Problem:** given an array and a `target`, find the **indices of every occurrence** of `target` — not just the first one — using recursion.
+
+**Example:**
+```
+arr    = [1, 2, 3, 4, 4, 8]      (indices 0, 1, 2, 3, 4, 5)
+target = 4
+ans    = [3, 4]
+```
+
+Unlike Linear Search (which stops at the first match and returns `true`/`false`), here we must **keep going after a match**, because more occurrences might still be ahead. So there is no early exit — every index has to be visited.
+
+### The Recursive Idea
+
+Pass the **list itself as an argument**. At each call:
+1. If `index` has run off the end of the array → nothing left to check → return the list.
+2. If `arr[index] == target` → **add `index` to the list**.
+3. Either way, **keep going** — call the function again with `index + 1` and the same list.
+
+```
+fun(arr, target, index, list)
+```
+
+**Base case:** `index == arr.length` → `return list`
+
+### Code
+
+```java
+static ArrayList<Integer> findAllIndex(int[] arr, int target, int index, ArrayList<Integer> list) {
+    if (index == arr.length) {
+        return list;                       // reached the end — the list is now complete
+    }
+    if (arr[index] == target) {
+        list.add(index);                   // match → record its index
+    }
+    return findAllIndex(arr, target, index + 1, list);   // keep going, whether or not it matched
+}
+```
+
+**Calling it (wrapper):**
+```java
+ArrayList<Integer> ans = findAllIndex(arr, 4, 0, new ArrayList<>());
+```
+
+### Worked Example — Tracing `fun(arr, 4, 0, [])`
+
+Array: `[1, 2, 3, 4, 4, 8]`, target = `4`
+
+```
+(arr, 4, 0, [])      → arr[0] = 1 ≠ 4   → nothing added  → (arr, 4, 1, [])
+(arr, 4, 1, [])      → arr[1] = 2 ≠ 4   → nothing added  → (arr, 4, 2, [])
+(arr, 4, 2, [])      → arr[2] = 3 ≠ 4   → nothing added  → (arr, 4, 3, [])
+(arr, 4, 3, [])      → arr[3] = 4 == 4  → add 3          → (arr, 4, 4, [3])
+(arr, 4, 4, [3])     → arr[4] = 4 == 4  → add 4          → (arr, 4, 5, [3, 4])
+(arr, 4, 5, [3, 4])  → arr[5] = 8 ≠ 4   → nothing added  → (arr, 4, 6, [3, 4])
+(arr, 4, 6, [3, 4])  → index == length  → base case, return [3, 4]
+```
+**Answer:** `[3, 4]` ✓
+
+### The "?" — What Does the Base Case Return? (VVI)
+
+The base case returns **`list`** — and that's exactly right, because the list has been **built up on the way down**, one match at a time. By the time `index == arr.length`, `list` already holds the complete answer.
+
+This is the same pattern as *"Passing an Accumulator Inside the Argument"* (steps-to-zero, count-zeros): the real work happens on the way **down**, and every call on the way back **up** just returns that same list, unchanged. Notice why each call must `return findAllIndex(...)` and not just call it — if the return is dropped, the final list never makes it back to the original caller.
+
+### Why the Same List Keeps Growing (VVI)
+
+An `ArrayList` is an **object**, and Java passes the **reference** to it into each call. So every call in the chain is working on the **very same list in memory** — not a copy.
+
+```
+(arr, 4, 3, [])   ──┐
+(arr, 4, 4, [3])    │   all of these are ONE list object being added to,
+(arr, 4, 5, [3,4])  │   shown at different moments in time
+(arr, 4, 6, [3,4]) ─┘
+```
+That's why `list.add(index)` in one call is visible to all the calls after it — the list "carries" the answer forward through the recursion.
+
+**Contrast with primitives:** an `int` passed as an argument is **copied** into each call (each call has its own value, like the `n` in `fact(n)`). That's why accumulators like `c` in count-zeros had to be *returned/re-passed* with `c + 1`, whereas a list can simply be mutated in place.
+
+### Alternative Approach — Without Passing the List In
+
+Instead of carrying one list down, **create a new list in every call** and combine the results on the way **back up**:
+
+```java
+static ArrayList<Integer> findAllIndex2(int[] arr, int target, int index) {
+    ArrayList<Integer> list = new ArrayList<>();      // fresh list for THIS call only
+
+    if (index == arr.length) {
+        return list;                                  // empty list at the very bottom
+    }
+
+    if (arr[index] == target) {
+        list.add(index);                              // this call's own contribution
+    }
+
+    ArrayList<Integer> ansFromBelow = findAllIndex2(arr, target, index + 1);
+    list.addAll(ansFromBelow);                        // merge what the deeper calls found
+    return list;
+}
+```
+
+**Trade-off:** this is a "pure" style (no list passed in, no shared state), but it creates a **new list on every call** — `O(N)` lists in total — whereas the argument-passing version uses just **one** list. Also note the order: each call adds its **own** index *before* the deeper ones, so the final list still comes out in ascending order (`[3, 4]`).
+
+### Complexity
+
+```
+Time Complexity:  O(N)     — every index is visited exactly once
+Space Complexity: O(N)     — recursion depth (call stack) of N, plus the result list
+```
+
+### Pattern Summary — Search Problems in Recursion
+
+| Problem | Returns | Stops early? | Where the answer is built |
+|---|---|---|---|
+| Linear Search | `boolean` | Yes (`\|\|` short-circuit) | On the way back up |
+| Find All Indices (list as argument) | `ArrayList<Integer>` | **No** — must visit every index | On the way **down** (list grows) |
+| Find All Indices (new list per call) | `ArrayList<Integer>` | **No** | On the way **back up** (`addAll`) |
