@@ -1000,13 +1000,19 @@ That's why `list.add(index)` in one call is visible to all the calls after it �
 
 **Contrast with primitives:** an `int` passed as an argument is **copied** into each call (each call has its own value, like the `n` in `fact(n)`). That's why accumulators like `c` in count-zeros had to be *returned/re-passed* with `c + 1`, whereas a list can simply be mutated in place.
 
-### Alternative Approach — Without Passing the List In
+### Alternative Approach — Return the List, Don't Pass It In (VVI)
 
-Instead of carrying one list down, **create a new list in every call** and combine the results on the way **back up**:
+**Goal:**
+- **Return** the list.
+- **Don't take it in as an argument.**
+
+**Challenge:** the return type is now `ArrayList<Integer>` — every call must hand a list back to its caller.
+
+**Problem:** **every call will have a new list.** Each call's list only knows about *its own* index, so the answers found by the deeper calls have to be **merged in on the way back up**.
 
 ```java
 static ArrayList<Integer> findAllIndex2(int[] arr, int target, int index) {
-    ArrayList<Integer> list = new ArrayList<>();      // fresh list for THIS call only
+    ArrayList<Integer> list = new ArrayList<>();      // fresh list for THIS call only (body of the function)
 
     if (index == arr.length) {
         return list;                                  // empty list at the very bottom
@@ -1022,7 +1028,48 @@ static ArrayList<Integer> findAllIndex2(int[] arr, int target, int index) {
 }
 ```
 
-**Trade-off:** this is a "pure" style (no list passed in, no shared state), but it creates a **new list on every call** — `O(N)` lists in total — whereas the argument-passing version uses just **one** list. Also note the order: each call adds its **own** index *before* the deeper ones, so the final list still comes out in ascending order (`[3, 4]`).
+### Worked Example — Tracing `(arr, t, 0)`
+
+`arr = [1, 2, 3, 4, 4, 8]`, `target = 4`. Each call has its **own** `list` (written `l`).
+
+**Going down** (each call creates its own list, adds its own index if it matches):
+```
+(arr, t, 0)   l = []
+     ↓
+(arr, t, 1)   l = []
+     ↓
+(arr, t, 2)   l = []
+     ↓
+(arr, t, 3)   l = [3]        ← arr[3] == 4, own index added
+     ↓
+(arr, t, 4)   l = [4]        ← arr[4] == 4, own index added
+     ↓
+(arr, t, 5)   l = []         ← arr[5] = 8, no match
+     ↓
+(arr, t, 6)   l = []         ← base case: index == length, return the empty list
+```
+
+**Coming back up** (each call receives the list from below and merges it with its own):
+```
+(arr, t, 6) returns []
+(arr, t, 5) gets []     → l stays []        → returns []
+(arr, t, 4) gets []     → l = [4]           → returns [4]
+(arr, t, 3) gets [4]    → l = [3] + [4]     → returns the combined list
+(arr, t, 2) gets that   → nothing to add    → returns it unchanged
+(arr, t, 1) gets that   → nothing to add    → returns it unchanged
+(arr, t, 0) gets that   → nothing to add    → returns it unchanged  ← final answer
+```
+**Answer:** both indices, `3` and `4`.
+
+**Order of the result:** the order depends on **which side is placed first** when merging.
+- Own index first, then `addAll(ansFromBelow)` (the code above) → `[3, 4]` (ascending).
+- Deeper results first, own index after (`list.addAll(ansFromBelow); if (match) list.add(index);`) → `[4, 3]` (this is the order the call sketch ends with).
+
+Both contain the same indices — pick the order the question asks for.
+
+**Key difference from the list-as-argument version:** there, the answer is built on the way **down** and the way up just relays it. Here, each call only knows its own piece, so the answer is built on the way **back up**, one merge per call.
+
+**Trade-off:** this is a "pure" style (no list passed in, no shared state), but it creates a **new list on every call** — `N + 1` lists in total — whereas the argument-passing version uses just **one** list.
 
 ### Complexity
 
