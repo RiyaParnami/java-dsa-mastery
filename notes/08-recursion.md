@@ -1085,3 +1085,115 @@ Space Complexity: O(N)     — recursion depth (call stack) of N, plus the resul
 | Linear Search | `boolean` | Yes (`\|\|` short-circuit) | On the way back up |
 | Find All Indices (list as argument) | `ArrayList<Integer>` | **No** — must visit every index | On the way **down** (list grows) |
 | Find All Indices (new list per call) | `ArrayList<Integer>` | **No** | On the way **back up** (`addAll`) |
+
+---
+
+## Application — Search in a Rotated Sorted Array (Recursive Binary Search)
+
+**Problem:** a sorted array has been **rotated** at some pivot (e.g. `[1,2,3,4,5,6,7,8,9]` → `[5,6,7,8,9,1,2,3]`). Find the index of `target`, in `O(log N)`, using recursion. (Assumes **distinct** elements.)
+
+**Example:**
+```
+arr    = [5, 6, 7, 8, 9, 1, 2, 3]      (indices 0 … 7)
+target = 7
+```
+
+### The Key Idea (VVI)
+
+After picking `mid`, **at least one half is always properly sorted** — even in a rotated array. So:
+1. Work out **which half is sorted**.
+2. Check whether `target` lies **inside that sorted half's range**.
+3. If yes → search that half. If no → search the **other** half.
+
+```
+ s                 m                 e
+[5, 6, 7,    8,    9, 1, 2, 3]
+ └─ sorted ──┘      └─ has the rotation break ─┘
+```
+
+### The Cases
+
+**① Left half is sorted** → `arr[s] <= arr[mid]`
+```
+if (key >= arr[s] && key <= arr[mid])   →  e = m - 1     // key is inside the sorted left half
+else                                    →  s = m + 1     // key must be in the right half
+```
+
+**② Otherwise, the right half is sorted** → check `key >= arr[m] && key <= arr[e]`
+```
+if (key >= arr[m] && key <= arr[e])     →  s = m + 1     // key is inside the sorted right half
+```
+
+**③ Else**
+```
+e = m - 1                                                // key must be in the left half
+```
+
+### Code
+
+```java
+static int search(int[] arr, int target, int s, int e) {
+    if (s > e) {
+        return -1;                                   // search space empty — not found
+    }
+
+    int m = s + (e - s) / 2;
+    if (arr[m] == target) {
+        return m;                                    // found
+    }
+
+    if (arr[s] <= arr[m]) {                          // ① left half is sorted
+        if (target >= arr[s] && target <= arr[m]) {
+            return search(arr, target, s, m - 1);
+        }
+        return search(arr, target, m + 1, e);
+    }
+
+    if (target >= arr[m] && target <= arr[e]) {      // ② right half is sorted, key inside it
+        return search(arr, target, m + 1, e);
+    }
+    return search(arr, target, s, m - 1);            // ③ else
+}
+```
+Call it as `search(arr, target, 0, arr.length - 1)`.
+
+### Worked Example — Case ① (left half sorted): `arr = [5,6,7,8,9,1,2,3]`, `target = 7`
+
+```
+Call 1: s=0, e=7, m=3 → arr[3]=8 ≠ 7
+        arr[s]=5 <= arr[m]=8  → left half sorted
+        7 >= 5 && 7 <= 8      → e = m-1 = 2
+
+Call 2: s=0, e=2, m=1 → arr[1]=6 ≠ 7
+        arr[s]=5 <= arr[m]=6  → left half sorted
+        7 >= 5 && 7 <= 6 ?    → false → s = m+1 = 2
+
+Call 3: s=2, e=2, m=2 → arr[2]=7 == 7 → found, return 2
+```
+**Answer:** index `2` ✓
+
+### Worked Example — Cases ② / ③ (right half sorted): `arr = [5,6,1,2,3,4]`, `target = 6`
+
+```
+Call 1: s=0, e=5, m=2 → arr[2]=1 ≠ 6
+        arr[s]=5 <= arr[m]=1 ?  → false → right half [1,2,3,4] is sorted
+        6 >= arr[m]=1 && 6 <= arr[e]=4 ?  → false   (6 is not in 1…4)
+        ③ else → e = m-1 = 1
+
+Call 2: s=0, e=1, m=0 → arr[0]=5 ≠ 6
+        arr[s]=5 <= arr[m]=5  → left half sorted
+        6 >= 5 && 6 <= 5 ?    → false → s = m+1 = 1
+
+Call 3: s=1, e=1, m=1 → arr[1]=6 == 6 → found, return 1
+```
+**Answer:** index `1` ✓
+
+### Complexity
+
+```
+Recurrence:        F(N) = F(N/2) + O(1)       (same shape as plain Binary Search)
+Time Complexity:   O(log N)
+Space Complexity:  O(log N)                    (recursion depth)
+```
+
+**Note:** with **duplicate** elements, `arr[s] <= arr[mid]` can no longer tell which half is sorted (e.g. `[3,1,3,3,3]`), so this logic only works for distinct values.
