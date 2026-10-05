@@ -1197,3 +1197,171 @@ Space Complexity:  O(log N)                    (recursion depth)
 ```
 
 **Note:** with **duplicate** elements, `arr[s] <= arr[mid]` can no longer tell which half is sorted (e.g. `[3,1,3,3,3]`), so this logic only works for distinct values.
+
+---
+
+## Application — Pattern Problems (Triangle of Stars)
+
+Patterns are normally written with **two nested loops**. In recursion, the two loops become **two arguments**:
+
+```
+for (r = n; r > 0; r--)        →   r  = current row   (the OUTER loop)
+    for (c = 0; c < r; c++)    →   c  = current column (the INNER loop)
+```
+So the function is `fun(r, c)`: `c` moves forward along the row, and when the row is finished, `r` goes down by one and `c` resets to `0`.
+
+### Pattern 1 — Inverted Triangle (print, *then* recurse)
+
+**Problem:** for `n = 4`, print:
+```
+****
+***
+**
+*
+```
+Row `r` has `r` stars → in row `r`, keep printing while `c < r`.
+
+**Calls for `n = 4` (the call chain):**
+```
+(4,0) → (4,1) → (4,2) → (4,3) → newline → (3,0) → ...
+ ★       ★       ★       ★                  next row starts, c resets to 0
+```
+Each of `(4,0) … (4,3)` prints one `*` (4 stars = row of 4). Once `c` reaches `r`, the row is done → print a **newline** and move to `(3, 0)`.
+
+```java
+static void triangle(int r, int c) {
+    if (r == 0) {
+        return;                         // base case: no rows left
+    }
+    if (c < r) {
+        System.out.print("*");          // print FIRST ...
+        triangle(r, c + 1);             // ... then move along the row
+    } else {
+        System.out.println();           // row finished → newline
+        triangle(r - 1, 0);             // next row, c resets to 0
+    }
+}
+```
+Call it as `triangle(4, 0)`.
+
+### Pattern 2 — Ascending Triangle (recurse, *then* print)
+
+**Problem:** for `n = 3`, print:
+```
+*
+**
+***
+```
+Same call chain as Pattern 1 — the only change is **where the print goes**: *after* the recursive call, so the stars are printed on the way **back up**.
+
+**Call chain for `n = 3`:**
+```
+(3,0) → (3,1) → (3,2) → (2,0) → (2,1) → (1,0) → (0,0)
+                                                   ↑ base case
+          then everything returns, printing on the way back:
+(0,0) → (1,0) → (2,1) → (2,0) → (3,2) → (3,1) → (3,0)
+```
+The deepest rows return first, so the **shortest row (1 star) is printed first** and the longest (3 stars) last.
+
+```java
+static void triangle2(int r, int c) {
+    if (r == 0) {
+        return;
+    }
+    if (c < r) {
+        triangle2(r, c + 1);            // recurse FIRST ...
+        System.out.print("*");          // ... print on the way back up
+    } else {
+        triangle2(r - 1, 0);
+        System.out.println();           // newline on the way back up
+    }
+}
+```
+
+**Note:** the newline is printed *before* each row's stars (on the way up), so this version's output starts with an empty line. Harmless for practice, but worth knowing.
+
+### Head vs Tail — Same Idea as Before
+
+| Version | Print position | Order of rows |
+|---|---|---|
+| `triangle` | before the recursive call (going down) | `****` first → `*` last |
+| `triangle2` | after the recursive call (coming back up) | `*` first → `***` last |
+
+This is exactly the **"print N to 1" vs "print 1 to N"** idea from earlier, applied to a 2-argument function.
+
+### A Note on the `(r, c)` Sketch
+
+In the sketches, `(3,2) → (2,0)` skips a step: in code the call `(3,3)` happens in between (`c == r`, so the `else` branch runs and jumps to `(2,0)`). The sketch merges that hop into the last call of the row.
+
+---
+
+## Application — Bubble Sort Using Recursion
+
+**Problem:** sort an array using bubble sort — but with recursion instead of two loops.
+
+**The same two-loop → `(r, c)` conversion:**
+```
+for (r = n-1; r > 0; r--)          →   r = how many pairs are left to compare in this pass
+    for (c = 0; c < r; c++)        →   c = the current pair  (arr[c], arr[c+1])
+        if (arr[c] > arr[c+1]) swap
+```
+
+### Idea
+
+In one pass, compare each **adjacent pair** and swap if out of order. This pushes the **largest** element to the end of the unsorted part. Then repeat the pass on a **smaller range** (one element fewer), because the last element is now in its final place.
+
+### Trace — `[4, 3, 2, 1]` (first pass, `r = 3`)
+
+```
+4, 3, 2, 1     (c=0) 4 > 3 → swap
+3, 4, 2, 1     (c=1) 4 > 2 → swap
+3, 2, 4, 1     (c=2) 4 > 1 → swap
+3, 2, 1 | 4    ← largest element (4) is now in its final place
+```
+**Calls:** `(3,0) → (3,1) → (3,2) → (2,0)` — after `c` finishes the row, `r` drops to `2` and `c` resets to `0`; the next pass only looks at `3, 2, 1`.
+
+### Full Trace
+
+```
+(3,0): 4 > 3 → swap → [3,4,2,1]
+(3,1): 4 > 2 → swap → [3,2,4,1]
+(3,2): 4 > 1 → swap → [3,2,1,4]     ← pass 1 done, 4 fixed
+(3,3): c == r → go to (2,0)
+(2,0): 3 > 2 → swap → [2,3,1,4]
+(2,1): 3 > 1 → swap → [2,1,3,4]     ← pass 2 done, 3 fixed
+(2,2): c == r → go to (1,0)
+(1,0): 2 > 1 → swap → [1,2,3,4]     ← pass 3 done
+(1,1): c == r → go to (0,0)
+(0,0): r == 0 → base case, return
+```
+**Answer:** `[1, 2, 3, 4]` ✓
+
+### Code
+
+```java
+static void bubble(int[] arr, int r, int c) {
+    if (r == 0) {
+        return;                                   // base case: nothing left to sort
+    }
+    if (c < r) {
+        if (arr[c] > arr[c + 1]) {
+            int temp = arr[c];                    // swap adjacent pair
+            arr[c] = arr[c + 1];
+            arr[c + 1] = temp;
+        }
+        bubble(arr, r, c + 1);                    // next pair in the same pass
+    } else {
+        bubble(arr, r - 1, 0);                    // pass finished → shorter range, c resets
+    }
+}
+```
+Call it as `bubble(arr, arr.length - 1, 0)`.
+
+### Complexity
+
+```
+Time Complexity:   O(N²)       — about N²/2 comparisons in total
+Space Complexity:  O(N²)       — see below
+```
+
+**Why the space is `O(N²)` and not `O(N)`:** all the calls form **one single long chain** (`(3,0) → (3,1) → … → (0,0)`) — nothing returns until the base case is hit — so the stack depth equals the **total number of calls** (~N²/2), not just the number of rows. The same applies to the star-pattern functions above. Iterative versions use `O(1)` extra space, so for large inputs the loop version is the safer choice.
