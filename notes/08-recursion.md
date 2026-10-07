@@ -1365,3 +1365,98 @@ Space Complexity:  O(N²)       — see below
 ```
 
 **Why the space is `O(N²)` and not `O(N)`:** all the calls form **one single long chain** (`(3,0) → (3,1) → … → (0,0)`) — nothing returns until the base case is hit — so the stack depth equals the **total number of calls** (~N²/2), not just the number of rows. The same applies to the star-pattern functions above. Iterative versions use `O(1)` extra space, so for large inputs the loop version is the safer choice.
+
+---
+
+## Application — Selection Sort Using Recursion
+
+**Problem:** sort an array using selection sort, with recursion instead of two loops.
+
+**Example:**
+```
+arr = [4, 3, 2, 8, 1]
+```
+
+### Idea
+
+In each pass, **find the largest element** in the unsorted range and **swap it with the last element of that range**. That element is now in its final place, so the next pass works on a range that is **one element shorter**.
+
+Same two-loop → arguments conversion as Bubble Sort, plus one extra argument to remember where the max is:
+```
+r    = last index of the unsorted range   (outer loop — shrinks each pass)
+c    = index currently being checked      (inner loop — scans 0 … r)
+max  = index of the largest element seen so far in this pass
+```
+
+### Trace (the sketch)
+
+```
+[4, 3, 2, 8, 1]      max = 8 → swap with last element of the range (1)
+[4, 3, 2, 1 | 8]     8 is in its final place
+[4, 3, 2, 1]         max = 4 → swap with last element of the range (1)
+[1, 3, 2 | 4, 8]     4 is fixed
+[1, 3, 2]            max = 3 → swap with last element of the range (2)
+[1, 2 | 3, 4, 8]     3 is fixed
+[1, 2]               max = 2 → already last, nothing changes
+[1, 2, 3, 4, 8]      ← Ans
+```
+
+### Code
+
+```java
+static void selection(int[] arr, int r, int c, int max) {
+    if (r == 0) {
+        return;                                   // base case: only one element left, already sorted
+    }
+    if (c <= r) {
+        if (arr[c] > arr[max]) {
+            selection(arr, r, c + 1, c);          // new largest found → max = c
+        } else {
+            selection(arr, r, c + 1, max);        // keep the old max
+        }
+    } else {
+        int temp = arr[max];                      // pass finished → swap max into position r
+        arr[max] = arr[r];
+        arr[r] = temp;
+        selection(arr, r - 1, 0, 0);              // shorter range; reset c and max
+    }
+}
+```
+Call it as `selection(arr, arr.length - 1, 0, 0)`.
+
+### Worked Example — `[4, 3, 2, 8, 1]`
+
+```
+r = 4:  scan c = 0…4  → 4, 3, 2, 8, 1 → max index = 3 (value 8)
+        c = 5 > r      → swap arr[3] ↔ arr[4]   → [4, 3, 2, 1, 8]
+
+r = 3:  scan c = 0…3  → 4, 3, 2, 1    → max index = 0 (value 4)
+        swap arr[0] ↔ arr[3]                    → [1, 3, 2, 4, 8]
+
+r = 2:  scan c = 0…2  → 1, 3, 2       → max index = 1 (value 3)
+        swap arr[1] ↔ arr[2]                    → [1, 2, 3, 4, 8]
+
+r = 1:  scan c = 0…1  → 1, 2          → max index = 1 (value 2)
+        swap arr[1] ↔ arr[1] (no change)        → [1, 2, 3, 4, 8]
+
+r = 0:  base case → return
+```
+**Answer:** `[1, 2, 3, 4, 8]` ✓
+
+### Bubble Sort vs Selection Sort
+
+| | Bubble Sort | Selection Sort |
+|---|---|---|
+| What happens in a pass | compare **adjacent pairs**, swap when out of order | **scan** for the max, then do **one swap** |
+| Extra argument | none (`r`, `c`) | `max` (index of the largest so far) |
+| Swaps per pass | up to `r` | at most `1` |
+| Result of a pass | largest element reaches the end | largest element reaches the end |
+
+Both shrink the range by one each pass (`r - 1`, `c` resets to `0`).
+
+### Complexity
+
+```
+Time Complexity:   O(N²)      — every pass scans the whole unsorted range, regardless of input order
+Space Complexity:  O(N²)      — one long chain of calls (same reasoning as recursive Bubble Sort)
+```
