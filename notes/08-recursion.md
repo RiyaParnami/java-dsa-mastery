@@ -1460,3 +1460,125 @@ Both shrink the range by one each pass (`r - 1`, `c` resets to `0`).
 Time Complexity:   O(N²)      — every pass scans the whole unsorted range, regardless of input order
 Space Complexity:  O(N²)      — one long chain of calls (same reasoning as recursive Bubble Sort)
 ```
+
+---
+
+## Application — Merge Sort
+
+**Problem:** sort an array using **divide & conquer** — split it, sort the pieces with recursion, then combine them.
+
+**Example:**
+```
+arr = [8, 3, 4, 12, 5, 6]
+```
+
+### The 3 Steps
+
+1. **Divide** the array into 2 parts.
+2. **Get both parts sorted via recursion.**
+3. **Merge** the sorted parts.
+
+Step 2 is where the recursion happens: each half is just the same problem on a smaller array — the same `F(N) = 2 × F(N/2) + …` shape as Divide & Conquer, except it makes **two** recursive calls (so it's a tree, like Fibonacci, but the input is **halved**, not decremented).
+
+**Base case:** an array with **1 element** is already sorted → return it as is.
+
+### Step 3 Explained — Merging Two Sorted Arrays (VVI)
+
+Given two arrays that are **already sorted**:
+```
+arr1 = [3, 5, 9, 19, 32]
+arr2 = [4, 6, 8]
+```
+Create a new array of size `arr1.length + arr2.length` (= 8), and keep **one pointer in each array**. At every step, **copy the smaller of the two current elements** into the new array and move that pointer forward.
+
+```
+3  vs 4  → take 3     [3]
+5  vs 4  → take 4     [3, 4]
+5  vs 6  → take 5     [3, 4, 5]
+9  vs 6  → take 6     [3, 4, 5, 6]
+9  vs 8  → take 8     [3, 4, 5, 6, 8]
+arr2 is finished → copy the REST of arr1 as it is: 9, 19, 32
+                      [3, 4, 5, 6, 8, 9, 19, 32]
+```
+**Why copying the rest works:** when one array runs out, everything left in the other is already sorted **and** larger than everything copied so far, so it can be dropped in unchanged.
+
+### Trace (the sketch) — `[8, 3, 4, 12, 5, 6]`
+
+**Going down (divide):**
+```
+                [8, 3, 4, 12, 5, 6]                ← main
+               /                    \
+        [8, 3, 4]                [12, 5, 6]
+        /       \                 (divided the same way)
+    [8, 3]      [4]
+    /    \
+  [8]    [3]                                        ← base cases (1 element)
+```
+
+**Coming back up (merge):**
+```
+[8] + [3]           → [3, 8]
+[3, 8] + [4]        → [3, 4, 8]       ← left half sorted
+[12, 5, 6]          → [5, 6, 12]      ← right half sorted
+[3, 4, 8] + [5, 6, 12]  → [3, 4, 5, 6, 8, 12]     ← returned to main
+```
+**Answer:** `[3, 4, 5, 6, 8, 12]` ✓
+
+**Note:** just like factorial and sum of digits, the real work (the merging) happens on the way **back up**; going down only splits.
+
+### Code
+
+```java
+static int[] mergeSort(int[] arr) {
+    if (arr.length == 1) {
+        return arr;                                           // base case
+    }
+
+    int mid = arr.length / 2;
+
+    int[] left  = mergeSort(Arrays.copyOfRange(arr, 0, mid));            // sort the left half
+    int[] right = mergeSort(Arrays.copyOfRange(arr, mid, arr.length));   // sort the right half
+
+    return merge(left, right);                                // combine the sorted halves
+}
+
+private static int[] merge(int[] first, int[] second) {
+    int[] mix = new int[first.length + second.length];        // size = arr1.length + arr2.length
+
+    int i = 0;   // pointer in first
+    int j = 0;   // pointer in second
+    int k = 0;   // pointer in mix
+
+    while (i < first.length && j < second.length) {
+        if (first[i] <= second[j]) {
+            mix[k++] = first[i++];                            // take the smaller one
+        } else {
+            mix[k++] = second[j++];
+        }
+    }
+
+    // one array is finished — copy whatever is left in the other
+    while (i < first.length) {
+        mix[k++] = first[i++];
+    }
+    while (j < second.length) {
+        mix[k++] = second[j++];
+    }
+
+    return mix;
+}
+```
+Call it as `arr = mergeSort(arr);` — it returns a **new** sorted array (the input array is not changed).
+
+**Why `<=` and not `<`?** On a tie, taking from `first` keeps equal elements in their original order (a **stable** sort).
+
+### Complexity
+
+```
+Recurrence:        T(N) = 2 × T(N/2) + O(N)      ← two half-size calls + one merge pass
+Time Complexity:   O(N log N)                     ← log N levels, O(N) merging work per level
+Space Complexity:  O(N)                           ← the extra arrays created while merging
+```
+- **Height of the tree** is `log N` (the input halves each level), so the call stack is only `O(log N)` deep — unlike the bubble/selection sort chains.
+- **Merge sort's time is `O(N log N)` in every case** (best, average, worst) — it doesn't depend on how the input was ordered.
+- For how to **solve** this recurrence (Master Theorem), see [`complexity/time-complexity-notes.md`](../complexity/time-complexity-notes.md).
