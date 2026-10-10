@@ -1572,6 +1572,32 @@ Call it as `arr = mergeSort(arr);` — it returns a **new** sorted array (the in
 
 **Why `<=` and not `<`?** On a tie, taking from `first` keeps equal elements in their original order (a **stable** sort).
 
+### Second Example — Odd Length: `[5, 4, 3, 2, 1]`
+
+With an odd length, `mid = 5 / 2 = 2` (integer division), so the **left half gets 2 elements** and the **right half gets 3**.
+
+**Going down (divide):**
+```
+                    [5, 4, 3, 2, 1]                  ← main
+                   /                \
+             [5, 4]                [3, 2, 1]
+             /     \               /       \
+          [5]      [4]          [3]       [2, 1]
+                                          /     \
+                                        [2]     [1]
+```
+
+**Coming back up (merge):**
+```
+[5] + [4]               → [4, 5]
+[2] + [1]               → [1, 2]
+[3] + [1, 2]            → [1, 2, 3]
+[4, 5] + [1, 2, 3]      → [1, 2, 3, 4, 5]     ← returned to main
+```
+**Answer:** `[1, 2, 3, 4, 5]` ✓
+
+**Notice:** only the deepest base cases are single elements; every other call *waits* for both of its halves to come back sorted before it merges them.
+
 ### Complexity
 
 ```
@@ -1582,3 +1608,34 @@ Space Complexity:  O(N)                           ← the extra arrays created w
 - **Height of the tree** is `log N` (the input halves each level), so the call stack is only `O(log N)` deep — unlike the bubble/selection sort chains.
 - **Merge sort's time is `O(N log N)` in every case** (best, average, worst) — it doesn't depend on how the input was ordered.
 - For how to **solve** this recurrence (Master Theorem), see [`complexity/time-complexity-notes.md`](../complexity/time-complexity-notes.md).
+
+### Why `O(N log N)` — Counting the Work Level by Level
+
+Draw the recursion tree and add up the **merge work done at each level**:
+
+```
+Level 0:        one array of size N                      → merges N elements              = N
+                  /                \
+Level 1:     size N/2            size N/2                → N/2 + N/2                      = N
+              /     \            /     \
+Level 2:  N/4      N/4        N/4      N/4               → 4 × (N/4)                      = N
+   ⋮          ⋮
+Last level:  N arrays of size 1                          → base cases (no merging needed)
+```
+
+- **Every level** touches all `N` elements exactly once while merging → `O(N)` work per level.
+- The array is **halved each time**, so there are about **`log₂ N` levels**.
+
+```
+Total work = (work per level) × (number of levels) = N × log N = O(N log N)
+```
+
+| Level | Number of arrays | Size of each | Work at this level |
+|---|---|---|---|
+| 0 | 1 | N | N |
+| 1 | 2 | N/2 | 2 × N/2 = N |
+| 2 | 4 | N/4 | 4 × N/4 = N |
+| … | … | … | N |
+| log N | N | 1 | — |
+
+This is the **same recurrence** `T(N) = 2T(N/2) + O(N)` written out as a tree — summing each level of the tree is the intuition behind the Master Theorem result.
