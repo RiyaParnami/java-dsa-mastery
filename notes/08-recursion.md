@@ -1639,3 +1639,38 @@ Total work = (work per level) × (number of levels) = N × log N = O(N log N)
 | log N | N | 1 | — |
 
 This is the **same recurrence** `T(N) = 2T(N/2) + O(N)` written out as a tree — summing each level of the tree is the intuition behind the Master Theorem result.
+
+### Finding the Number of Levels (Deriving `log₂ N`)
+
+**Key point:** at **every level, `N` elements are being merged** (the pieces at a level always add up to the whole array).
+
+The size of each piece **halves** at every level:
+
+```
+Level 0:   N      =  N / 2⁰
+Level 1:   N / 2  =  N / 2¹
+Level 2:   N / 4  =  N / 2²
+   ⋮
+Level k:   1      =  N / 2ᵏ        ← last level: pieces of size 1 (base case)
+```
+
+**Solving for `k`** — the number of levels until the piece size reaches `1`:
+```
+1 = N / 2ᵏ
+⇒ 2ᵏ = N
+⇒ k · log 2 = log N          (take log on both sides)
+⇒ k = log₂ N
+```
+
+So the tree has **`log₂ N` levels**, and each level does **`N`** work:
+
+```
+Time Complexity:   O(N × log N)
+```
+
+### Space Complexity
+
+```
+Space Complexity (Aux):  O(N)
+```
+Merging needs an **extra array** (`mix`) to hold the combined result, so the auxiliary space is `O(N)`. (This is in contrast to the in-place sorts above, which only used the call stack.)
