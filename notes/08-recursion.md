@@ -1674,3 +1674,60 @@ Time Complexity:   O(N × log N)
 Space Complexity (Aux):  O(N)
 ```
 Merging needs an **extra array** (`mix`) to hold the combined result, so the auxiliary space is `O(N)`. (This is in contrast to the in-place sorts above, which only used the call stack.)
+
+### Solving the Merge Sort Recurrence — Akra–Bazzi Method
+
+The tree method above gives the intuition. The **Akra–Bazzi formula** solves the same recurrence mathematically.
+
+**Step 1 — Write the recurrence.** Merge sort sorts two halves, then merges them (at most `N - 1` comparisons):
+```
+T(N) = T(N/2) + T(N/2) + (N - 1)
+     = 2 · T(N/2) + (N - 1)
+```
+
+**Step 2 — Find `p`.** For a recurrence of the form `T(x) = Σ aᵢ · T(bᵢ · x) + g(x)`, find `p` such that:
+```
+Σ aᵢ · bᵢ^p = 1
+```
+Here `a = 2` (two calls) and `b = 1/2` (each on half the input):
+```
+2 × (1/2)^p = 1     ⇒     p = 1
+```
+
+**Step 3 — Plug into the formula.**
+```
+T(x) = Θ( x^p · [ 1 + ∫₁ˣ  g(u) / u^(p+1)  du ] )
+```
+With `p = 1` and `g(u) = u - 1`:
+```
+T(N) = N + N · ∫₁ᴺ (u - 1) / u²  du
+```
+
+**Step 4 — Solve the integral.** Split the fraction:
+```
+(u - 1) / u²  =  1/u  -  1/u²
+
+∫ (1/u) du  -  ∫ u⁻² du
+=  log u  -  ( -u⁻¹ )
+=  log u  +  1/u
+```
+Apply the limits `1` to `N`:
+```
+[ log u + 1/u ]₁ᴺ  =  ( log N + 1/N )  -  ( log 1 + 1 )
+                    =  log N + 1/N - 1          (since log 1 = 0)
+```
+
+**Step 5 — Put it back.**
+```
+T(N) = N + N · [ log N + 1/N - 1 ]
+     = N + N·log N + 1 - N
+     = N·log N + 1                  ← the N and -N cancel
+```
+
+**Answer:**
+```
+T(N) = O(N log N)
+```
+✓ — the same result as the level-by-level tree method (`N` work per level × `log N` levels).
+
+**Note:** the base of the `log` only changes a constant factor, so it doesn't matter for Big-O.
