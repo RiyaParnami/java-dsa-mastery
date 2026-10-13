@@ -1731,3 +1731,133 @@ T(N) = O(N log N)
 ✓ — the same result as the level-by-level tree method (`N` work per level × `log N` levels).
 
 **Note:** the base of the `log` only changes a constant factor, so it doesn't matter for Big-O.
+
+### In-Place Merge Sort (Index-Based Version)
+
+The first version creates **new arrays at every call** (`Arrays.copyOfRange`) and returns the sorted result. The **in-place** version never splits the array — it passes **index ranges** into the *same* array, and sorts that array directly.
+
+**Arguments:** `(arr, s, m, e)` → `s` = start, `m` = mid, `e` = end of the range (**`e` is exclusive**, i.e. the range is `s … e-1`).
+
+**The calls:**
+```
+mergeSortInPlace(arr, s, e)
+        /                \
+(arr, s, m)          (arr, m, e)         ← left half [s, m)   and   right half [m, e)
+```
+After both halves are sorted, **merge** the two ranges with `mergeInPlace(arr, s, m, e)`.
+
+**Base case:** a range of **one element** (`e - s == 1`) is already sorted → return.
+
+### The Merge Step
+
+The two sorted ranges sit **side by side** in the array:
+```
+ s              m              e
+[ 4, 5  |  1, 2, 3 ]            ← left [s, m)   and   right [m, e)
+```
+1. Merge them into a temporary array `mix` (same two-pointer idea as before).
+2. **Copy `mix` back** into the original array, starting at index `s`:
+
+```
+for (k = 0; k < mix.length; k++) {
+    arr[s + k] = mix[k];
+}
+```
+
+`mix = [1, 2, 3, 4, 5]` → `arr[s+0] = 1`, `arr[s+1] = 2`, … The `s +` is what puts the result back at the **correct position** inside the big array (not at index 0).
+
+**Small example — range `[3, 5)` holding `[2, 1]`:**
+```
+s = 3,  mix = [1, 2]
+arr[3 + 0] = 1
+arr[3 + 1] = 2          →  the range [2, 1] becomes [1, 2]
+```
+
+### Code
+
+```java
+static void mergeSortInPlace(int[] arr, int s, int e) {
+    if (e - s == 1) {
+        return;                                   // base case: one element
+    }
+
+    int mid = (s + e) / 2;
+
+    mergeSortInPlace(arr, s, mid);                // sort left half   [s, mid)
+    mergeSortInPlace(arr, mid, e);                // sort right half  [mid, e)
+
+    mergeInPlace(arr, s, mid, e);                 // merge the two sorted ranges
+}
+
+private static void mergeInPlace(int[] arr, int s, int m, int e) {
+    int[] mix = new int[e - s];                   // temporary array for this range only
+
+    int i = s;     // pointer in left range  [s, m)
+    int j = m;     // pointer in right range [m, e)
+    int k = 0;     // pointer in mix
+
+    while (i < m && j < e) {
+        if (arr[i] <= arr[j]) {
+            mix[k++] = arr[i++];
+        } else {
+            mix[k++] = arr[j++];
+        }
+    }
+
+    while (i < m) {                               // leftovers from the left range
+        mix[k++] = arr[i++];
+    }
+    while (j < e) {                               // leftovers from the right range
+        mix[k++] = arr[j++];
+    }
+
+    for (int l = 0; l < mix.length; l++) {        // copy back into the ORIGINAL array
+        arr[s + l] = mix[l];
+    }
+}
+```
+Call it as `mergeSortInPlace(arr, 0, arr.length)` — it sorts `arr` itself and returns nothing.
+
+### Worked Example — `[5, 4, 3, 2, 1]`
+
+Call: `(arr, 0, 5)`, `mid = 2` → left range `[0,2)`, right range `[2,5)`.
+
+```
+(0,5)                                  [5, 4, 3, 2, 1]
+├── (0,2)  mid=1                       left half
+│    ├── (0,1) → base case             [5]
+│    ├── (1,2) → base case             [4]
+│    └── merge(0,1,2)  → mix=[4,5]     arr = [4, 5, 3, 2, 1]
+│
+├── (2,5)  mid=3                       right half
+│    ├── (2,3) → base case             [3]
+│    ├── (3,5)  mid=4
+│    │    ├── (3,4) → base case        [2]
+│    │    ├── (4,5) → base case        [1]
+│    │    └── merge(3,4,5) → mix=[1,2] arr = [4, 5, 3, 1, 2]
+│    └── merge(2,3,5) → mix=[1,2,3]    arr = [4, 5, 1, 2, 3]
+│
+└── merge(0,2,5): left [4,5], right [1,2,3] → mix=[1,2,3,4,5]
+                                       arr = [1, 2, 3, 4, 5]   ✓
+```
+**Answer:** `[1, 2, 3, 4, 5]` — sorted **in the same array**.
+
+Notice the state `[4, 5 | 1, 2, 3]` just before the last merge — that's the `s … m … e` picture from the merge step above.
+
+### Copy Version vs In-Place Version
+
+| | Copy version (`mergeSort(arr)`) | In-place version (`mergeSortInPlace(arr, s, e)`) |
+|---|---|---|
+| Recursive calls pass | **new smaller arrays** | **index ranges** `(s, e)` into the same array |
+| Returns | a new sorted array | nothing (`void`) — the original array is sorted |
+| Original array | unchanged | modified |
+| Arrays created | at every split **and** every merge | only a temp `mix` per merge |
+
+### Complexity
+
+```
+Time Complexity:   O(N log N)       — same recurrence as before: 2·T(N/2) + O(N)
+Space Complexity:  O(N)             — the temporary `mix` array used while merging
+```
+
+**Note:** "in-place" here means the *recursion* doesn't copy sub-arrays — it works on ranges of one array. The merge step still needs a temporary `mix` array, so the auxiliary space is still `O(N)` (a truly in-place merge exists, but it is much more complicated).
