@@ -1861,3 +1861,159 @@ Space Complexity:  O(N)             — the temporary `mix` array used while mer
 ```
 
 **Note:** "in-place" here means the *recursion* doesn't copy sub-arrays — it works on ranges of one array. The merge step still needs a temporary `mix` array, so the auxiliary space is still `O(N)` (a truly in-place merge exists, but it is much more complicated).
+
+---
+
+## Application — Quick Sort
+
+**Problem:** sort an array using **divide & conquer** — pick a **pivot**, put it in its correct position, then sort what's on each side with recursion.
+
+### What is a Pivot? (VVI)
+
+**Pivot:** choose **any element** of the array. After the first pass:
+- all the elements **`< p`** will be on the **left (LHS)** of `p`, and
+- all the elements **`> p`** will be on the **right (RHS)** of `p`.
+
+**Example:** `[5, 4, 3, 2, 1]`, choose `p = 4`:
+```
+before:   5,  4,  3,  2,  1
+after:   [1,  3,  2]   4   [5]
+          └─ < 4 ─┘        └ > 4 ┘
+```
+The pivot `4` is now in its **correct position**. The two sides are still unsorted, but they're **independent smaller problems** — just call quick sort on each side:
+```
+[1, 3, 2]  →  quick sort  →  [1, 2, 3]
+[5]        →  already sorted
+result:    [1, 2, 3, 4, 5]
+```
+
+### How to Put the Pivot at the Correct Position?
+
+Use two pointers: `s` (from the start) and `e` (from the end).
+
+```
+while (nums[s] < p)  →  s++          // left element is already on the correct side → skip it
+while (nums[e] > p)  →  e--          // right element is already on the correct side → skip it
+```
+When both loops stop, `nums[s]` is on the **wrong side** (too big) and `nums[e]` is on the **wrong side** (too small) → **swap `s` and `e`**, move both pointers inward, and repeat until the pointers cross (`s > e`).
+
+### Trace — `[5, 4, 3, 2, 1]` with `p = 4`
+
+```
+s=0, e=4:   nums[0]=5 < 4 ? no  → s stays 0
+            nums[4]=1 > 4 ? no  → e stays 4
+            swap(nums[0], nums[4])           → [1, 4, 3, 2, 5]      s=1, e=3
+
+s=1, e=3:   nums[1]=4 < 4 ? no  → s stays 1
+            nums[3]=2 > 4 ? no  → e stays 3
+            swap(nums[1], nums[3])           → [1, 2, 3, 4, 5]      s=2, e=2
+
+s=2, e=2:   nums[2]=3 < 4 ? yes → s = 3
+            nums[3]=4 < 4 ? no  → s stops at 3
+            nums[2]=3 > 4 ? no  → e stays 2
+            s > e  (3 > 2) → stop
+```
+Final pointers: **`e = 2`, `s = 3`** — they have **crossed**, and that gives the two parts:
+```
+ low        e   s      high
+[ 1,  2,  3 ] [ 4,  5 ]
+  └ (low, e) ┘ └ (s, high) ┘
+```
+- **Left part:** `(low, e)` → indices `0 … 2` → `[1, 2, 3]`
+- **Right part:** `(s, high)` → indices `3 … 4` → `[4, 5]`
+
+### `low` and `high` — Which Part Are We Working On? (VVI)
+
+In `main` we call `quickSort(nums, 0, nums.length - 1)`. After that, **`low` and `high` tell each call which part of the array it is working on** — every recursive call gets a narrower `(low, high)` range of the **same array** (like `s, e` in the in-place merge sort).
+
+```
+quickSort(nums, low, high)
+          /                 \
+ quickSort(nums, low, e)   quickSort(nums, s, high)
+   (left part)               (right part)
+```
+
+### Code
+
+```java
+static void quickSort(int[] nums, int low, int high) {
+    if (low >= high) {
+        return;                                   // base case: 0 or 1 element → already sorted
+    }
+
+    int s = low;
+    int e = high;
+    int mid = s + (e - s) / 2;
+    int pivot = nums[mid];                        // any element works — the middle is a common choice
+
+    while (s <= e) {
+        while (nums[s] < pivot) {                 // already on the correct (left) side
+            s++;
+        }
+        while (nums[e] > pivot) {                 // already on the correct (right) side
+            e--;
+        }
+
+        if (s <= e) {                             // both are on the wrong side → swap them
+            int temp = nums[s];
+            nums[s] = nums[e];
+            nums[e] = temp;
+            s++;
+            e--;
+        }
+    }
+
+    // pivot is now in its correct position — sort the two parts
+    quickSort(nums, low, e);                      // left part
+    quickSort(nums, s, high);                     // right part
+}
+```
+Call it as `quickSort(nums, 0, nums.length - 1)`.
+
+**Note:** the code picks the **middle** element as the pivot, while the sketch picked `4` — any element is a valid pivot, only the number of passes changes.
+
+### Worked Example — the Sub-Array `[1, 2, 3]` with `p = 2` (the middle element)
+
+```
+low=0, high=2, pivot = nums[1] = 2
+
+s=0:  nums[0]=1 < 2 → s=1;   nums[1]=2 < 2 ? no → s stops at 1
+e=2:  nums[2]=3 > 2 → e=1;   nums[1]=2 > 2 ? no → e stops at 1
+s <= e (1 <= 1) → swap nums[1] with itself (no change), s=2, e=0
+s > e → stop
+
+left  = (low, e)  = (0, 0) → [1]    ← one element, base case
+right = (s, high) = (2, 2) → [3]    ← one element, base case
+```
+The pivot `2` sits **between** the two parts (it's excluded from both), exactly where it belongs → `[1, 2, 3]` ✓
+
+### Full Picture — `[5, 4, 3, 2, 1]`
+
+```
+quickSort(0, 4)           pivot placed → left (0,2) = [1,2,3]   right (3,4) = [4,5]
+ ├── quickSort(0, 2)      pivot 2 placed → [1] and [3]  → both base cases
+ └── quickSort(3, 4)      pivot placed   → nothing left to sort on either side
+Result: [1, 2, 3, 4, 5] ✓
+```
+
+### Why `<` and `>` (not `<=` / `>=`) in the `while` Loops?
+
+Elements **equal to the pivot** are allowed to stop the pointers and get **swapped**. This keeps the two parts balanced when there are many duplicates, and guarantees `s` and `e` always move, so the recursion always shrinks.
+
+### Complexity
+
+```
+Best / Average:   O(N log N)    — pivot splits the array into two reasonably balanced parts
+Worst case:       O(N²)         — pivot is always the smallest/largest element (parts of size 0 and N-1)
+Space:            O(log N) average   (recursion depth)   /   O(N) worst case
+```
+**Recurrence (balanced split):** `T(N) = 2 · T(N/2) + O(N)` — the `O(N)` is the partitioning pass, the same shape as merge sort.
+
+### Merge Sort vs Quick Sort
+
+| | Merge Sort | Quick Sort |
+|---|---|---|
+| Where the work happens | **merging** (on the way back up) | **partitioning** (before the recursive calls) |
+| Extra array needed | yes — `mix`, `O(N)` | **no** — swaps inside the same array |
+| Worst-case time | `O(N log N)` always | `O(N²)` (rare with a good pivot) |
+| Stable | yes | no |
