@@ -2017,3 +2017,65 @@ Space:            O(log N) average   (recursion depth)   /   O(N) worst case
 | Extra array needed | yes — `mix`, `O(N)` | **no** — swaps inside the same array |
 | Worst-case time | `O(N log N)` always | `O(N²)` (rare with a good pivot) |
 | Stable | yes | no |
+
+### How to Pick the Pivot
+
+Common choices:
+- **Random element** — hard to beat with a bad input; the usual way to avoid the worst case in practice.
+- **Corner element** (first or last) — simple, but on an already sorted (or reverse-sorted) array it keeps picking the smallest/largest element → the worst case below.
+- **The middle element** — what the code above uses; handles sorted input well.
+
+### Quick Sort Complexity — Setting Up the Recurrence (Important)
+
+After one partition around the pivot `p`, the array of size `N` splits into three parts:
+```
+ ←── k elements ──→  p  ←── (N - k - 1) elements ──→
+   (all < p)         1         (all > p)                        total = N
+```
+Both parts are sorted with recursion, and the partitioning pass itself costs `O(N)`:
+
+```
+T(N) = T(k) + T(N - k - 1) + O(N)
+```
+
+The value of `k` (how **evenly** the pivot splits the array) decides the complexity.
+
+### Worst Case — `k = 0`
+
+The pivot is always the **smallest or largest** element, so one side is **empty** (`k = 0`) and the other side has `N - 1` elements.
+
+**Example:** `[3, 5, 8, 9, 20, 34, 18, 66]` with the pivot `66` (the largest, at a corner):
+```
+left  = everything else → (N - 1) elements
+right = nothing         → 0 elements
+```
+```
+T(N) = T(0) + T(N - 1) + O(N)
+T(N) = T(N - 1) + O(N)
+```
+Unrolling it — each level removes only **one** element but still does a full partition pass:
+```
+N + (N-1) + (N-2) + … + 2 + 1  =  N(N+1)/2
+
+T(N) = O(N²)
+```
+For the full derivation, check the **Space & Time Complexity lecture**.
+
+### Best Case — `k = N/2`
+
+The pivot is always the **median**, so each side gets half of the elements:
+```
+T(N) = T(N/2) + T(N/2) + O(N)
+T(N) = 2 · T(N/2) + O(N)
+
+T(N) = O(N log N)
+```
+This is **exactly the same recurrence as Merge Sort**, so it solves the same way (tree method: `N` work per level × `log N` levels). The exact derivation is covered in the Space & Time Complexity lecture and the Merge Sort video.
+
+### Summary
+
+| Case | Pivot splits the array... | `k` | Recurrence | Time |
+|---|---|---|---|---|
+| Best | evenly | `N/2` | `2·T(N/2) + O(N)` | `O(N log N)` |
+| Average | reasonably well | — | — | `O(N log N)` |
+| Worst | completely unevenly (0 and N-1) | `0` | `T(N-1) + O(N)` | `O(N²)` |
