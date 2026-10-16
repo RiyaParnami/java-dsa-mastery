@@ -2079,3 +2079,24 @@ This is **exactly the same recurrence as Merge Sort**, so it solves the same way
 | Best | evenly | `N/2` | `2·T(N/2) + O(N)` | `O(N log N)` |
 | Average | reasonably well | — | — | `O(N log N)` |
 | Worst | completely unevenly (0 and N-1) | `0` | `T(N-1) + O(N)` | `O(N²)` |
+
+### Notes — Quick Sort
+
+- **Not stable** (already covered in the initial sorting videos) — equal elements can change their relative order when they are swapped across the pivot.
+- **In-place** — this is why Quick Sort is **preferred for arrays** instead of Merge Sort. Merge Sort takes **`O(N)` extra space** (the `mix` array), Quick Sort only swaps inside the same array.
+- **Merge Sort is better for linked lists** — because of how memory is allocated: the nodes are **not stored in continuous memory**, so there is no cheap random access (`nums[s]`, `nums[e]`, swapping far-apart elements) that Quick Sort's partitioning depends on. Merge Sort only walks through the lists from front to back and re-links nodes, so it fits linked lists naturally.
+
+### Hybrid Sorting Algorithms (Tim Sort)
+
+A **hybrid** sorting algorithm combines two algorithms to get the strengths of both. **Tim Sort** is:
+
+```
+Merge Sort  +  Insertion Sort
+                    ↓
+        works well with partially sorted data
+```
+
+- **Merge Sort** gives the reliable `O(N log N)` behaviour on large inputs.
+- **Insertion Sort** is very fast on **small** or **partially sorted** pieces (close to `O(N)` when the data is almost sorted), so it handles those pieces.
+
+Real-world data is often partially sorted, which is why this combination works so well in practice. (Java's `Arrays.sort` on objects uses Tim Sort.)
