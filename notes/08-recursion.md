@@ -2100,3 +2100,122 @@ Merge Sort  +  Insertion Sort
 - **Insertion Sort** is very fast on **small** or **partially sorted** pieces (close to `O(N)` when the data is almost sorted), so it handles those pieces.
 
 Real-world data is often partially sorted, which is why this combination works so well in practice. (Java's `Arrays.sort` on objects uses Tim Sort.)
+
+---
+
+## Application — Strings in Recursion: Skip a Character
+
+**Basic question:** given a string, **remove every `'a'`** from it.
+
+```
+str = "baccad"        ans = "bccd"
+```
+
+There are two ways to build the answer string — the same two choices seen earlier in *Find All Indices* (list as argument vs new list per call):
+
+1. **Pass the `ans` string in the argument** → it can be passed on to the future calls.
+2. **Create the `ans` variable in the function body** → every call gets a **new** one.
+
+### Approach 1 — Pass the Answer in the Argument (Processed / Unprocessed)
+
+Split the string into two parts, written as `processed / unprocessed`:
+```
+processed   → the answer built so far
+unprocessed → the part of the string still to be looked at
+```
+At each call, look at the **first character** of `unprocessed`:
+- if it is `'a'` → **skip it** (don't add it to `processed`)
+- otherwise → **add it** to `processed`
+
+Then recurse on the **rest** of `unprocessed`.
+
+**Base case:** `unprocessed` is empty → nothing left to look at → `processed` is the answer.
+
+```java
+static void skip(String p, String up) {
+    if (up.isEmpty()) {
+        System.out.println(p);                  // base case: the answer is complete
+        return;
+    }
+
+    char ch = up.charAt(0);                     // first character of the unprocessed part
+
+    if (ch == 'a') {
+        skip(p, up.substring(1));               // skip it: processed stays the same
+    } else {
+        skip(p + ch, up.substring(1));          // keep it: add it to processed
+    }
+}
+```
+Call it as `skip("", "baccad")`.
+
+### Trace (the sketch) — `skip("", "baccad")`
+
+```
+   processed / unprocessed
+        "" / baccad       ch = b  → keep      →  "b"   / accad
+        b  / accad        ch = a  → SKIP      →  "b"   / ccad
+        b  / ccad         ch = c  → keep      →  "bc"  / cad
+        bc / cad          ch = c  → keep      →  "bcc" / ad
+        bcc/ ad           ch = a  → SKIP      →  "bcc" / d
+        bcc/ d            ch = d  → keep      →  "bccd"/ ""
+        bccd / ""         base case → print "bccd"      ← back to main
+```
+**Answer:** `bccd` ✓
+
+**Notice:** the answer is built on the way **down**; the base case just delivers it (same pattern as the "accumulator inside the argument" problems).
+
+### Approach 2 — Create the Answer in the Function Body
+
+Each call builds its **own local answer** (`ch` + whatever the **recursive call returns**), so the function now **returns a `String`** and the pieces are combined on the way **back up**.
+
+```
+(baccad):  ans = b  +  (accad)         ← local ans of this call  +  result of the recursive call
+(accad):   ans = "" +  (ccad)          ← 'a' is skipped → contributes an empty string
+(ccad):    ans = c  +  (cad)
+(cad):     ans = c  +  (ad)
+(ad):      ans = "" +  (d)
+(d):       ans = d  +  ("")
+("")       base case → returns ""
+```
+
+```java
+static String skip(String up) {
+    if (up.isEmpty()) {
+        return "";                              // base case: empty string
+    }
+
+    char ch = up.charAt(0);
+
+    if (ch == 'a') {
+        return skip(up.substring(1));           // skip: contribute nothing, just pass the result up
+    } else {
+        return ch + skip(up.substring(1));      // keep: this call's char + the result from below
+    }
+}
+```
+Call it as `String ans = skip("baccad");`.
+
+### Trace — Coming Back Up
+
+```
+skip("")       returns ""
+skip("d")      = d + ""      → "d"
+skip("ad")     = skip("d")   → "d"           ('a' skipped)
+skip("cad")    = c + "d"     → "cd"
+skip("ccad")   = c + "cd"    → "ccd"
+skip("accad")  = skip("ccad")→ "ccd"         ('a' skipped)
+skip("baccad") = b + "ccd"   → "bccd"        ← returned to main
+```
+**Answer:** `bccd` ✓
+
+### Approach 1 vs Approach 2
+
+| | Approach 1 (answer in argument) | Approach 2 (answer in function body) |
+|---|---|---|
+| Extra argument | yes — `p` (processed) | no |
+| Return type | `void` (prints at the base case) | `String` |
+| Answer is built | on the way **down** | on the way **back up** |
+| Base case | prints / returns the finished `p` | returns `""` |
+
+**Note:** Java `String`s are **immutable** — `p + ch` and `substring(1)` each create a **new** string. That's why Approach 1 can safely pass `p + ch` down without any call affecting another, unlike the shared `ArrayList` in *Find All Indices*. The copying also means the total work is more than `O(N)` for very long strings — fine for practice, but worth knowing.
