@@ -2219,3 +2219,79 @@ skip("baccad") = b + "ccd"   → "bccd"        ← returned to main
 | Base case | prints / returns the finished `p` | returns `""` |
 
 **Note:** Java `String`s are **immutable** — `p + ch` and `substring(1)` each create a **new** string. That's why Approach 1 can safely pass `p + ch` down without any call affecting another, unlike the shared `ArrayList` in *Find All Indices*. The copying also means the total work is more than `O(N)` for very long strings — fine for practice, but worth knowing.
+
+### Skip a String (Not Just a Character)
+
+**Problem:** remove every occurrence of the **word `"apple"`** from a string.
+
+```
+str = "bdapplefg"        ans = "bdfg"
+```
+Same Approach-2 idea (return a `String`, build the answer on the way back up), but now the check is **"does the unprocessed part *start with* `apple`?"** instead of comparing one character.
+
+- If it **starts with `"apple"`** → skip the **whole word** at once, i.e. continue from `up.substring(5)` (`"apple"` has 5 characters).
+- Otherwise → keep the first character and continue from `up.substring(1)`.
+
+```java
+static String skipApple(String up) {
+    if (up.isEmpty()) {
+        return "";                                      // base case
+    }
+
+    if (up.startsWith("apple")) {
+        return skipApple(up.substring(5));              // skip the whole word → jump 5 characters
+    } else {
+        return up.charAt(0) + skipApple(up.substring(1));   // keep this character
+    }
+}
+```
+
+### Trace (the sketch) — `"bdapplefg"`
+
+**Going down:**
+```
+(bdapplefg):  ans = b  + (dapplefg)
+(dapplefg):   ans = d  + (applefg)
+(applefg):    starts with "apple" → ans = "" + (fg)        ← up.substring(5) skips the word
+(fg):         ans = f  + (g)
+(g):          ans = g  + ("")
+(""):         base case → returns ""
+```
+
+**Coming back up:**
+```
+skip("")         returns ""
+skip("g")        = g + ""        → "g"
+skip("fg")       = f + "g"       → "fg"
+skip("applefg")  = skip("fg")    → "fg"          ← the word "apple" contributed nothing
+skip("dapplefg") = d + "fg"      → "dfg"
+skip("bdapplefg")= b + "dfg"     → "bdfg"        ← returned to main
+```
+**Answer:** `bdfg` ✓
+
+---
+
+## Subsets
+
+**Related ideas:** Permutations & Combinations, Subsets.
+
+**Subset:** a **non-adjacent collection** — a collection of elements picked from the original, where the chosen elements do **not** have to sit next to each other (unlike a subarray, which must be continuous).
+
+**Example:**
+```
+[3, 5, 9]  →  [3], [3, 5], [3, 9], [3, 5, 9], [5, 9], [5], [9]
+```
+Notice `[3, 9]` is a valid subset even though `3` and `9` are not neighbours.
+
+**Note:** the **empty subset `[]`** (choosing nothing) is also a valid subset, so a list of `N` elements has `2^N` subsets in total — `8` for `[3, 5, 9]` (the 7 above plus `[]`). The sketch lists only the non-empty ones.
+
+### Recursion & Iteration — Subsets of a String
+
+The same idea works on strings:
+```
+str = "abc"
+ans = ["a", "b", "c", "ab", "ac", "bc", "abc"]
+```
+(plus `""`, the empty subset).
+
+**VVI:** this pattern of **taking some elements and removing (leaving out) some** is known as the **subset pattern**. Every element has two choices — it is either **in** the subset or **out** of it — which is where the `2^N` count comes from.
