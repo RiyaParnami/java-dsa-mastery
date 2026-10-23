@@ -2295,3 +2295,128 @@ ans = ["a", "b", "c", "ab", "ac", "bc", "abc"]
 (plus `""`, the empty subset).
 
 **VVI:** this pattern of **taking some elements and removing (leaving out) some** is known as the **subset pattern**. Every element has two choices — it is either **in** the subset or **out** of it — which is where the `2^N` count comes from.
+
+### Approach 1 — Iteration: Add Each Element to Every Existing Subset
+
+**Idea:** start with just the **empty subset**, then process the elements **one at a time**. For each new element, take **every subset built so far**, make a **copy** of it, **add the new element** to the copy, and keep both the old and the new subsets.
+
+**Example:** `arr = [1, 2, 3]`
+
+```
+start:         [ [] ]
+
+add 1:         [ [], [1] ]
+               └ old ┘ └ copies of the old ones, with 1 added
+
+add 2:         [ [], [1],  [2], [1, 2] ]
+               └─ old ─┘  └─ old ones + 2 ─┘
+
+add 3:         [ [], [1], [2], [1, 2],  [3], [1, 3], [2, 3], [1, 2, 3] ]
+               └────────── old ────────┘ └────── old ones + 3 ──────┘
+```
+**Answer:** `[ [], [1], [2], [1,2], [3], [1,3], [2,3], [1,2,3] ]` — **8 subsets** (`2³`).
+
+The number of subsets **doubles** with every element (every existing subset gives one new subset), which is exactly the `2^N` count.
+
+```java
+static List<List<Integer>> subset(int[] arr) {
+    List<List<Integer>> outer = new ArrayList<>();
+    outer.add(new ArrayList<>());                    // start with the empty subset
+
+    for (int num : arr) {
+        int n = outer.size();                        // fix the size BEFORE adding new subsets
+        for (int i = 0; i < n; i++) {
+            List<Integer> internal = new ArrayList<>(outer.get(i));   // copy an existing subset
+            internal.add(num);                       // add the new element to the copy
+            outer.add(internal);
+        }
+    }
+    return outer;
+}
+```
+
+### Approach 2 — Recursion: Take It or Leave It (Processed / Unprocessed)
+
+Use the same `processed / unprocessed` split as the skip-a-character problem. At each call, look at the **first character** of `unprocessed` — there are **two choices**:
+
+1. **Take it** → add it to `processed`.
+2. **Leave it** → keep `processed` as it is.
+
+Then recurse on the **rest** of `unprocessed` for **both** choices. So every call makes **two** recursive calls → a binary tree with **2^N leaves**.
+
+**Base case:** `unprocessed` is empty → `processed` is one finished subset → print it.
+
+```java
+static void subseq(String p, String up) {
+    if (up.isEmpty()) {
+        System.out.println(p);                       // base case: one complete subset
+        return;
+    }
+
+    char ch = up.charAt(0);
+
+    subseq(p + ch, up.substring(1));                 // choice 1: TAKE the character
+    subseq(p, up.substring(1));                      // choice 2: LEAVE the character
+}
+```
+Call it as `subseq("", "abc")`.
+
+### Recursion Tree (the sketch) — `subseq("", "abc")`
+
+Written as `processed / unprocessed` (`∅` = empty string):
+
+```
+                                ( "" / abc )
+                        take a /              \ leave a
+                     ( a / bc )              ( "" / bc )
+                take b /      \ leave b     take b /     \ leave b
+                (ab / c)     (a / c)        (b / c)      ("" / c)
+         take c /   \ leave c    ...         ...           ...
+        (abc/∅)    (ab/∅)   (ac/∅) (a/∅)  (bc/∅) (b/∅)  (c/∅) (∅/∅)
+```
+
+**The leaves are the answer** — read from left to right:
+```
+abc,  ab,  ac,  a,  bc,  b,  c,  ""
+```
+That's **8 subsets** = `2³` ✓ (`""` is the empty subset).
+
+**Smaller example — `str = "ab"`:** `("" / ab)` has just **two** branches — `(a / b)` (took `a`) and `("" / b)` (left `a`). Every call splits into exactly two; there is no third branch.
+
+### Collecting the Subsets in a List (Returning Them)
+
+Instead of printing at the base case, add `p` to a list — the same "list as argument" pattern as *Find All Indices*:
+
+```java
+static ArrayList<String> subseqRet(String p, String up) {
+    if (up.isEmpty()) {
+        ArrayList<String> list = new ArrayList<>();
+        list.add(p);                                 // the finished subset
+        return list;
+    }
+
+    char ch = up.charAt(0);
+
+    ArrayList<String> left  = subseqRet(p + ch, up.substring(1));   // take
+    ArrayList<String> right = subseqRet(p, up.substring(1));        // leave
+
+    left.addAll(right);                              // merge the results from both choices
+    return left;
+}
+```
+
+### Iteration vs Recursion for Subsets
+
+| | Iteration | Recursion (take / leave) |
+|---|---|---|
+| How the subsets are built | add each element to **all** existing subsets (copies) | decide **take or leave** for each element, down the tree |
+| Output order for `[1,2,3]` / `"abc"` | `[], [1], [2], [1,2], [3], …` | `abc, ab, ac, a, bc, b, c, ""` |
+| Number of subsets | `2^N` | `2^N` |
+
+### Complexity
+
+```
+Number of subsets:   2^N
+Time Complexity:     O(N × 2^N)     — 2^N subsets, and building/copying each one takes up to N steps
+Space Complexity:    O(N × 2^N)     — to store all the subsets (the recursion itself is only N deep)
+```
