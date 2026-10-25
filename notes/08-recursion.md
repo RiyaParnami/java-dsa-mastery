@@ -2381,7 +2381,7 @@ abc,  ab,  ac,  a,  bc,  b,  c,  ""
 ```
 That's **8 subsets** = `2³` ✓ (`""` is the empty subset).
 
-**Smaller example — `str = "ab"`:** `("" / ab)` has just **two** branches — `(a / b)` (took `a`) and `("" / b)` (left `a`). Every call splits into exactly two; there is no third branch.
+**Smaller example — `str = "ab"`:** `("" / ab)` has two branches — `(a / b)` (took `a`) and `("" / b)` (left `a`). Each of those splits into two again, giving `ab, a, b, ""` (4 = `2²`). The **three-branch** version of this tree is the ASCII variant, covered in the next subsection.
 
 ### Collecting the Subsets in a List (Returning Them)
 
@@ -2420,3 +2420,47 @@ Number of subsets:   2^N
 Time Complexity:     O(N × 2^N)     — 2^N subsets, and building/copying each one takes up to N steps
 Space Complexity:    O(N × 2^N)     — to store all the subsets (the recursion itself is only N deep)
 ```
+
+### Variation — Subsets with ASCII Values (3 Choices per Character)
+
+Now every character has **three** choices instead of two:
+
+1. **Take the character** → `p + ch`
+2. **Leave it** → `p`
+3. **Take its ASCII value** → `p + (ch + 0)` (for example `'a'` becomes `97`)
+
+So every call makes **three** recursive calls.
+
+**`str = "ab"`** — the tree from the sketch (`∅` = empty `processed`):
+```
+                          ( ∅ / ab )
+              take a /       leave a |        take ASCII of a \
+             ( a / b )           ( ∅ / b )              ( 97 / b )
+```
+Each of these three splits again in the same way when `b` is processed:
+```
+( a / b )    →  ab,    a,   a98
+( ∅ / b )    →  b,     "",  98
+( 97 / b )   →  97b,   97,  9798
+```
+**Answer for `"ab"`:** `ab, a, a98, b, "", 98, 97b, 97, 9798` — **9 results** = `3²`.
+
+```java
+static void subseqAscii(String p, String up) {
+    if (up.isEmpty()) {
+        System.out.println(p);                           // base case
+        return;
+    }
+
+    char ch = up.charAt(0);
+
+    subseqAscii(p + ch, up.substring(1));                // choice 1: take the character
+    subseqAscii(p, up.substring(1));                     // choice 2: leave it
+    subseqAscii(p + (ch + 0), up.substring(1));          // choice 3: take its ASCII value
+}
+```
+Call it as `subseqAscii("", "ab")`.
+
+**Why `(ch + 0)`?** Adding an `int` to a `char` promotes it to an `int`, so `ch + 0` is the **ASCII value** (`'a' + 0 = 97`). The brackets matter: `p + (ch + 0)` appends `97`, whereas `p + ch + 0` would append the letter and then a `0`.
+
+**Count:** 3 choices for each of `N` characters → **`3^N`** results (9 for `"ab"`, 27 for `"abc"`).
