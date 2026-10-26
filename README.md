@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 113 |
+| Implementations Written | 114 |
 | Current Focus | Recursion and Divide and Conquer |
 | Target Completion | October 2026 |
 
