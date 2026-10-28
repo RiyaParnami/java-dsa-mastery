@@ -2464,3 +2464,102 @@ Call it as `subseqAscii("", "ab")`.
 **Why `(ch + 0)`?** Adding an `int` to a `char` promotes it to an `int`, so `ch + 0` is the **ASCII value** (`'a' + 0 = 97`). The brackets matter: `p + (ch + 0)` appends `97`, whereas `p + ch + 0` would append the letter and then a `0`.
 
 **Count:** 3 choices for each of `N` characters → **`3^N`** results (9 for `"ab"`, 27 for `"abc"`).
+
+### Complexity of Subsets — Where Each Part Comes From
+
+```
+Time Complexity:   O(N × 2^N)
+                        ↑
+                  2^N = number of subsets
+```
+There are `2^N` subsets, and creating each one (copying it and adding an element) takes up to `O(N)` work.
+
+```
+Space Complexity:  O(2^N × N)
+                      ↑      ↑
+        total subsets        space taken by each subset = O(N)
+```
+
+### Subsets with Duplicates
+
+**Problem:** the array can contain **duplicate** elements, but the answer must **not** contain duplicate subsets.
+
+**Example:** `arr = [1, 2, 2]`
+
+If we simply reuse the iteration approach, the second `2` would be added to **every** existing subset and produce **repeated** subsets (`[2]` and `[1, 2]` would appear twice). So:
+
+1. **Sort the array first** — equal elements then sit **next to each other**.
+2. When the current element is the **same as the previous one**, add it **only to the subsets created in the previous step** (not to all the subsets).
+
+```
+start:          [ [] ]
+
+add 1:          [ [], [1] ]
+
+add 2 (new):    [ [], [1],  [2], [1, 2] ]
+                           └─ added to ALL existing subsets ─┘
+
+add 2 (same as previous → only add it to the subsets created in the last step: [2] and [1, 2]):
+                [ [], [1], [2], [1, 2],  [2, 2], [1, 2, 2] ]
+                                         └ new ones only ┘
+```
+The subsets `[2]` and `[1, 2]` that the second `2` would have created on `[]` and `[1]` are **skipped** (crossed out in the sketch) because they already exist.
+
+**Answer:** `[ [], [1], [2], [1,2], [2,2], [1,2,2] ]` — 6 subsets, no repeats ✓
+
+### How the Range Is Tracked (`start` and `end`)
+
+Keep two indices into the list of subsets built so far:
+```
+start = where to start copying from
+end   = the last index of the subsets that existed before this step
+```
+- **Normal element:** `start = 0` → copy **all** existing subsets.
+- **Same as the previous element:** `start = end + 1` → copy **only** the subsets added in the previous step.
+
+```
+Step for arr[2] = 2 (a duplicate):
+subsets so far = [ [], [1], [2], [1,2] ]    indices 0 … 3
+previous step added indices 2 … 3  →  start = end + 1 = 2  →  copy only [2] and [1,2]
+```
+
+### Code
+
+```java
+static List<List<Integer>> subsetDuplicate(int[] arr) {
+    Arrays.sort(arr);                                   // duplicates must be next to each other
+
+    List<List<Integer>> outer = new ArrayList<>();
+    outer.add(new ArrayList<>());                       // start with the empty subset
+
+    int start = 0;
+    int end = 0;
+
+    for (int i = 0; i < arr.length; i++) {
+        start = 0;
+        if (i > 0 && arr[i] == arr[i - 1]) {            // duplicate of the previous element
+            start = end + 1;                            // only use subsets from the previous step
+        }
+
+        end = outer.size() - 1;                         // last index BEFORE adding new subsets
+        int n = outer.size();
+
+        for (int j = start; j < n; j++) {
+            List<Integer> internal = new ArrayList<>(outer.get(j));   // copy
+            internal.add(arr[i]);                       // add the current element
+            outer.add(internal);
+        }
+    }
+    return outer;
+}
+```
+
+### Trace — `[1, 2, 2]`
+
+| `i` | `arr[i]` | duplicate? | `start` | `end` | copies | subsets after this step |
+|---|---|---|---|---|---|---|
+| 0 | 1 | no | 0 | 0 | `[]` | `[], [1]` |
+| 1 | 2 | no | 0 | 1 | `[]`, `[1]` | `[], [1], [2], [1,2]` |
+| 2 | 2 | **yes** | `end + 1 = 2` | 3 | `[2]`, `[1,2]` | `[], [1], [2], [1,2], [2,2], [1,2,2]` |
+
+**Complexity:** same as before — `O(N × 2^N)` time and space in the worst case (no duplicates, all `2^N` subsets).
