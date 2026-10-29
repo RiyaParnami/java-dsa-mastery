@@ -2507,6 +2507,13 @@ The subsets `[2]` and `[1, 2]` that the second `2` would have created on `[]` an
 
 **Answer:** `[ [], [1], [2], [1,2], [2,2], [1,2,2] ]` — 6 subsets, no repeats ✓
 
+### Key Points (VVI)
+
+- **When you find a duplicate element, only add it to the newly created subsets of the previous step.**
+  Adding it to *all* existing subsets would recreate subsets that already exist (e.g. `[2]` and `[1, 2]` would appear twice).
+- **Because of the point above, duplicates have to be together → sort the array first.**
+  Only when equal elements sit next to each other can "same as the previous element" (`arr[i] == arr[i - 1]`) be checked, and the previous step's subsets are exactly the ones that element created.
+
 ### How the Range Is Tracked (`start` and `end`)
 
 Keep two indices into the list of subsets built so far:
