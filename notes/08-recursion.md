@@ -2570,3 +2570,127 @@ static List<List<Integer>> subsetDuplicate(int[] arr) {
 | 2 | 2 | **yes** | `end + 1 = 2` | 3 | `[2]`, `[1,2]` | `[], [1], [2], [1,2], [2,2], [1,2,2]` |
 
 **Complexity:** same as before — `O(N × 2^N)` time and space in the worst case (no duplicates, all `2^N` subsets).
+
+---
+
+## Permutations
+
+**Problem:** given a string, find all the **arrangements** (orderings) of its characters.
+
+```
+str = "abc"
+permutations = [abc, bac, cab, bca, acb, cba]     (3! = 6)
+```
+
+Unlike subsets, **every character must be used**, and **the order matters**.
+
+### The Idea (VVI)
+
+Use the same `processed / unprocessed` split as before. Take the **first character** of `unprocessed` and **insert it at every possible position** in `processed`.
+
+```
+processed = "a",  ch = 'b'   →   "ba"   and   "ab"
+                                   ↑ before a   ↑ after a
+```
+
+**Number of calls at each step = size of `p` + 1** (a string of length `k` has `k + 1` gaps to insert into).
+
+```
+p = ""   →  1 position
+p = "a"  →  2 positions
+p = "ab" →  3 positions        total leaves = 1 × 2 × 3 = 3! = 6
+```
+
+### Recursion Tree — `("" / abc)`
+
+```
+                      ( "" / abc )
+                            |
+                       ( a / bc )
+                ┌───────────┴───────────┐
+          ( ba / c )               ( ab / c )
+       ┌─────┼─────┐             ┌─────┼─────┐
+   (cba/∅) (bca/∅) (bac/∅)   (cab/∅) (acb/∅) (abc/∅)
+```
+The leaves are the answer: `cba, bca, bac, cab, acb, abc` — **6 = 3!** ✓
+
+**Note:** a node makes `p.length() + 1` calls, so unlike subsets (a fixed 2 calls) this needs a **`for` loop** to make the recursive calls.
+
+### How to Insert at Every Position
+
+For `p = "ba"` and `ch = 'c'`, loop `i` from `0` to `p.length()` (**inclusive**):
+
+```
+f = p.substring(0, i)           // part BEFORE the insert position
+s = p.substring(i, p.length())  // part AFTER the insert position
+new p = f + ch + s
+```
+
+```
+i = 0:  f = ""    s = "ba"   →  "" + c + "ba"  =  "cba"
+i = 1:  f = "b"   s = "a"    →  "b" + c + "a"  =  "bca"
+i = 2:  f = "ba"  s = ""     →  "ba" + c + ""  =  "bac"
+```
+`i <= p.length()` (not `<`) is what allows inserting at the **very end** (`bac`).
+
+### Code
+
+```java
+static void permutations(String p, String up) {
+    if (up.isEmpty()) {
+        System.out.println(p);                       // base case: one complete permutation
+        return;
+    }
+
+    char ch = up.charAt(0);
+
+    for (int i = 0; i <= p.length(); i++) {          // inclusive: p.length() + 1 positions
+        String f = p.substring(0, i);
+        String s = p.substring(i, p.length());
+        permutations(f + ch + s, up.substring(1));   // insert ch between f and s
+    }
+}
+```
+Call it as `permutations("", "abc")`.
+
+### Returning the Permutations in a List
+
+Same "create a list in the body, merge on the way back up" pattern as *Find All Indices* and *Subsets*:
+
+```java
+static ArrayList<String> permutationsList(String p, String up) {
+    if (up.isEmpty()) {
+        ArrayList<String> base = new ArrayList<>();
+        base.add(p);
+        return base;
+    }
+
+    char ch = up.charAt(0);
+    ArrayList<String> ans = new ArrayList<>();       // new list for THIS call
+
+    for (int i = 0; i <= p.length(); i++) {
+        String f = p.substring(0, i);
+        String s = p.substring(i, p.length());
+        ans.addAll(permutationsList(f + ch + s, up.substring(1)));   // merge from below
+    }
+    return ans;
+}
+```
+
+### Complexity
+
+```
+Number of permutations:  N!
+Time Complexity:         O(N × N!)    — N! leaves, each string takes O(N) to build
+Space Complexity:        O(N)         — recursion depth (print version)
+                         O(N × N!)    — if all permutations are stored in a list
+```
+
+### Subsets vs Permutations
+
+| | Subsets | Permutations |
+|---|---|---|
+| Choice at each character | take / leave | insert at **every position** of `p` |
+| Calls per node | 2 (fixed) | `p.length() + 1` (needs a loop) |
+| Order matters? | no | **yes** |
+| Number of results | `2^N` | `N!` |
