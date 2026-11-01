@@ -2694,3 +2694,154 @@ Space Complexity:        O(N)         — recursion depth (print version)
 | Calls per node | 2 (fixed) | `p.length() + 1` (needs a loop) |
 | Order matters? | no | **yes** |
 | Number of results | `2^N` | `N!` |
+
+---
+
+## Application — Phone Keypad Combinations (Letter Combinations of Digits)
+
+**Problem:** given a string of digits, print every **letter combination** the digits could represent, using the keypad below.
+
+**Keypad used in this problem** (note: it starts at digit `1`, unlike a real phone where `2` is `abc`):
+```
+ 1        2        3
+abc      def      ghi
+0 1 2    3 4 5    6 7 8
+
+ 4        5        6
+jkl      mno      pqr
+9 10 11  12 13 14 15 16 17
+
+ 7        8        9
+stu      vwx       yz
+18 19 20 21 22 23  24 25 (26 → skip)
+```
+
+**Example:**
+```
+digits = "12"
+ans    = [ad, ae, af, bd, be, bf, cd, ce, cf]     (3 × 3 = 9 combinations)
+```
+
+### The Idea (VVI)
+
+Every digit owns a **block of 3 consecutive letters**, so the digit can be converted into a **range of indices** into the alphabet (`a = 0`, `b = 1`, …):
+
+```
+range of digit = [ (digit - 1) × 3 ,  digit × 3 )
+```
+
+| digit | range | letters |
+|---|---|---|
+| 1 | `[0, 3)` → 0, 1, 2 | a, b, c |
+| 2 | `[3, 6)` → 3, 4, 5 | d, e, f |
+| 3 | `[6, 9)` → 6, 7, 8 | g, h, i |
+| 4 | `[9, 12)` → 9, 10, 11 | j, k, l |
+| … | … | … |
+| 9 | `[24, 27)` → 24, 25, **26** | y, z, **(skip)** |
+
+**Why "skip" for index `26`?** The alphabet only has 26 letters (indices `0 … 25`), so `index = 26` doesn't exist — the last digit `9` has just **2** letters (`y`, `z`).
+
+### Index → Character (VVI)
+
+```
+char to add to processed  =  'a' + index
+```
+Characters are stored as **unicode/ASCII numbers**, so adding to a `char` moves along the alphabet:
+```
+'a' + 0 = 'a'
+'a' + 1 = 'b'
+'a' + 3 = 'd'        ← the d in "ad" comes from 'a' + 3
+```
+`'a' + index` is an **`int`**, so cast it back with `(char)` before appending to the string.
+
+### The Recursive Idea
+
+Same `processed / unprocessed` split as before. At each call:
+1. Take the **first digit** of `unprocessed`.
+2. Loop over **that digit's range** — each index gives one letter.
+3. For **each letter**, add it to `processed` and recurse on the **rest** of the digits.
+
+**Base case:** `unprocessed` is empty → `processed` is one complete combination → print it.
+
+Like permutations, this needs a **`for` loop** (3 recursive calls per digit, not a fixed 2).
+
+### Recursion Tree — `("" / 12)`
+
+```
+                         ( "" / 12 )
+              digit = 1 → range [0, 3) → i = 0, 1, 2
+              /                |                 \
+         ( a / 2 )         ( b / 2 )          ( c / 2 )
+   digit = 2 → [3, 6) → i = 3, 4, 5     (same for b and c)
+    /      |      \
+(ad/∅)  (ae/∅)  (af/∅)                 ← 'a' + 3, 'a' + 4, 'a' + 5
+```
+The leaves are the answer: `ad, ae, af, bd, be, bf, cd, ce, cf`.
+
+### Code — Printing
+
+```java
+static void pad(String p, String up) {
+    if (up.isEmpty()) {
+        System.out.println(p);                        // base case: one full combination
+        return;
+    }
+
+    int digit = up.charAt(0) - '0';                   // '2' → 2  (char to int)
+
+    for (int i = (digit - 1) * 3; i < digit * 3; i++) {
+        if (i == 26) {
+            continue;                                 // no 27th letter → skip
+        }
+        char ch = (char) ('a' + i);                   // index → letter
+        pad(p + ch, up.substring(1));                 // add letter, move to next digit
+    }
+}
+```
+Call it as `pad("", "12")`.
+
+**Why `up.charAt(0) - '0'`?** `'2'` is the **character** `2` (its unicode value is 50), not the number `2`. Subtracting `'0'` (48) gives the real integer.
+
+### Code — Returning a List
+
+Same "new list in the body, merge on the way back up" pattern as permutations:
+
+```java
+static ArrayList<String> padRet(String p, String up) {
+    if (up.isEmpty()) {
+        ArrayList<String> list = new ArrayList<>();
+        list.add(p);                                  // one finished combination
+        return list;
+    }
+
+    int digit = up.charAt(0) - '0';
+    ArrayList<String> ans = new ArrayList<>();        // new list for THIS call
+
+    for (int i = (digit - 1) * 3; i < digit * 3; i++) {
+        if (i == 26) {
+            continue;
+        }
+        char ch = (char) ('a' + i);
+        ans.addAll(padRet(p + ch, up.substring(1)));  // merge results from below
+    }
+    return ans;
+}
+```
+
+### Complexity
+
+```
+Number of combinations:  3^N        (3 letters per digit, N digits)
+Time Complexity:         O(N × 3^N) — 3^N leaves, each string takes O(N) to build
+Space Complexity:        O(N)       — recursion depth (print version)
+                         O(N × 3^N) — if all combinations are stored in a list
+```
+
+### Pattern Summary — String Recursion Problems
+
+| Problem | Choices per step | Calls per node | Results |
+|---|---|---|---|
+| Subsets | take / leave | 2 | `2^N` |
+| Subsets with ASCII | take / leave / ASCII | 3 | `3^N` |
+| Permutations | insert at every position | `p.length() + 1` (loop) | `N!` |
+| Phone Keypad | each letter of the digit | 3 (loop) | `3^N` |
