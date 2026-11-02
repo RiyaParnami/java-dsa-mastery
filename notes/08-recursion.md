@@ -2845,3 +2845,144 @@ Space Complexity:        O(N)       — recursion depth (print version)
 | Subsets with ASCII | take / leave / ASCII | 3 | `3^N` |
 | Permutations | insert at every position | `p.length() + 1` (loop) | `N!` |
 | Phone Keypad | each letter of the digit | 3 (loop) | `3^N` |
+
+---
+
+## Application — Dice Throw Combinations (Amazon)
+
+**Problem:** you throw a standard die (faces `1, 2, 3, 4, 5, 6`) as many times as needed. Print **every sequence of throws** whose values add up to the given `target`.
+
+**Example — `target = 4`:**
+```
+ans = [ 4, 22, 112, 31, ... ]
+```
+Full answer (in the order the code below produces it):
+```
+1111, 112, 121, 13, 211, 22, 31, 4          (8 results)
+```
+
+**Note:** `13` and `31` are counted as **different** results — the **order of the throws matters**. (Strictly these are compositions of the target, but the question calls them "combinations".)
+
+### The Idea (VVI)
+
+Use the `processed / unprocessed` split again, but now `unprocessed` is a **number**: the **remaining target**.
+```
+processed → the throws made so far  (e.g. "12")
+target    → how much is still left to make  (e.g. 4 - 1 - 2 = 1)
+```
+At each call, **try every face value `i` from 1 to 6** (as long as `i <= target`, since a throw bigger than what's left would overshoot):
+- **take** the face `i` → add it to `processed`
+- recurse with `target - i`
+
+The sketch's `processed / target` pairs:
+```
+( "" / 4 )  →  ( 1 / 3 ),  ( 2 / 2 ),  ( 3 / 1 ),  ( 4 / 0 )
+```
+**Base case:** `target == 0` → the throws add up exactly → `processed` is one valid answer.
+
+### Recursion Tree — `("" / 4)`
+
+```
+                        ( "" / 4 )
+         i=1 /        i=2 |        i=3 |        i=4 \
+        ( 1 / 3 )      ( 2 / 2 )     ( 3 / 1 )      ( 4 / 0 )  ← base: "4"
+       /    |    \
+ (11 / 2) (12 / 1) (13 / 0)                              ← base: "13"
+    ...      ...
+```
+- `( 4 / 0 )` → `target == 0` → **answer `4`**.
+- `( 1 / 3 )` → tries `i = 1, 2, 3` (4 would overshoot the remaining `3`) → `11/2`, `12/1`, `13/0` → `13` is an answer, the others keep going.
+
+**Why `i <= target`?** Once the remaining target is smaller than a face value, that face can't be thrown. It also guarantees `target` never goes negative, so every path ends exactly at `0`.
+
+### Code — Printing
+
+```java
+static void dice(String p, int target) {
+    if (target == 0) {
+        System.out.println(p);                       // base case: throws add up to the target
+        return;
+    }
+
+    for (int i = 1; i <= 6 && i <= target; i++) {    // faces 1..6, never more than what's left
+        dice(p + i, target - i);                     // take face i, reduce the target
+    }
+}
+```
+Call it as `dice("", 4)`.
+
+### Code — Returning a List
+
+Same "new list in the body, merge on the way back up" pattern as permutations and the keypad problem:
+
+```java
+static ArrayList<String> diceRet(String p, int target) {
+    if (target == 0) {
+        ArrayList<String> list = new ArrayList<>();
+        list.add(p);                                 // one finished sequence of throws
+        return list;
+    }
+
+    ArrayList<String> ans = new ArrayList<>();       // new list for THIS call
+
+    for (int i = 1; i <= 6 && i <= target; i++) {
+        ans.addAll(diceRet(p + i, target - i));      // merge results from below
+    }
+    return ans;
+}
+```
+
+### Worked Example — `target = 4`
+
+```
+( "" / 4 )
+├── ( 1 / 3 )
+│    ├── ( 11 / 2 )
+│    │    ├── ( 111 / 1 )
+│    │    │    └── ( 1111 / 0 )  → 1111
+│    │    └── ( 112 / 0 )        → 112
+│    ├── ( 12 / 1 )
+│    │    └── ( 121 / 0 )        → 121
+│    └── ( 13 / 0 )              → 13
+├── ( 2 / 2 )
+│    ├── ( 21 / 1 )
+│    │    └── ( 211 / 0 )        → 211
+│    └── ( 22 / 0 )              → 22
+├── ( 3 / 1 )
+│    └── ( 31 / 0 )              → 31
+└── ( 4 / 0 )                    → 4
+```
+**Answer:** `1111, 112, 121, 13, 211, 22, 31, 4` ✓
+
+### Making the Number of Faces a Parameter
+
+The die doesn't have to have 6 faces — pass it in:
+```java
+static void dice(String p, int target, int faces) {
+    if (target == 0) {
+        System.out.println(p);
+        return;
+    }
+    for (int i = 1; i <= faces && i <= target; i++) {
+        dice(p + i, target - i, faces);
+    }
+}
+```
+
+### Complexity
+
+```
+Number of results (when faces >= target):  2^(target - 1)     — 8 for target = 4
+Time Complexity:   O(2^N × N)  roughly     — N = target; each result string is up to N long
+Space Complexity:  O(N)        recursion depth (the deepest path is all 1s: target calls)
+                   O(N × 2^N)  if all results are stored in a list
+```
+
+### Pattern Summary — Updated
+
+| Problem | What changes per call | Calls per node | Base case |
+|---|---|---|---|
+| Subsets | `up` shrinks by 1 character | 2 (take / leave) | `up` is empty |
+| Permutations | `up` shrinks by 1 character | `p.length() + 1` (loop) | `up` is empty |
+| Phone Keypad | `up` shrinks by 1 digit | 3 (loop) | `up` is empty |
+| Dice Throw | `target` shrinks by the face thrown | up to 6 (loop) | `target == 0` |
