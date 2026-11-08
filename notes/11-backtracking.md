@@ -182,6 +182,69 @@ static ArrayList<String> pathRet(String p, int r, int c) {
 }
 ```
 
+### The Same Problem with the "Countdown" Convention — `(p, r, c)`
+
+In Problem 1, `r` and `c` were the **rows and columns still left to cross**. The same convention works for printing the paths, so the code looks just like `count`: the maze is labelled `3, 2, 1` along both sides, you **start at `(3, 3)`** and the **end is `(1, 1)`**.
+
+```
+(p, r, c)     p = the path till the point (r, c)
+```
+- **Move DOWN**  → `r - 1`, add `'D'`  (only if `r > 1`)
+- **Move RIGHT** → `c - 1`, add `'R'`  (only if `c > 1`)
+- **Base case:** `r == 1 && c == 1` → reached the end → `p` is a complete path.
+
+**Tree (the sketch):**
+```
+                          ( "" , 3, 3 )
+                 D /                         \ R
+          ( D, 2, 3 )                     ( R, 3, 2 )
+        D /          \ R                        ...
+ ( DD, 1, 3 )     ( DR, 2, 2 )
+       | R              ...
+ ( DDR, 1, 2 )
+       | R
+ ( DDRR, 1, 1 )   → base case → add "DDRR" to the answer list
+```
+
+**Printing:**
+```java
+static void path(String p, int r, int c) {
+    if (r == 1 && c == 1) {
+        System.out.println(p);                    // reached the end
+        return;
+    }
+    if (r > 1) {
+        path(p + 'D', r - 1, c);                  // move down
+    }
+    if (c > 1) {
+        path(p + 'R', r, c - 1);                  // move right
+    }
+}
+```
+Call it as `path("", 3, 3)`.
+
+**Returning a list** (a new `list = ( )` in each call, merged on the way back up):
+```java
+static ArrayList<String> pathRet(String p, int r, int c) {
+    if (r == 1 && c == 1) {
+        ArrayList<String> list = new ArrayList<>();
+        list.add(p);                              // base case: the finished path goes into the list
+        return list;
+    }
+
+    ArrayList<String> list = new ArrayList<>();
+    if (r > 1) {
+        list.addAll(pathRet(p + 'D', r - 1, c));
+    }
+    if (c > 1) {
+        list.addAll(pathRet(p + 'R', r, c - 1));
+    }
+    return list;
+}
+```
+
+**Note (from the lecture):** this is **exactly the same theory as `p, up`** (processed / unprocessed) in the **subsets** question — watch that video for the details. Here `p` is the path already taken, and the remaining maze from `(r, c)` plays the role of the unprocessed part.
+
 ### Complexity
 
 ```
@@ -190,3 +253,89 @@ Time Complexity:                exponential          (every path is generated an
 Space Complexity:               O(n)  recursion depth   (the longest path has 2(n-1) moves)
                                 (plus the list of paths, if they are stored)
 ```
+
+---
+
+## Problem 3 — Maze with Diagonal Moves
+
+**Problem:** same maze, but now you may also move **diagonally** (one step down **and** one step right at the same time). Count / print the paths.
+
+From a cell there are now **three** moves:
+```
+→  RIGHT      (r, c - 1)
+↓  DOWN       (r - 1, c)
+↘  DIAGONAL   (r - 1, c - 1)
+```
+
+### Conditions for Each Move (VVI)
+
+A move is allowed only if it **stays inside the maze**. Using the countdown convention (`r`, `c` = rows/columns left, end at `(1, 1)`):
+
+| Move | Goes to | Allowed only if |
+|---|---|---|
+| Down | `(r - 1, c)` | `r > 1` |
+| Diagonal | `(r - 1, c - 1)` | `r > 1 && c > 1` (needs a free row **and** a free column) |
+| Right | `(r, c - 1)` | `c > 1` |
+
+### Tree — `(3, 3)`
+
+```
+                        ( 3, 3 )
+         down /            | diagonal           \ right
+         r > 1            r > 1 && c > 1          c > 1
+      ( 2, 3 )           ( 2, 2 )              ( 3, 2 )
+```
+Every call now makes **up to 3** recursive calls (the sketch shows the three branches from `(3, 3)` with the conditions `r > 1`, `r > 1 && c > 1` and `c > 1`).
+
+### Code — Counting
+
+```java
+static int countDiag(int r, int c) {
+    if (r == 1 || c == 1) {
+        return 1;                                 // only one straight path left
+    }
+    int down     = countDiag(r - 1, c);           // down
+    int diagonal = countDiag(r - 1, c - 1);       // diagonal
+    int right    = countDiag(r, c - 1);           // right
+    return down + diagonal + right;
+}
+```
+Trace for a `3 × 3` maze:
+```
+count(2,2) = count(1,2) + count(1,1) + count(2,1) = 1 + 1 + 1 = 3
+count(2,3) = count(1,3) + count(1,2) + count(2,2) = 1 + 1 + 3 = 5
+count(3,2) = count(2,2) + count(2,1) + count(3,1) = 3 + 1 + 1 = 5
+count(3,3) = count(2,3) + count(2,2) + count(3,2) = 5 + 3 + 5 = 13
+```
+So a `3 × 3` maze has **13** paths with diagonals (versus 6 without).
+
+### Code — Printing the Paths
+
+Down and right are both `D`/`R` in the earlier problems, so use **`V`** (vertical), **`H`** (horizontal) and **`D`** (diagonal) so the letters don't clash:
+
+```java
+static void pathDiag(String p, int r, int c) {
+    if (r == 1 && c == 1) {
+        System.out.println(p);                    // reached the end
+        return;
+    }
+    if (r > 1 && c > 1) {
+        pathDiag(p + 'D', r - 1, c - 1);          // diagonal
+    }
+    if (r > 1) {
+        pathDiag(p + 'V', r - 1, c);              // vertical (down)
+    }
+    if (c > 1) {
+        pathDiag(p + 'H', r, c - 1);              // horizontal (right)
+    }
+}
+```
+**Small check — a `2 × 2` maze** (`pathDiag("", 2, 2)`):
+```
+( "" , 2, 2 ) → diagonal → ( D , 1, 1 )                         → "D"
+              → vertical → ( V , 1, 2 ) → horizontal → ( VH, 1, 1 )   → "VH"
+              → horizontal → ( H , 2, 1 ) → vertical → ( HV, 1, 1 )   → "HV"
+```
+**Output:** `D`, `VH`, `HV` — 3 paths, matching `count(2, 2) = 3`.
+
+The `H / V / D` letters are my choice for the printing version, since the sketch only shows the three arrows and conditions.
