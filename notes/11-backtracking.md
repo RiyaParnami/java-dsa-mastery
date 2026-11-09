@@ -339,3 +339,108 @@ static void pathDiag(String p, int r, int c) {
 **Output:** `D`, `VH`, `HV` — 3 paths, matching `count(2, 2) = 3`.
 
 The `H / V / D` letters are my choice for the printing version, since the sketch only shows the three arrows and conditions.
+
+---
+
+## Problem 4 — Maze with Obstacles
+
+**Problem:** a `3 × 3` maze where some cells are **blocked** (a "river"). Moves are still **Right** and **Down**. Print every path from the top-left cell to the bottom-right cell that **does not step on a river cell**.
+
+### Representing the Maze — a Boolean Matrix
+
+```
+false → river (blocked)          true → free cell
+```
+
+```java
+boolean[][] maze = {
+    { true, true,  true },
+    { true, false, true },        // the cell (1, 1) is a river
+    { true, true,  true }
+};
+```
+```
+      0      1      2
+0   free   free   free
+1   free  RIVER   free
+2   free   free   free
+```
+
+### The Rule (VVI)
+
+> **When you land on a new cell, check whether that cell is a river or not.**
+> **If you land on a river, stop the recursion for that call.**
+
+So the check goes at the **start of every call**, before any further moves are made from that cell. That call simply `return`s — nothing below it is explored, and the other branches carry on as usual.
+
+(Cutting a branch off as soon as it hits something invalid is called **pruning**.)
+
+### Recursion Tree — `(p, 0, 0)`
+
+`(row, col)` shown for each call, `p` = the path so far:
+
+```
+                              ( p , 0, 0 )
+                    D /                         \ R
+               ( 1, 0 )                       ( 0, 1 )
+            D /        \ R                  D /        \ R
+       ( 2, 0 )      ( 1, 1 )         ( 1, 1 )        ( 0, 2 )
+          | R         RIVER ✗          RIVER ✗             | D
+       ( 2, 1 )     stop here         stop here         ( 1, 2 )
+          | R                                              | D
+       ( 2, 2 ) ✓                                        ( 2, 2 ) ✓
+```
+Both `(1, 1)` calls land on the river and **stop**. The sketch circles the left one with a blue `X`; the right one is cut off for the same reason. Only the two branches that go around it reach `(2, 2)`.
+
+### Code
+
+```java
+static void pathRestrictions(String p, boolean[][] maze, int r, int c) {
+    if (!maze[r][c]) {
+        return;                                       // landed on a river → stop this call
+    }
+
+    if (r == maze.length - 1 && c == maze[0].length - 1) {
+        System.out.println(p);                        // reached the end: p is a valid path
+        return;
+    }
+
+    if (r < maze.length - 1) {
+        pathRestrictions(p + 'D', maze, r + 1, c);    // move DOWN
+    }
+    if (c < maze[0].length - 1) {
+        pathRestrictions(p + 'R', maze, r, c + 1);    // move RIGHT
+    }
+}
+```
+Call it as `pathRestrictions("", maze, 0, 0)`.
+
+**Output:**
+```
+DDRR
+RRDD
+```
+- `DDRR` → `(0,0) → (1,0) → (2,0) → (2,1) → (2,2)`
+- `RRDD` → `(0,0) → (0,1) → (0,2) → (1,2) → (2,2)`
+
+**The two paths on the grid** (`≈` = river, numbers = order of the steps):
+```
+ DDRR                RRDD
+ 0  .  .             0  1  2
+ 1  ≈  .             .  ≈  3
+ 2  3  4             .  .  4
+```
+
+The other 4 paths of the `3 × 3` maze (`DRDR`, `DRRD`, `RDDR`, `RDRD`) all pass through `(1, 1)`, so they are cut off. Without the river there would be **6** paths; with it, **2**.
+
+### Why the River Check Comes First
+
+The river check is placed **before** the "reached the end" check. That way, if the **start** or the **end** cell itself is a river, the function returns immediately and prints **nothing** (no valid path exists) — instead of wrongly printing a path that ends on a blocked cell.
+
+### Complexity
+
+```
+Time Complexity:   exponential in the worst case  (no rivers → all C(2(n-1), n-1) paths are explored)
+Space Complexity:  O(n)  recursion depth          (the longest path has 2(n-1) moves)
+```
+Obstacles only **reduce** the work, since every river cell removes all the paths that go through it.
