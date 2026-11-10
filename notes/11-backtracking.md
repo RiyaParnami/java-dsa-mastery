@@ -444,3 +444,154 @@ Time Complexity:   exponential in the worst case  (no rivers → all C(2(n-1), n
 Space Complexity:  O(n)  recursion depth          (the longest path has 2(n-1) moves)
 ```
 Obstacles only **reduce** the work, since every river cell removes all the paths that go through it.
+
+---
+
+## Problem 5 — All Paths in a Maze (4 Directions) — Backtracking
+
+**Problem:** same `3 × 3` maze, but now you may move in **all four directions** — **D**own, **R**ight, **U**p and **L**eft. Print **every path** from the top-left cell `(0, 0)` to the bottom-right cell `(2, 2)`.
+
+### The New Problem — Going Back Over Your Own Steps
+
+With `U` and `L` allowed, a path can walk **back onto a cell it has already used**:
+
+```
+( "" , 0, 0 )
+     │ D
+( D , 1, 0 )
+     │ U
+( DU , 0, 0 )      ← back at the START cell!
+     │ D
+( DUD , 1, 0 )     ← and again ... D, U, D, U, ...
+```
+The recursion **never stops** (`StackOverflowError`), and even if it did, a path like `DU…` that comes back to a cell it already visited **cannot be an answer**.
+
+> **Do not move back on the same path.** (Only go to **new** cells.)
+
+### How to Solve? (VVI)
+
+> **All the cells that are visited — mark them as `false`, so that the recursion does not go there again.**
+
+This **reuses the river idea from Problem 4**: a `false` cell stops the call. The only difference is that *we* now create the "rivers" ourselves, as we walk.
+
+```
+( "" , 0, 0 )
+   ├── ( D , 1, 0 )
+   │     ├── ( DD , 2, 0 )
+   │     ├── ( DR , 1, 1 )
+   │     └── ( DU , 0, 0 )   ✗  (0,0) is already false → stop       ← the X in the sketch
+   └── ( R , 0, 1 )
+```
+
+### Common Sense (VVI)
+
+> **Marking a cell `false` == "I have that cell in my current path."**
+
+The mark must only mean *"used by the path I am **currently** building"*. So **when that path is over** — for example, when you arrive at another recursion call that belongs to a **different path** — those cells **should not be `false`**.
+
+> ★ **While you are moving back, you restore the maze as it was.**
+
+### When Do We Go Back?
+
+> **When the function returns.**
+
+When you come **out of** a recursive call, you are back in the call that made it, which is now finished with that branch. So **re-mark the cell as `true`** at that point.
+
+```
+mark the cell false      ← on the way DOWN (entering the cell)
+   ... make all the recursive calls ...
+mark the cell true       ← on the way back UP (the function is about to return)
+```
+**This is known as backtracking** — make a change, explore, then **undo the change** so the next branch starts from the original state.
+
+### Code
+
+```java
+static void allPath(String p, boolean[][] maze, int r, int c) {
+    if (!maze[r][c]) {
+        return;                                       // river OR already on my current path → stop
+    }
+
+    if (r == maze.length - 1 && c == maze[0].length - 1) {
+        System.out.println(p);                        // reached the end: p is a valid path
+        return;
+    }
+
+    maze[r][c] = false;                               // I'm using this cell in my current path
+
+    if (r < maze.length - 1) {
+        allPath(p + 'D', maze, r + 1, c);             // down
+    }
+    if (c < maze[0].length - 1) {
+        allPath(p + 'R', maze, r, c + 1);             // right
+    }
+    if (r > 0) {
+        allPath(p + 'U', maze, r - 1, c);             // up
+    }
+    if (c > 0) {
+        allPath(p + 'L', maze, r, c - 1);             // left
+    }
+
+    maze[r][c] = true;                                // BACKTRACK: restore the cell as it was
+}
+```
+Call it as:
+```java
+boolean[][] maze = {
+    { true, true, true },
+    { true, true, true },
+    { true, true, true }
+};
+allPath("", maze, 0, 0);
+```
+
+**Why does the "reached the end" `return` not need a restore?** It returns *before* the cell is marked `false`, so there is nothing to undo.
+
+**Bounds checks:** `r > 0` and `c > 0` are the new ones — `U` and `L` must not walk off the **top** or **left** edge.
+
+### Trace — Marking and Restoring (`DDRURD`)
+
+`F` = marked `false` (on my current path), `.` = free:
+```
+start (0,0)       D → (1,0)        D → (2,0)        R → (2,1)
+ F . .             F . .            F . .            F . .
+ . . .             F . .            F . .            F . .
+ . . .             . . .            F . .            F F .
+
+U → (1,1)         R → (1,2)        D → (2,2) = END → print "DDRURD"
+ F . .             F . .
+ F F .             F F F
+ F F .             F F .
+```
+Then the calls **return one by one**, and each one sets its own cell back to `true` on the way out — so the next branch (for example `DR…` from `(1,0)`) sees a clean maze again.
+
+### What Goes Wrong Without the Restore?
+
+If you mark cells `false` but **never set them back to `true`**, the first path leaves its cells blocked forever. Every later path that needs one of those cells is wrongly cut off, so **valid answers go missing**. The restore step is what makes the marks apply to the **current path only**.
+
+### Output — a `3 × 3` Maze
+
+There are **12** paths. Six start with `D`:
+```
+DDRR     DDRURD     DDRUURD     DRDR     DRRD     DRURDD
+```
+and six start with `R` (the mirror images, swapping `D ↔ R` and `U ↔ L`):
+```
+RRDD     RRDLDR     RRDLLDR     RDRD     RDDR     RDLDRR
+```
+`DDRR`, `DDRURD`, `DRDR`, … are all valid; none of them uses the same cell twice. (A path that goes `D` then `U` is cut off at once because `(0, 0)` is already `false`.)
+
+### Complexity
+
+```
+Time Complexity:   exponential   (all simple paths from start to end are explored; 4 choices per call)
+Space Complexity:  O(n × m)      recursion depth — a path can visit every cell once
+                                 (no extra visited array: the maze itself is used as the "visited" marker)
+```
+
+### Pattern — Backtracking in One Line
+
+```
+choose (mark)  →  explore (recursive calls)  →  un-choose (restore)
+```
+The recursion tree is the same as before; the new part is **undoing your change when the function returns**, so every branch starts from the state its parent had.
