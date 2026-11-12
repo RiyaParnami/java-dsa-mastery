@@ -595,3 +595,110 @@ Space Complexity:  O(n × m)      recursion depth — a path can visit every cel
 choose (mark)  →  explore (recursive calls)  →  un-choose (restore)
 ```
 The recursion tree is the same as before; the new part is **undoing your change when the function returns**, so every branch starts from the state its parent had.
+
+---
+
+## Problem 6 — Print the Path as a Matrix of Step Numbers
+
+**Problem:** same 4-direction maze as Problem 5, but instead of printing the path as a string (`DDRR`), print the **maze itself**, with each cell on the path filled with **the step number** at which it was visited (`1` for the start, `2` for the next cell, and so on).
+
+**Example 1 — path `DDRR`:**
+```
+ 1  0  0
+ 2  0  0
+ 3  4  5
+```
+**Example 2 — path `DDRURD`:**
+```
+ 1  0  0
+ 2  5  6
+ 3  4  7
+```
+Cells that are **not** on the path stay `0`. (The sketch leaves the last cell of the first grid blank; the path `DDRR` has `5` steps, so the end cell gets `5`.)
+
+### The 4 Steps (from the sketch)
+
+1. **Take a `step` variable** — pass it as an argument; start it at `1`.
+2. **Update the `path` array** — when you enter a cell, write the current `step` into `path[r][c]`.
+3. **Print it in the base condition** — when you reach the end cell, write its step number and print the whole `path` matrix.
+4. **Backtrack** — when the function returns, **undo** the cell in `path` (set it back to `0`), together with the `true` restore from Problem 5.
+
+### Code
+
+```java
+static void allPathPrint(String p, boolean[][] maze, int r, int c, int[][] path, int step) {
+    if (!maze[r][c]) {
+        return;                                       // river OR already on my current path
+    }
+
+    if (r == maze.length - 1 && c == maze[0].length - 1) {
+        path[r][c] = step;                            // the end cell's step number
+        for (int[] row : path) {
+            System.out.println(Arrays.toString(row)); // print the matrix of steps
+        }
+        System.out.println(p);                        // and the path string
+        System.out.println();
+        path[r][c] = 0;                               // undo the end cell too
+        return;
+    }
+
+    maze[r][c] = false;                               // cell is on my current path
+    path[r][c] = step;                                // step 2: record the step number
+
+    if (r < maze.length - 1) {
+        allPathPrint(p + 'D', maze, r + 1, c, path, step + 1);
+    }
+    if (c < maze[0].length - 1) {
+        allPathPrint(p + 'R', maze, r, c + 1, path, step + 1);
+    }
+    if (r > 0) {
+        allPathPrint(p + 'U', maze, r - 1, c, path, step + 1);
+    }
+    if (c > 0) {
+        allPathPrint(p + 'L', maze, r, c - 1, path, step + 1);
+    }
+
+    maze[r][c] = true;                                // backtrack: free the cell again
+    path[r][c] = 0;                                   // backtrack: erase its step number
+}
+```
+Call it as:
+```java
+boolean[][] maze = {
+    { true, true, true },
+    { true, true, true },
+    { true, true, true }
+};
+int[][] path = new int[3][3];                         // all 0 to begin with
+allPathPrint("", maze, 0, 0, path, 1);
+```
+
+### Why `step + 1` and Not `step++`
+
+Same lesson as the `n--` pitfall in the recursion notes: `step++` would pass the **old** value and change `step` *after* the call, so every neighbour would get the same number. `step + 1` passes the new value and **leaves `step` unchanged in this call** — which is exactly what the other branches of this same call need.
+
+### Trace — `DDRURD`
+
+Step number written when each cell is entered:
+```
+(0,0) → 1      (1,0) → 2      (2,0) → 3      (2,1) → 4
+(1,1) → 5      (1,2) → 6      (2,2) → 7  ← end: print
+```
+```
+ 1  0  0
+ 2  5  6
+ 3  4  7
+```
+Then every call returns and resets its own cell to `0` (and `true` in `maze`), so the next path starts from an empty `path`.
+
+### Why Reset `path` Too?
+
+If you only restore `maze` and forget `path[r][c] = 0`, **leftover numbers from earlier paths stay in the matrix**. A later path like `DRDR` (which does not visit those cells) would be printed with stale step numbers from a different path mixed in. Backtracking must undo **every** change you made — the `visited` mark **and** the `path` entry.
+
+### Complexity
+
+```
+Time Complexity:   exponential   (all simple paths are explored)
+                   + O(n × m) extra for each path printed (printing the matrix)
+Space Complexity:  O(n × m)      the extra `path` matrix (plus the recursion depth, also up to n × m)
+```
