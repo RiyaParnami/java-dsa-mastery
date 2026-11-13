@@ -702,3 +702,177 @@ Time Complexity:   exponential   (all simple paths are explored)
                    + O(n × m) extra for each path printed (printing the matrix)
 Space Complexity:  O(n × m)      the extra `path` matrix (plus the recursion depth, also up to n × m)
 ```
+
+---
+
+## Problem 7 — N-Queens
+
+**Problem:** place `N` queens on an `N × N` chessboard so that **no two queens attack each other**. Count (and print) every valid arrangement.
+
+A queen attacks in **8 directions** — along its row, its column and both diagonals, as far as the board goes:
+```
+  ↖   ↑   ↗
+    \ | /
+  ← — Q — →
+    / | \
+  ↙   ↓   ↘
+```
+So no two queens may share a **row**, a **column** or a **diagonal**.
+
+**Example — `N = 4`** (place 4 queens on a `4 × 4` board). There are **2** valid answers:
+```
+ . Q . .          . . Q .
+ . . . Q          Q . . .
+ Q . . .          . . . Q
+ . . Q .          . Q . .
+```
+
+**Points (from the sketch):** it uses **recursion** ✓ and **backtracking** ✓.
+
+### The Idea (VVI)
+
+**One queen per row.** Every row must hold exactly one queen (two queens in a row would attack each other), so build the answer **row by row**, from the top:
+
+```
+for the current row r:
+    try every column c = 0 … N-1
+        if (r, c) is SAFE → place a queen there, then solve row r + 1
+        after coming back  → REMOVE the queen (backtrack), try the next column
+```
+**Base case:** `row == N` → all `N` rows have a queen → one valid arrangement → count it / print the board.
+
+The sketch writes the function as `(board, r, c)`. In the tree, every node is a cell `(r, c)` we **try** to place a queen in:
+```
+Row 0 choices:    (0,0)   (0,1)   (0,2)   (0,3)
+                    |
+Row 1 choices:    (1,0)   (1,1)   (1,2)   ...      ← tried under the queen at (0,0)
+```
+Most of these are **not safe** — for example, with a queen at `(0,0)`, both `(1,0)` (same column) and `(1,1)` (diagonal) are rejected — so those branches are cut at once (pruning, like the river in Problem 4).
+
+### How to Check if a Cell Is Safe (VVI) — `isSafe(board, r, c)`
+
+Because queens are placed **from the top, row by row**, there is nothing below the current row yet. So we only look **upward**, in 3 directions from `(r, c)`:
+
+| Direction | Cells to check | How many cells |
+|---|---|---|
+| **Vertical** (same column, above) | `(0, c) … (r-1, c)` | rows `[0, r)` |
+| **Left diagonal** (up-left) | `(r-1, c-1)`, `(r-2, c-2)`, … → **`r--, c--`** | `min(r, c)` |
+| **Right diagonal** (up-right) | `(r-1, c+1)`, `(r-2, c+2)`, … → **`r--, c++`** | `min(r, length - c - 1)` |
+
+**Why `min(…)` for the diagonals?** The diagonal stops at whichever edge you hit **first**:
+- Going **up-left** you run out of rows after `r` steps, or out of columns after `c` steps → `min(r, c)`.
+- Going **up-right** you run out of rows after `r` steps, or out of columns after `length - c - 1` steps (the columns to the right of `c`) → `min(r, length - c - 1)`.
+
+```
+Example, a 5 × 5 board (columns 0-4), checking cell (3, 2):
+  left diagonal  : min(3, 2)         = 2 cells  → (2,1), (1,0)
+  right diagonal : min(3, 5 - 2 - 1) = 2 cells  → (2,3), (1,4)
+```
+
+### Code
+
+```java
+static int queens(boolean[][] board, int row) {
+    if (row == board.length) {
+        display(board);                               // all N queens placed → one valid answer
+        System.out.println();
+        return 1;
+    }
+
+    int count = 0;
+
+    for (int col = 0; col < board.length; col++) {    // try every column of this row
+        if (isSafe(board, row, col)) {
+            board[row][col] = true;                   // place the queen
+            count += queens(board, row + 1);          // solve the remaining rows
+            board[row][col] = false;                  // BACKTRACK: remove the queen
+        }
+    }
+    return count;
+}
+
+private static boolean isSafe(boolean[][] board, int row, int col) {
+    // vertical — same column, rows above
+    for (int i = 0; i < row; i++) {
+        if (board[i][col]) {
+            return false;
+        }
+    }
+
+    // left diagonal — (r--, c--)
+    int maxLeft = Math.min(row, col);
+    for (int i = 1; i <= maxLeft; i++) {
+        if (board[row - i][col - i]) {
+            return false;
+        }
+    }
+
+    // right diagonal — (r--, c++)
+    int maxRight = Math.min(row, board.length - col - 1);
+    for (int i = 1; i <= maxRight; i++) {
+        if (board[row - i][col + i]) {
+            return false;
+        }
+    }
+
+    return true;                                      // nothing attacks this cell
+}
+
+private static void display(boolean[][] board) {
+    for (boolean[] row : board) {
+        for (boolean cell : row) {
+            System.out.print(cell ? "Q " : "X ");
+        }
+        System.out.println();
+    }
+}
+```
+Call it as:
+```java
+int n = 4;
+boolean[][] board = new boolean[n][n];
+System.out.println(queens(board, 0));                 // prints the boards, then 2
+```
+
+**Why no row check?** There is exactly one queen per row by construction (we move to `row + 1` after each placement), so two queens can never share a row.
+
+### Trace — `N = 4`, Finding the First Answer
+
+`Q(r, c)` = queen placed, `✗` = not safe (reason in brackets), `↩` = backtrack:
+```
+row 0:  try (0,0) ✓ place
+  row 1:  (1,0) ✗ column     (1,1) ✗ diagonal     (1,2) ✓ place
+    row 2:  (2,0) ✗ col   (2,1) ✗ diag   (2,2) ✗ col   (2,3) ✗ diag      → dead end ↩ remove (1,2)
+  row 1:  (1,3) ✓ place
+    row 2:  (2,0) ✗ col   (2,1) ✓ place
+      row 3:  (3,0) ✗   (3,1) ✗   (3,2) ✗ diag   (3,3) ✗ col             → dead end ↩ remove (2,1)
+    row 2:  (2,2) ✗ diag   (2,3) ✗ col                                    → dead end ↩ remove (1,3)
+  row 1:  nothing left                                                   ↩ remove (0,0)
+
+row 0:  try (0,1) ✓ place
+  row 1:  (1,0) ✗ diag   (1,1) ✗ col   (1,2) ✗ diag   (1,3) ✓ place
+    row 2:  (2,0) ✓ place
+      row 3:  (3,0) ✗ col   (3,1) ✗ col   (3,2) ✓ place
+        row 4 == N → ANSWER:  (0,1) (1,3) (2,0) (3,2)
+```
+```
+ . Q . .
+ . . . Q
+ Q . . .
+ . . Q .
+```
+The recursion then keeps backtracking and, starting from `(0,2)`, finds the second answer (the mirror image). `(0,3)` gives nothing more.
+
+### Why Backtrack (Remove the Queen)?
+
+`board[row][col] = false` after the recursive call is what makes **every column in a row start from the same board** — the cell was placed **for this attempt only**. Without it, the earlier queens would stay on the board forever and later attempts would find them as "attackers", rejecting valid cells. Same idea as restoring the maze cells in Problem 5.
+
+### Complexity
+
+```
+Time Complexity:   about O(N!)    — row 0 has N choices, but each queen removes at least one column
+                                    (and some diagonals) from the next row, so fewer than N each time;
+                                    isSafe adds an extra O(N) per check
+Space Complexity:  O(N²)          the board  (the recursion depth is only N, one call per row)
+```
+Pruning with `isSafe` is what keeps this far below the `N^N` of trying every cell blindly.
