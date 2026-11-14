@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 120 |
+| Implementations Written | 121 |
 | Current Focus | Recursion and Divide and Conquer |
 | Target Completion | October 2026 |
 
@@ -129,7 +129,7 @@ This repository focuses on consistent learning through concept implementation, s
   - [x] Merge sort
   - [x] Quick sort
 - [ ] **Backtracking**
-  - [ ] N-Queens
+  - [x] N-Queens
   - [ ] N-Knights
   - [ ] Sudoku solver
   - [x] Maze problems
