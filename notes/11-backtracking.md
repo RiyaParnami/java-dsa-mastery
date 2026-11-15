@@ -876,3 +876,193 @@ Time Complexity:   about O(N!)    — row 0 has N choices, but each queen remove
 Space Complexity:  O(N²)          the board  (the recursion depth is only N, one call per row)
 ```
 Pruning with `isSafe` is what keeps this far below the `N^N` of trying every cell blindly.
+
+### N-Queens Complexity — the Recurrence
+
+**Setting it up** (the sketch draws the smaller `(N - 1)` board inside the big one):
+
+```
+T(N) = N × T(N - 1) + O(N²)
+        ↑      ↑         ↑
+        |      |         extra work done in one call (checking cells / printing the N × N board)
+        |      the problem that is left: one row is used up → N - 1 rows remain
+        N choices (columns) for the queen of the current row
+```
+
+**Result (from the Time Complexity lecture):**
+```
+O(N³ + N!)  =  O(N!)          ← N! grows far faster than N³, so it wins
+```
+
+**Check by unrolling** `T(N) = N · T(N-1) + N²`:
+```
+T(N) = N² + N·(N-1)² + N·(N-1)·(N-2)² + …
+     = N! × ( 1²/1! + 2²/2! + 3²/3! + … + N²/N! )
+```
+The bracket is a sum that **settles near a constant** (it never grows with `N`), so `T(N) = Θ(N!)`.
+
+**Intuition (the `4 × 3 × 2 × 1 = 4!` in the sketch):** row 0 has at most `4` columns, but each queen blocks its column (and some diagonals), so row 1 has at most `3`, row 2 at most `2`, row 3 at most `1`:
+```
+4 × 3 × 2 × 1 = 4!          (an upper bound — the diagonal checks prune even more)
+```
+
+---
+
+## Problem 8 — N-Knights
+
+**Problem:** place `N` knights on an `N × N` board so that **no two knights attack each other**. Print every valid arrangement.
+
+A knight attacks the **8 cells** an "L" away (`±2` rows & `±1` column, or `±1` row & `±2` columns). Unlike queens, knights do **not** attack along rows, columns or diagonals — so two knights **can** sit next to each other.
+
+**Example — `N = 4`** (4 knights on a `4 × 4` board). One valid arrangement (the sketch's grid):
+```
+ K K K .
+ . K . .
+ . . . .
+ . . . .
+```
+Check: `(0,0)`, `(0,1)`, `(0,2)`, `(1,1)` — no two are an "L" apart ✓.
+
+### Why This Is Different from N-Queens (VVI)
+
+In N-Queens every row **must** hold exactly one queen, so a `for` loop over the columns of the row worked. Here a row can hold **any number of knights** (zero, one, several), so every **cell** is a separate yes / no decision — this is the **take / leave** pattern from *Subsets*:
+
+> **At each cell: place a knight here (if it is safe), or skip the cell. Then go to the next cell.**
+
+The function walks the board cell by cell (left → right, then the next row), exactly the path of the red arrows in the sketch.
+
+### The Arguments (VVI)
+
+```
+( board , row , col , knights )        first call:  ( board , 0 , 0 , 4 )
+```
+- `row, col` → the **current cell** we are deciding about.
+- `knights` → how many knights are **still left to place** (`4` at the start).
+
+> ★ **You can eliminate the `for` loops with conditions, but then you need another variable in the arguments.**
+> Here that extra variable is **`col`**: instead of looping over the columns inside a call, every call handles **one** cell and passes `col + 1` to the next.
+
+### Base Cases and Moving Along the Board
+
+```
+knights == 0                       → all knights placed → print the board, return
+row == N - 1 && col == N           → fell off the last cell, knights still left → return (no answer)
+col == N                           → this row is finished → go to ( row + 1 , 0 )
+```
+
+### The Tree — `( row , col , knights )`
+
+Placing a knight **reduces `knights` by one**; skipping does not:
+```
+( 0, 0, 4 )  — place a knight at (0,0)
+     ↓
+( 0, 1, 3 )  — place at (0,1)
+     ↓
+( 0, 2, 2 )  — place at (0,2)
+     ↓
+   …            (skip (0,3), skip the rest of row 0, skip (1,0))
+     ↓
+( 1, 1, 1 )  — place at (1,1)   →   knights = 0  →  PRINT
+```
+The sketch jumps from `(0, 2, 2)` to `(1, 1, 1)` because it only draws the **"place"** calls — in between, the "skip" calls move `col` forward without changing `knights`.
+
+### How to Check if a Cell Is Safe — `isSafe(board, row, col)`
+
+Knights are placed **in order** (row by row, left to right), so only the **earlier** cells hold knights. Of the 8 "L" cells, only **4** lie **above** the current cell (the other 4 are below, where nothing has been placed yet):
+
+```
+( r - 2 , c - 1 )
+( r - 2 , c + 1 )
+( r - 1 , c - 2 )
+( r - 1 , c + 2 )
+```
+A cell is unsafe if **any** of these four (that is **on the board**) already holds a knight.
+
+### Code
+
+```java
+static void knight(boolean[][] board, int row, int col, int knights) {
+    if (knights == 0) {
+        display(board);                               // all knights placed → one valid answer
+        System.out.println();
+        return;
+    }
+
+    if (row == board.length - 1 && col == board.length) {
+        return;                                       // off the last cell, knights still left
+    }
+
+    if (col == board.length) {
+        knight(board, row + 1, 0, knights);           // row finished → start the next row
+        return;
+    }
+
+    if (isSafe(board, row, col)) {
+        board[row][col] = true;                       // place a knight here
+        knight(board, row, col + 1, knights - 1);     // go on with one knight fewer
+        board[row][col] = false;                      // BACKTRACK: remove it
+    }
+
+    knight(board, row, col + 1, knights);             // the other choice: skip this cell
+}
+
+private static boolean isSafe(boolean[][] board, int row, int col) {
+    if (isValid(board, row - 2, col - 1) && board[row - 2][col - 1]) {
+        return false;
+    }
+    if (isValid(board, row - 2, col + 1) && board[row - 2][col + 1]) {
+        return false;
+    }
+    if (isValid(board, row - 1, col - 2) && board[row - 1][col - 2]) {
+        return false;
+    }
+    if (isValid(board, row - 1, col + 2) && board[row - 1][col + 2]) {
+        return false;
+    }
+    return true;
+}
+
+// do not check a cell that is outside the board
+private static boolean isValid(boolean[][] board, int row, int col) {
+    return row >= 0 && row < board.length && col >= 0 && col < board.length;
+}
+
+private static void display(boolean[][] board) {
+    for (boolean[] row : board) {
+        for (boolean cell : row) {
+            System.out.print(cell ? "K " : "X ");
+        }
+        System.out.println();
+    }
+}
+```
+Call it as:
+```java
+int n = 4;
+boolean[][] board = new boolean[n][n];
+knight(board, 0, 0, n);
+```
+
+### Backtracking Rule (from the Sketch)
+
+> **Note:** when a choice you make **affects future answers**, use **backtracking**.
+
+Placing a knight changes which cells are safe for **all the later cells**. After exploring that branch you must **remove the knight** (`board[row][col] = false`), so the "skip this cell" branch — and every other branch — starts from the board its parent had.
+
+### Complexity
+
+```
+Time Complexity:   exponential — each of the N² cells has 2 choices (place / skip),
+                   so at most 2^(N²) branches, heavily reduced by the isSafe pruning
+Space Complexity:  O(N²)   — the board  (recursion depth is also up to N² cells)
+```
+
+### N-Queens vs N-Knights
+
+| | N-Queens | N-Knights |
+|---|---|---|
+| Per row | exactly **one** queen | **any number** of knights |
+| Choice | which **column** of the row (a `for` loop) | **place / skip** each cell (take / leave) |
+| Arguments | `(board, row)` | `(board, row, col, knights)` |
+| Attack check | column + 2 diagonals (upward) | 4 "L" cells (upward) |
+| Base case | `row == N` | `knights == 0` |
