@@ -1066,3 +1066,161 @@ Space Complexity:  O(N²)   — the board  (recursion depth is also up to N² ce
 | Arguments | `(board, row)` | `(board, row, col, knights)` |
 | Attack check | column + 2 diagonals (upward) | 4 "L" cells (upward) |
 | Base case | `row == N` | `knights == 0` |
+
+---
+
+## Problem 9 — Sudoku Solver
+
+**Problem:** fill the empty cells of a `9 × 9` Sudoku board with the digits `1 … 9` so that **every row**, **every column** and **every `3 × 3` box** contains each digit **exactly once**.
+
+**The board** (`0` = empty cell, the sketch's puzzle):
+```
+     0 1 2   3 4 5   6 7 8
+ 0 │ 5 3 0 │ 0 7 0 │ 0 0 0
+ 1 │ 6 0 0 │ 1 9 5 │ 0 0 0
+ 2 │ 0 9 8 │ 0 0 0 │ 0 6 0
+   ├───────┼───────┼───────
+ 3 │ 8 0 0 │ 0 6 0 │ 0 0 3
+ 4 │ 4 0 0 │ 8 0 3 │ 0 0 1
+ 5 │ 7 0 0 │ 0 2 0 │ 0 0 6
+   ├───────┼───────┼───────
+ 6 │ 0 6 0 │ 0 0 0 │ 2 8 0
+ 7 │ 0 0 0 │ 4 1 9 │ 0 0 5
+ 8 │ 0 0 0 │ 0 8 0 │ 0 7 9
+```
+(The red and blue marks in the sketch are the row, column and box being checked for one cell.)
+
+### The Idea (VVI)
+
+The function takes just **`(board)`**. Each call:
+1. **Find the first empty cell** (scan row by row, left to right). For this board it is `(0, 2)`.
+2. **Try every digit `1 … 9`** in that cell — the sketch writes the range `[1, 9]`.
+3. For each digit that is **safe**, **place it** and **recurse** to fill the next empty cell.
+4. If the recursive call **fails** (returns `false`), **remove the digit** (backtrack) and try the next one.
+5. If **no** digit works → return `false` → the **previous** cell must change its digit.
+
+**Base case:** no empty cell is left → the board is complete → return `true`.
+
+```
+(board) → first empty cell is (0, 2) → try 1 … 9
+              ↓ a safe digit
+          (board) → first empty cell is (0, 3) → try 1 … 9
+              ↓ ...
+```
+The function returns a **`boolean`** because we only need **one** solution: as soon as one call returns `true`, every call above it returns `true` immediately and the board stays filled.
+
+### How to Check if a Digit Is Safe — `isSafe(board, row, col, num)`
+
+`num` must **not** already appear in:
+
+| Check | Cells | Sketch |
+|---|---|---|
+| **Row** | `(row, 0) … (row, 8)` | the red oval across a row |
+| **Column** | `(0, col) … (8, col)` | the tall red box down a column |
+| **3 × 3 box** | the 9 cells of the box that holds `(row, col)` | the small red/blue boxes |
+
+### Finding the Box — the Remainder Trick (VVI)
+
+The boxes start at rows/columns `0, 3, 6`. To get the **top-left corner** of the box that contains `(row, col)`, subtract the **remainder**:
+
+```
+boxRow = row - row % 3
+boxCol = col - col % 3
+```
+Then check the 3 × 3 cells from `(boxRow, boxCol)` to `(boxRow + 2, boxCol + 2)`.
+
+**Examples from the sketch:**
+
+| Cell | Row part | Column part | Box starts at |
+|---|---|---|---|
+| `(3, 6)` | `3 - 3 % 3 = 3` | `6 - 6 % 3 = 6` | `(3, 6)` |
+| `(6, 8)` | `6 - 6 % 3 = 6` | `8 - 8 % 3 = 8 - 2 = 6` | `(6, 6)` |
+| `(7, 4)` | `7 - 7 % 3 = 7 - 1 = 6` | `4 - 4 % 3 = 4 - 1 = 3` | `(6, 3)` |
+
+(For a general `n × n` board the `3` is `√n`.)
+
+### Code
+
+```java
+static boolean solve(int[][] board) {
+    int n = board.length;
+    int row = -1;
+    int col = -1;
+    boolean emptyLeft = false;
+
+    // 1. find the first empty cell
+    for (int i = 0; i < n && !emptyLeft; i++) {
+        for (int j = 0; j < n; j++) {
+            if (board[i][j] == 0) {
+                row = i;
+                col = j;
+                emptyLeft = true;
+                break;
+            }
+        }
+    }
+
+    if (!emptyLeft) {
+        return true;                                  // base case: board is full → solved
+    }
+
+    // 2. try every digit in that cell
+    for (int num = 1; num <= 9; num++) {
+        if (isSafe(board, row, col, num)) {
+            board[row][col] = num;                    // place the digit
+            if (solve(board)) {
+                return true;                          // the rest of the board worked out
+            }
+            board[row][col] = 0;                      // BACKTRACK: undo and try the next digit
+        }
+    }
+    return false;                                     // no digit fits → previous cell must change
+}
+
+private static boolean isSafe(int[][] board, int row, int col, int num) {
+    // row and column
+    for (int i = 0; i < board.length; i++) {
+        if (board[row][i] == num || board[i][col] == num) {
+            return false;
+        }
+    }
+
+    // 3 × 3 box
+    int boxRow = row - row % 3;
+    int boxCol = col - col % 3;
+    for (int r = boxRow; r < boxRow + 3; r++) {
+        for (int c = boxCol; c < boxCol + 3; c++) {
+            if (board[r][c] == num) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+```
+Call it as `solve(board)` — the board is filled **in place**.
+
+### Trace — the First Empty Cell `(0, 2)`
+
+```
+row 0 has   5, 3, 7
+column 2 has 8
+box (0, 0) has 5, 3, 6, 9, 8
+
+digits already blocked: 3, 5, 6, 7, 8, 9   →   safe candidates: 1, 2, 4
+```
+The recursion tries `1` first. If the rest of the board can't be completed with it, the call comes back `false`, `1` is **removed**, and `2` is tried, then `4`. This puzzle has a single solution, which has `4` in this cell, so `1` and `2` are eventually rejected somewhere deeper and undone by backtracking.
+
+### Why Backtrack (Reset to `0`)?
+
+`board[row][col] = 0` after a failed recursive call is what makes **every digit start from the same board**. A wrong guess made early may only be discovered **many cells later**, when some cell has no safe digit left — the recursion unwinds, and each cell it passes through must be **cleared** so it can be tried again with a different digit. Same idea as removing the queen in N-Queens.
+
+### Complexity
+
+```
+Time Complexity:   O(9^(n²))    — total 9 numbers to try, for every cell (n² cells, n = 9);
+                                  the safe checks prune most of these branches in practice
+Space Complexity:  O(n²)        — the board itself (the recursion is at most n² calls deep,
+                                  one per empty cell)
+```
+(For a general `n × n` Sudoku with digits `1 … n`, this becomes `O(n^(n²))`.)
