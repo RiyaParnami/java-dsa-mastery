@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 122 |
+| Implementations Written | 123 |
 | Current Focus | Recursion and Divide and Conquer |
 | Target Completion | October 2026 |
 
@@ -125,12 +125,12 @@ This repository focuses on consistent learning through concept implementation, s
   - [x] Execution flow and stack visualization
   - [x] Function call tree building
   - [x] Tail recursion
-- [ ] **Sorting via Recursion**
+- [x] **Sorting via Recursion**
   - [x] Merge sort
   - [x] Quick sort
-- [ ] **Backtracking**
+- [x] **Backtracking**
   - [x] N-Queens
-  - [ ] N-Knights
+  - [x] N-Knights
   - [x] Sudoku solver
   - [x] Maze problems
 - [ ] **Applied Recursion**
