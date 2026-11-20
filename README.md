@@ -18,8 +18,8 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 123 |
-| Current Focus | Recursion and Divide and Conquer |
+| Implementations Written | 124 |
+| Current Focus | Object Oriented Programming |
 | Target Completion | October 2026 |
 
 ---
@@ -160,8 +160,8 @@ This repository focuses on consistent learning through concept implementation, s
 <summary><b>10. Object Oriented Programming</b></summary>
 
 - [ ] **Core Principles**
-  - [ ] Classes and instances
-  - [ ] `this` keyword
+  - [x] Classes and instances
+  - [x] `this` keyword
   - [ ] Inheritance, abstraction, polymorphism, encapsulation
   - [ ] Method overloading and overriding
 - [ ] **Java-Specific Constructs**
