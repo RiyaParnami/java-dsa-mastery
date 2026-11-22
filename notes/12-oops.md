@@ -48,7 +48,7 @@ The **class** is written **once**; the **objects** are the actual students. Each
 
 ```java
 class Student {
-    int rollNo;
+    int rno;
     String name;
     float marks;
 }
@@ -56,12 +56,12 @@ class Student {
 Creating the objects with `new`:
 ```java
 Student student1 = new Student();
-student1.rollNo = 14;
+student1.rno = 14;
 student1.name = "Kunal";
 student1.marks = 82.9f;
 
 Student student2 = new Student();
-student2.rollNo = 28;
+student2.rno = 28;
 student2.name = "Rahul";
 student2.marks = 92.7f;
 ```
@@ -140,6 +140,72 @@ Student b = new Student();     // b → another Student object
 
 ---
 
+## Declaring vs Creating an Object — Compile Time vs Runtime
+
+```java
+class Student {
+    int rno;
+    String name;
+    float marks;
+}
+```
+Making an object takes **two steps**, and they can be written separately:
+
+```java
+Student student1;                 // 1. declare — a reference variable of type Student
+student1 = new Student();         // 2. initialize — create the object and store its reference
+```
+or in one line:
+```java
+Student student1 = new Student();
+```
+
+| Part | When it happens | What it does |
+|---|---|---|
+| `Student student1` | **compile time** | declares the reference variable `student1` (its name and type are known before the program runs) |
+| `new Student()` | **runtime** | creates the object **while the program is running** |
+
+(Until `new` runs, `student1` has **no object** to point to.)
+
+### What Is `Student()`? — the Constructor (VVI)
+
+The circled `Student()` after `new` (the `?` in the sketch) is the **constructor**.
+
+> **A constructor is a special function that runs when you create an object, and it allocates some variables.**
+
+So `new Student()` runs the constructor of the `Student` class, which sets up the object's variables (`rno`, `name`, `marks`). Its name is the **same as the class name**.
+
+### What Does `new` Do? (VVI)
+
+> **`new` dynamically allocates memory and returns a reference to it.**
+
+- **Dynamically** → the memory is allocated **at runtime**, not before the program runs.
+- It returns a **reference**, which is stored in `student1`.
+
+```
+   STACK                          HEAP
+ ┌───────────┐              ┌──────────────┐
+ │ student2 ─┼────────────► │   ( object ) │
+ │           │              └──────────────┘
+ │ student1 ─┼────────────► ┌──────────────┐
+ │           │              │ rno          │
+ └───────────┘              │ name         │
+                            │ marks        │
+                            └──────────────┘
+```
+Objects live in the **heap**; the reference variables (`student1`, `student2`) live in the **stack** and point to them.
+
+### The Dot Operator `.`
+
+The **dot operator** reaches the variables **inside** an object:
+
+```java
+System.out.println(student1.rno);       // prints 14
+```
+`student1.rno` means "the `rno` of the object that `student1` refers to". Each object has its own `rno`, so `student2.rno` is a different value.
+
+---
+
 ## Summary
 
 - A **class** is a template — a **logical construct**; it takes no memory.
@@ -147,3 +213,7 @@ Student b = new Student();     // b → another Student object
 - **`new`** creates an object.
 - A variable like `a` or `b` holds a **reference** to the object, not the object itself.
 - Many objects can be created from one class, each with **its own values**.
+- `Student student1` is the declaration (**compile time**); `new Student()` creates the object (**runtime**).
+- `Student()` is the **constructor** — a special function that runs when an object is created.
+- `new` **dynamically allocates memory and returns a reference** to it.
+- The **dot operator** (`student1.rno`) accesses the variables of an object.
