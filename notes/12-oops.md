@@ -206,6 +206,71 @@ System.out.println(student1.rno);       // prints 14
 
 ---
 
+## Constructor with Arguments — Binding Values to the Object
+
+**What:** give the values at the moment the object is created.
+
+```java
+Student kunal = new Student(13, "Kunal Kushwaha", 84.3f);
+```
+The `Student(...)` after `new` is the constructor, and now it receives **arguments** — `13`, `"Kunal Kushwaha"`, `84.3`.
+
+> The constructor is a **special type of function in the class**. Its job is to **bind these arguments with the object** — the values you pass become the values of that object's variables.
+
+### Default Values vs Constructor Values (VVI)
+
+When an object is created, its variables first get **default values**; the constructor then **replaces** them with the arguments.
+
+```
+Student (the class — default values)
+┌────────────────────┐
+│ rno   = 0          │
+│ name  = null       │
+│ marks = 0.0        │
+└────────────────────┘
+        │ new kunal                         │ rahul
+        ▼                                   ▼
+┌────────────────────────────┐      ┌────────────────────────────┐
+│ rno   = 13                 │      │  its OWN rno, name, marks  │
+│ name  = "Kunal Kushwaha"   │      │                            │
+│ marks = 84.3               │      │                            │
+└────────────────────────────┘      └────────────────────────────┘
+```
+Every `new` makes a **separate object**, and each one has **its own** copy of `rno`, `name` and `marks`. Setting `kunal`'s values does not touch `rahul`'s.
+
+| Variable | Default value |
+|---|---|
+| `int rno` | `0` |
+| `String name` | `null` |
+| `float marks` | `0.0` |
+
+### Code — Writing the Constructor
+
+```java
+class Student {
+    int rno;
+    String name;
+    float marks;
+
+    // constructor: same name as the class, no return type
+    Student(int r, String n, float m) {
+        rno = r;              // bind the arguments to this object's variables
+        name = n;
+        marks = m;
+    }
+}
+```
+```java
+Student kunal = new Student(13, "Kunal Kushwaha", 84.3f);
+Student rahul = new Student(28, "Rahul", 92.7f);
+
+System.out.println(kunal.rno);        // 13
+System.out.println(rahul.name);       // Rahul
+```
+Once you write a constructor **with arguments**, `new Student()` (with no arguments) no longer works unless you also write a constructor that takes none.
+
+---
+
 ## Summary
 
 - A **class** is a template — a **logical construct**; it takes no memory.
@@ -217,3 +282,5 @@ System.out.println(student1.rno);       // prints 14
 - `Student()` is the **constructor** — a special function that runs when an object is created.
 - `new` **dynamically allocates memory and returns a reference** to it.
 - The **dot operator** (`student1.rno`) accesses the variables of an object.
+- A constructor with arguments (`new Student(13, "Kunal Kushwaha", 84.3f)`) **binds the arguments to the object**.
+- Variables start with **default values** (`0`, `null`, `0.0`); the constructor replaces them. Every object has its **own copy**.
