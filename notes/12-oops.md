@@ -271,6 +271,77 @@ Once you write a constructor **with arguments**, `new Student()` (with no argume
 
 ---
 
+## Two References, One Object
+
+```java
+Student one = new Student();
+Student two = one;
+```
+`new` runs **once**, so there is only **one object**. `two = one` copies the **reference**, not the object — both variables now point to the **same** object:
+
+```
+   STACK                      HEAP
+ ┌─────────┐              ┌──────────────┐
+ │ two ────┼────────────► │              │
+ │         │         ┌──► │   (object)   │
+ │ one ────┼─────────┘    │              │
+ └─────────┘              └──────────────┘
+```
+So a change made through one name is seen through the other:
+```java
+two.rno = 10;
+System.out.println(one.rno);      // 10 — same object
+```
+
+---
+
+## Garbage Collection (GC)
+
+An object stays in the heap only while something **refers** to it.
+
+```
+   STACK                       HEAP
+ ┌─────────┐              ┌──────────────┐
+ │ a ──────┼────────────► │  object 1    │   ← has a reference → stays
+ └─────────┘              └──────────────┘
+                          ┌──────────────┐
+                          │  object 2    │   ← no reference points here → garbage
+                          └──────────────┘ ──► GC removes it
+```
+- An object with **no reference** pointing to it can never be used again — it is **garbage**.
+- The **garbage collector (GC)** is the part of Java that **frees the memory** of such objects when it runs. You do not delete objects yourself.
+
+In the second sketch, `obj` points to one object. The other objects in the heap (circled) have no reference, so they are cleaned up when the **GC runs**.
+
+---
+
+## The `final` Keyword
+
+`final` means **"this cannot be changed after it is set"**.
+
+### `final` with a Primitive
+
+```java
+final int INCREASE = 2;
+```
+- The value is **fixed** — `INCREASE = 3;` gives a compile error.
+- **Always initialize while declaring** a `final` variable.
+- Constants are written in **UPPER CASE** by convention.
+
+### `final` with an Object Reference (VVI)
+
+```java
+final Student kunal = new Student();
+
+kunal.name = "new name";          // ✓ allowed — the object's data can change
+kunal = new Student();            // ✗ error — cannot point to another object
+```
+`final` locks the **reference** (the variable `kunal`), **not the object**:
+- **Allowed:** changing the values **inside** the object (`kunal.name = …`).
+- **Not allowed:** making `kunal` refer to **another object** (`kunal = other object`).
+
+---
+
 ## Summary
 
 - A **class** is a template — a **logical construct**; it takes no memory.
@@ -284,3 +355,6 @@ Once you write a constructor **with arguments**, `new Student()` (with no argume
 - The **dot operator** (`student1.rno`) accesses the variables of an object.
 - A constructor with arguments (`new Student(13, "Kunal Kushwaha", 84.3f)`) **binds the arguments to the object**.
 - Variables start with **default values** (`0`, `null`, `0.0`); the constructor replaces them. Every object has its **own copy**.
+- `Student two = one;` copies the **reference** — both names point to the **same object**.
+- An object with **no reference** is garbage; the **garbage collector (GC)** frees its memory.
+- `final` fixes a variable: always **initialize while declaring**. For an object, the **reference** can't change, but the object's **data can**.
