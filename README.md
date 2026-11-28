@@ -18,7 +18,7 @@ This repository focuses on consistent learning through concept implementation, s
 | Metric | Value |
 | :--- | :--- |
 | Topics Completed | 4 / 22 |
-| Implementations Written | 128 |
+| Implementations Written | 129 |
 | Current Focus | Object Oriented Programming |
 | Target Completion | October 2026 |
 
@@ -165,7 +165,7 @@ This repository focuses on consistent learning through concept implementation, s
   - [ ] Inheritance, abstraction, polymorphism, encapsulation
   - [ ] Method overloading and overriding
 - [ ] **Java-Specific Constructs**
-  - [ ] Static vs non-static members
+  - [x] Static vs non-static members
   - [ ] Packages and access control
   - [ ] Interfaces and abstract classes
   - [ ] Annotations
